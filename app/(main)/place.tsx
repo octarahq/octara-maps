@@ -32,7 +32,6 @@ import {
   ScrollView,
   Share,
   StatusBar,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -185,7 +184,7 @@ export default function PlaceDetailScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.center]}>
+      <View className="flex-1 bg-[#101922] justify-center items-center">
         <ActivityIndicator size="large" color={Colors.dark.primary} />
       </View>
     );
@@ -194,7 +193,7 @@ export default function PlaceDetailScreen() {
   const headerImage = details?.photos?.[0]?.url || null;
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-[#101922]">
       <StatusBar
         hidden
         translucent
@@ -202,39 +201,52 @@ export default function PlaceDetailScreen() {
         barStyle="light-content"
       />
 
-      <View style={[styles.header, { paddingTop: topInset }]}>
+      <View
+        className="flex-row items-center justify-between px-4 pb-3"
+        style={{ paddingTop: topInset }}
+      >
         <TouchableOpacity
           onPress={() => router.back()}
-          style={styles.iconButton}
+          className="w-12 h-12 rounded-full items-center justify-center"
         >
           <BackIcon />
         </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>
+        <Text
+          className="text-white text-[18px] font-bold flex-1 text-center"
+          numberOfLines={1}
+        >
           {t("title")}
         </Text>
-        <TouchableOpacity style={styles.iconButton} onPress={handleShare}>
+        <TouchableOpacity
+          className="w-12 h-12 rounded-full items-center justify-center"
+          onPress={handleShare}
+        >
           <ShareIcon />
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         {headerImage && (
-          <View style={styles.imageContainer}>
+          <View className="px-4 py-3">
             <ImageBackground
               source={{ uri: headerImage }}
-              style={styles.heroImage}
+              className="w-full h-64 rounded-[16px] overflow-hidden"
               imageStyle={{ borderRadius: 16 }}
             />
           </View>
         )}
 
-        <View style={styles.content}>
-          <Text style={styles.title}>{placeTitle}</Text>
-          <Text style={styles.subtitle}>{categoryLabel}</Text>
+        <View className="px-4 pt-3">
+          <Text className="text-white text-[32px] font-extrabold tracking-[-0.5px]">
+            {placeTitle}
+          </Text>
+          <Text className="text-[#90adcb] text-[16px] mt-1">
+            {categoryLabel}
+          </Text>
 
-          <View style={styles.buttonGroup}>
+          <View className="flex-row mt-6 gap-3">
             <TouchableOpacity
-              style={styles.directionsButton}
+              className="flex-1 h-[56px] bg-primary rounded-[12px] flex-row items-center justify-center gap-2"
               onPress={() => {
                 telemetryFeatureUsed("place_directions_requested", {
                   place_type: osm_value || "unknown",
@@ -251,10 +263,12 @@ export default function PlaceDetailScreen() {
               }}
             >
               <DirectionsIcon />
-              <Text style={styles.directionsText}>{t("directions")}</Text>
+              <Text className="text-white text-[16px] font-bold">
+                {t("directions")}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.actionButton}
+              className="w-[56px] h-[56px] bg-[#223649] rounded-[12px] items-center justify-center"
               onPress={() => {
                 telemetryFeatureUsed("place_save_requested", {
                   place_type: osm_value || "unknown",
@@ -266,7 +280,7 @@ export default function PlaceDetailScreen() {
             </TouchableOpacity>
             {details?.phone && (
               <TouchableOpacity
-                style={styles.actionButton}
+                className="w-[56px] h-[56px] bg-[#223649] rounded-[12px] items-center justify-center"
                 onPress={() => {
                   telemetryFeatureUsed("place_phone_called", {
                     place_type: osm_value || "unknown",
@@ -279,7 +293,7 @@ export default function PlaceDetailScreen() {
             )}
             {details?.website && (
               <TouchableOpacity
-                style={styles.actionButton}
+                className="w-[56px] h-[56px] bg-[#223649] rounded-[12px] items-center justify-center"
                 onPress={() => {
                   telemetryFeatureUsed("place_website_opened", {
                     place_type: osm_value || "unknown",
@@ -292,21 +306,25 @@ export default function PlaceDetailScreen() {
             )}
           </View>
 
-          <View style={styles.detailsList}>
+          <View className="mt-8 gap-6">
             {address && (
               <View>
-                <View style={styles.detailItem}>
-                  <View style={styles.detailIconContainer}>
+                <View className="flex-row gap-4">
+                  <View className="w-10 h-10 rounded-[8px] bg-primary/10 items-center justify-center">
                     <AddressIcon color={Colors.dark.primary} />
                   </View>
-                  <View style={styles.detailTextContainer}>
-                    <Text style={styles.detailLabel}>{t("address")}</Text>
-                    <Text style={styles.detailValue}>{placeAddress}</Text>
+                  <View className="flex-1">
+                    <Text className="text-[#90adcb] text-[12px] font-semibold uppercase tracking-widest">
+                      {t("address")}
+                    </Text>
+                    <Text className="text-white text-[16px] font-medium mt-[2px]">
+                      {placeAddress}
+                    </Text>
                   </View>
                 </View>
 
                 {lat && lng ? (
-                  <View style={styles.placeMapPreviewFull}>
+                  <View className="mt-3 mx-4 h-[120px] rounded-[12px] overflow-hidden">
                     <MapSnapshot
                       lat={parseFloat(lat as string)}
                       lng={parseFloat(lng as string)}
@@ -319,7 +337,7 @@ export default function PlaceDetailScreen() {
             {details?.opening_hours && (
               <>
                 <TouchableOpacity
-                  style={styles.detailItem}
+                  className="flex-row gap-4"
                   onPress={() => {
                     telemetryFeatureUsed("place_hours_viewed", {
                       place_type: osm_value || "unknown",
@@ -327,13 +345,15 @@ export default function PlaceDetailScreen() {
                     setHoursModalVisible(true);
                   }}
                 >
-                  <View style={styles.detailIconContainer}>
+                  <View className="w-10 h-10 rounded-[8px] bg-primary/10 items-center justify-center">
                     <ScheduleIcon color={Colors.dark.primary} />
                   </View>
-                  <View style={styles.detailTextContainer}>
-                    <Text style={styles.detailLabel}>{t("hours")}</Text>
-                    <View style={styles.hoursStatusRow}>
-                      <Text style={styles.detailValue}>
+                  <View className="flex-1">
+                    <Text className="text-[#90adcb] text-[12px] font-semibold uppercase tracking-widest">
+                      {t("hours")}
+                    </Text>
+                    <View className="flex-row justify-between items-center mr-2">
+                      <Text className="text-white text-[16px] font-medium mt-[2px]">
                         {ohStatus
                           ? ((): string => {
                               const today = new Date().getDay();
@@ -376,14 +396,14 @@ export default function PlaceDetailScreen() {
                       </Text>
                       {ohStatus ? (
                         ohStatus.isOpen ? (
-                          <View style={styles.openBadge}>
-                            <Text style={styles.openBadgeText}>
+                          <View className="bg-[#2ecc71]/10 px-2 py-1 rounded">
+                            <Text className="text-[#2ecc71] text-[10px] font-extrabold">
                               {t("openNow")}
                             </Text>
                           </View>
                         ) : (
-                          <View style={styles.closedBadge}>
-                            <Text style={styles.closedBadgeText}>
+                          <View className="bg-[#ff6b6b]/10 px-2 py-1 rounded">
+                            <Text className="text-[#ff6b6b] text-[10px] font-extrabold">
                               {t("closed")}
                             </Text>
                           </View>
@@ -429,22 +449,26 @@ export default function PlaceDetailScreen() {
           }
         }}
       >
-        <BottomSheetView style={styles.hoursModalInner}>
-          <Text style={styles.title}>{t("hours")}</Text>
-          <ScrollView style={{ marginTop: 12 }}>
+        <BottomSheetView className="flex-1 w-full rounded-[16px] p-4">
+          <Text className="text-white text-[32px] font-extrabold tracking-[-0.5px]">
+            {t("hours")}
+          </Text>
+          <ScrollView className="mt-3">
             {(ohStatus &&
               ohUtils?.formatDayLines(ohStatus.rules).map((l: string) => (
-                <Text key={l} style={styles.hoursModalLine}>
+                <Text key={l} className="text-white text-[16px] mb-2">
                   {l}
                 </Text>
-              ))) || <Text style={styles.hoursModalLine}>Aucun</Text>}
+              ))) || <Text className="text-white text-[16px] mb-2">Aucun</Text>}
 
-            <View style={{ height: 24 }} />
+            <View className="h-6" />
             <TouchableOpacity
               onPress={() => setHoursModalVisible(false)}
-              style={styles.navButton}
+              className="bg-primary h-[56px] rounded-[16px] flex-row items-center justify-center gap-2"
             >
-              <Text style={styles.navButtonText}>{t("ok")}</Text>
+              <Text className="text-white text-[18px] font-extrabold">
+                {t("ok")}
+              </Text>
             </TouchableOpacity>
           </ScrollView>
         </BottomSheetView>
@@ -452,227 +476,3 @@ export default function PlaceDetailScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#101922",
-  },
-  center: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
-  iconButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
-    flex: 1,
-    textAlign: "center",
-  },
-  scrollContent: {
-    paddingBottom: 100,
-  },
-  imageContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  heroImage: {
-    width: "100%",
-    height: 256,
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  content: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "800",
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    color: "#90adcb",
-    fontSize: 16,
-    marginTop: 4,
-  },
-  buttonGroup: {
-    flexDirection: "row",
-    marginTop: 24,
-    gap: 12,
-  },
-  directionsButton: {
-    flex: 1,
-    height: 56,
-    backgroundColor: Colors.dark.primary,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  directionsText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  buttonIcon: {
-    marginRight: 4,
-  },
-  actionButton: {
-    width: 56,
-    height: 56,
-    backgroundColor: "#223649",
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  detailsList: {
-    marginTop: 32,
-    gap: 24,
-  },
-  detailItem: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  detailIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: "rgba(13,127,242,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  detailTextContainer: {
-    flex: 1,
-  },
-  detailLabel: {
-    color: "#90adcb",
-    fontSize: 12,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  detailValue: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "500",
-    marginTop: 2,
-  },
-
-  placeMapPreview: {
-    marginTop: 8,
-    width: "100%",
-    height: 120,
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  placeMapPreviewFull: {
-    marginTop: 12,
-    marginHorizontal: 16,
-    width: "auto",
-    height: 120,
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  hoursStatusRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginRight: 8,
-  },
-  statusBadge: {
-    backgroundColor: "rgba(13,127,242,0.2)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  statusText: {
-    color: Colors.dark.primary,
-    fontSize: 10,
-    fontWeight: "800",
-  },
-  openBadge: {
-    backgroundColor: "rgba(46,204,113,0.12)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  openBadgeText: {
-    color: "#2ecc71",
-    fontSize: 10,
-    fontWeight: "800",
-  },
-  closedBadge: {
-    backgroundColor: "rgba(255,107,107,0.12)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  closedBadgeText: {
-    color: "#ff6b6b",
-    fontSize: 10,
-    fontWeight: "800",
-  },
-  subDetailValue: {
-    color: "#90adcb",
-    fontSize: 14,
-    marginTop: 2,
-  },
-  navButton: {
-    backgroundColor: Colors.dark.primary,
-    height: 56,
-    borderRadius: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  navButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "800",
-  },
-  errorText: {
-    color: "#fff",
-    fontSize: 18,
-    marginBottom: 16,
-  },
-  backLink: {
-    color: Colors.dark.primary,
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  hoursModalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-  },
-  hoursModalInner: {
-    flex: 1,
-    width: "100%",
-    borderRadius: 16,
-    padding: 16,
-  },
-  hoursModalLine: {
-    color: "#fff",
-    fontSize: 16,
-    marginBottom: 8,
-  },
-});
