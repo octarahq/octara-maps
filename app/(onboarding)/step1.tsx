@@ -6,7 +6,7 @@ import { useUser } from "@/contexts/UserContext";
 import { createTranslator, setLanguage as setI18nLanguage } from "@/i18n";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import HeroIcon from "./_components/hero-icon";
 
 const { t } = createTranslator("onboarding");
@@ -23,11 +23,14 @@ export default function Step1() {
   };
 
   return (
-    <ThemedView style={styles.root}>
-      <View style={styles.topBar}>
-        <View style={styles.langWrapper}>
+    <ThemedView
+      className="flex-1"
+      style={{ backgroundColor: Colors.dark.background }}
+    >
+      <View className="absolute top-0 w-full pt-6 px-4 items-end z-10">
+        <View className="relative">
           <HapticTouchable
-            style={styles.langButton}
+            className="flex-row items-center gap-[6px] py-[6px] px-[12px] rounded-full bg-white/5 border border-white/10"
             onPress={() => setShowMenu((v: boolean) => !v)}
           >
             <MaterialIcons
@@ -36,7 +39,7 @@ export default function Step1() {
               color="white"
               style={{ marginRight: 6 }}
             />
-            <ThemedText style={styles.langButtonText}>
+            <ThemedText className="text-white/80 text-[14px]">
               {language === "en" ? t("lang_en") : t("lang_fr")}
             </ThemedText>
             <MaterialIcons
@@ -47,14 +50,14 @@ export default function Step1() {
             />
           </HapticTouchable>
           {showMenu && (
-            <View style={styles.langMenu}>
+            <View className="absolute top-full right-0 mt-2 bg-black rounded-[8px] p-2 z-[20]">
               <HapticTouchable onPress={() => changeLang("en")}>
-                <ThemedText style={styles.langMenuItem}>
+                <ThemedText className="text-white py-1 px-3">
                   {t("lang_en")}
                 </ThemedText>
               </HapticTouchable>
               <HapticTouchable onPress={() => changeLang("fr")}>
-                <ThemedText style={styles.langMenuItem}>
+                <ThemedText className="text-white py-1 px-3">
                   {t("lang_fr")}
                 </ThemedText>
               </HapticTouchable>
@@ -64,20 +67,23 @@ export default function Step1() {
       </View>
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.content}>
+        <View className="flex-1 items-center justify-center px-8 mt-16 mb-[100px] z-[1]">
           <HeroIcon />
 
-          <View style={styles.headlineContainer}>
-            <ThemedText type="title" style={styles.headline}>
+          <View className="max-w-[320px] pb-4">
+            <ThemedText
+              type="title"
+              className="text-white font-bold text-[36px] text-center"
+            >
               {t("step1.welcome_title")}
             </ThemedText>
           </View>
 
-          <View style={styles.bodyContainer}>
-            <ThemedText style={styles.body}>
+          <View className="max-w-[280px] pb-6">
+            <ThemedText className="text-white/60 text-[18px] text-center">
               {t("step1.welcome_body")}
             </ThemedText>
           </View>
@@ -86,85 +92,3 @@ export default function Step1() {
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-    textAlign: "center",
-    marginTop: 64,
-    marginBottom: 100,
-    zIndex: 1,
-  },
-  headlineContainer: {
-    maxWidth: 320,
-    paddingBottom: 16,
-  },
-  headline: {
-    color: Colors.dark.text,
-    fontWeight: "bold",
-    fontSize: 36,
-    textAlign: "center",
-  },
-  bodyContainer: {
-    maxWidth: 280,
-    paddingBottom: 24,
-  },
-  body: {
-    color: "rgba(255,255,255,0.6)",
-    fontSize: 18,
-    textAlign: "center",
-  },
-  topBar: {
-    position: "absolute",
-    top: 0,
-    width: "100%",
-    paddingTop: 24,
-    paddingHorizontal: 16,
-    alignItems: "flex-end",
-    zIndex: 10,
-  },
-  langWrapper: {
-    position: "relative",
-  },
-  langButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-  langButtonText: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 14,
-  },
-  langMenu: {
-    position: "absolute",
-    top: "100%",
-    right: 0,
-    marginTop: 8,
-    backgroundColor: "rgba(0,0,0,1)",
-    borderRadius: 8,
-    padding: 8,
-    zIndex: 20,
-  },
-  langMenuItem: {
-    color: "white",
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-  },
-});
