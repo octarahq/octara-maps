@@ -1,9 +1,10 @@
 import { HapticTouchable } from "@/components/HapticTouchable";
 import { Colors } from "@/constants/theme";
 import { useThemeColor } from "@/hooks/use-theme-color";
+import { cn } from "@/utils/cn";
 import * as Haptics from "expo-haptics";
 import type { TouchableOpacityProps } from "react-native";
-import { StyleSheet, Text, Vibration } from "react-native";
+import { Text, Vibration } from "react-native";
 
 export type OnboardingButtonProps = TouchableOpacityProps & {
   title: string;
@@ -12,6 +13,7 @@ export type OnboardingButtonProps = TouchableOpacityProps & {
 export default function OnboardingButton({
   title,
   style,
+  className,
   onPress,
   disabled,
   ...rest
@@ -34,13 +36,12 @@ export default function OnboardingButton({
 
   return (
     <HapticTouchable
-      className="flex-1 h-[56px] rounded-[28px] items-center justify-center"
-      style={[
-        styles.shadow,
-        { backgroundColor: background },
-        isDisabled && styles.shadowDisabled,
-        style,
-      ]}
+      className={cn(
+        "flex-1 h-[56px] rounded-[28px] items-center justify-center",
+        className,
+        isDisabled ? "bg-gray-700" : "bg-primary",
+        "shadow",
+      )}
       onPress={handlePress}
       {...rest}
     >
@@ -54,17 +55,3 @@ export default function OnboardingButton({
     </HapticTouchable>
   );
 }
-
-const styles = StyleSheet.create({
-  shadow: {
-    shadowColor: Colors.dark.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  shadowDisabled: {
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-});
