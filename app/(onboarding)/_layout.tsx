@@ -4,7 +4,7 @@ import { createTranslator } from "@/i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Slot, usePathname, useRouter } from "expo-router";
 import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { usePermissions } from "../../contexts/PermissionsContext";
 import OnboardingButton from "./_components/button";
@@ -139,9 +139,9 @@ function InnerLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
+      <View className="flex-1 bg-[#101922]">
         <Slot />
-        <View style={styles.footer} pointerEvents="box-none">
+        <View className="absolute bottom-0 left-0 right-0 w-full px-6 pb-4 bg-transparent z-10">
           <PageIndicators total={ROUTES.length} current={validIndex} />
           <OnboardingButton
             title={
@@ -170,20 +170,3 @@ function InnerLayout() {
 export default function OnboardingLayout() {
   return <InnerLayout />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    width: "100%",
-    paddingHorizontal: 24,
-    paddingBottom: Platform.OS === "ios" ? 24 : 16,
-    backgroundColor: "transparent",
-    zIndex: 10,
-  },
-});
