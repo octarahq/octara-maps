@@ -10,12 +10,11 @@ import React, { useEffect } from "react";
 import {
   ActivityIndicator,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   ToastAndroid,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 export default function ShareLocationScreen() {
@@ -73,30 +72,30 @@ export default function ShareLocationScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
+      <View className="flex-1 bg-[#101922]">
         <Header title={t("title")} />
-        <View style={styles.centerContainer}>
+        <View className="items-center justify-center p-4">
           <ActivityIndicator size="large" color="#e3e3e3" />
-          <Text style={styles.centerText}>{t("loading")}</Text>
+          <Text className="text-[#90adcb]">{t("loading")}</Text>
         </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-[#101922]">
       <Header title={t("title")} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.searchArea}>
-          <View style={styles.searchBox}>
-            <Text style={styles.searchIcon}>
+      <ScrollView contentContainerClassName="p-4 pb-10">
+        <View className="px-1">
+          <View className="h-14 rounded-12 bg-[#12202a] flex-row items-center px-3">
+            <Text className="text-[#90adcb] mr-2">
               <SearchIcon />
             </Text>
             <TextInput
               placeholder={t("placeholder")}
               placeholderTextColor="#90adcb"
-              style={styles.input}
+              className="flex-1 text-white text-[16px]"
               value={query}
               onChangeText={setQuery}
             />
@@ -104,7 +103,7 @@ export default function ShareLocationScreen() {
         </View>
         {actualySharing.length > 0 && (
           <View>
-            <Text style={styles.sectionTitle}>{t("actually_sharing")}</Text>
+            <Text className="text-[#90adcb]">{t("actually_sharing")}</Text>
             {actualySharing.map((u) => (
               <TouchableOpacity
                 key={u.id}
@@ -118,16 +117,16 @@ export default function ShareLocationScreen() {
                   })
                 }
               >
-                <View style={styles.card}>
-                  <View style={styles.iconWrapper}>
+                <View className="flex-row items-center mt-3 p-3 rounded-14 border border-[#2e3a4c] bg-[#1a2533]">
+                  <View className="w-12 h-12 rounded-24 bg-[#2e3a4c] items-center justify-center mr-4">
                     <AvatarImg id={u.id} />
                   </View>
-                  <View style={styles.textWrapper}>
-                    <Text style={styles.placeName} numberOfLines={1}>
+                  <View className="flex-1">
+                    <Text className="text-white" numberOfLines={1}>
                       {u.whoShare.name || "Unknown User"} {t("to")}{" "}
                       {u.toWho.name || "Unknown User"}
                     </Text>
-                    <Text style={styles.placeType} numberOfLines={1}></Text>
+                    <Text className="text-[#90adcb]" numberOfLines={1}></Text>
                   </View>
                 </View>
               </TouchableOpacity>
@@ -136,8 +135,8 @@ export default function ShareLocationScreen() {
         )}
         {!query ? (
           nearbyUsers.length === 0 ? (
-            <View style={styles.centerContainer}>
-              <Text style={styles.centerText}>{t("no_nearby")}</Text>
+            <View className="justify-content items-center flex-1">
+              <Text className="text-[#90adcb]">{t("no_nearby")}</Text>
             </View>
           ) : (
             nearbyUsers.map((u) => (
@@ -152,15 +151,15 @@ export default function ShareLocationScreen() {
                   })
                 }
               >
-                <View style={styles.card}>
-                  <View style={styles.iconWrapper}>
+                <View className="flex-row items-center mt-3 p-3 rounded-14 border border-[#2e3a4c] bg-[#1a2533]">
+                  <View className="w-12 h-12 rounded-24 bg-[#2e3a4c] items-center justify-center mr-4">
                     <AvatarImg src={u.avatar_url} />
                   </View>
-                  <View style={styles.textWrapper}>
-                    <Text style={styles.placeName} numberOfLines={1}>
+                  <View className="flex-1">
+                    <Text className="text-white" numberOfLines={1}>
                       {u.name || "Unknown User"}
                     </Text>
-                    <Text style={styles.placeType} numberOfLines={1}>
+                    <Text className="text-[#90adcb]" numberOfLines={1}>
                       {u.email}
                     </Text>
                   </View>
@@ -169,13 +168,13 @@ export default function ShareLocationScreen() {
             ))
           )
         ) : results === null ? (
-          <View style={styles.centerContainer}>
+          <View className="justify-content items-center flex-1">
             <ActivityIndicator size="large" color="#e3e3e3" />
-            <Text style={styles.centerText}>{t("searching")}</Text>
+            <Text className="text-[#90adcb]">{t("searching")}</Text>
           </View>
         ) : results.length === 0 ? (
-          <View style={styles.centerContainer}>
-            <Text style={styles.centerText}>{t("no_results")}</Text>
+          <View className="justify-content items-center flex-1">
+            <Text className="text-[#90adcb]">{t("no_results")}</Text>
           </View>
         ) : (
           results.map((u) => (
@@ -190,15 +189,15 @@ export default function ShareLocationScreen() {
                 })
               }
             >
-              <View style={styles.card}>
-                <View style={styles.iconWrapper}>
+              <View className="flex-row items-center mt-3 p-3 rounded-14 border border-[#2e3a4c] bg-[#1a2533]">
+                <View className="w-12 h-12 rounded-24 bg-[#2e3a4c] items-center justify-center mr-4">
                   <AvatarImg src={u.avatar_url} />
                 </View>
-                <View style={styles.textWrapper}>
-                  <Text style={styles.placeName} numberOfLines={1}>
+                <View className="flex-1">
+                  <Text className="text-white" numberOfLines={1}>
                     {u.name || "Unknown User"}
                   </Text>
-                  <Text style={styles.placeType} numberOfLines={1}>
+                  <Text className="text-[#90adcb]" numberOfLines={1}>
                     {u.email}
                   </Text>
                 </View>
@@ -210,74 +209,3 @@ export default function ShareLocationScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 24,
-    backgroundColor: "#101922",
-  },
-  centerContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    flex: 1,
-  },
-  centerText: {
-    marginTop: 16,
-    textAlign: "center",
-    color: "#e3e3e3",
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  sectionTitle: {
-    color: "#e3e3e3",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  searchArea: { paddingHorizontal: 12 },
-  searchBox: {
-    height: 56,
-    borderRadius: 12,
-    backgroundColor: "#12202a",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    marginBottom: 12,
-  },
-  searchIcon: { color: "#90adcb", marginRight: 8 },
-  input: { flex: 1, color: "#fff", fontSize: 16 },
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 16,
-    padding: 16,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "#2e3a4c",
-    backgroundColor: "#1a2533",
-  },
-  iconWrapper: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#2e3a4c",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  textWrapper: {
-    flex: 1,
-  },
-  placeName: {
-    color: "#e3e3e3",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  placeType: {
-    color: "#e3e3e3",
-    fontSize: 14,
-    marginTop: 4,
-  },
-});
