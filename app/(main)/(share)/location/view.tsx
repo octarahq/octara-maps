@@ -5,15 +5,15 @@ import { useLocationSharing } from "@/contexts/LocationSharingContext";
 import { createTranslator } from "@/i18n";
 import { OctaraService, OctaraUser } from "@/services/OctaraService";
 import { telemetryNavigationStart } from "@/services/TelemetryService";
+import { cn } from "@/utils/cn";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  StyleSheet,
   Text,
   ToastAndroid,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 export default function ShareLocationViewScreen() {
@@ -120,11 +120,11 @@ export default function ShareLocationViewScreen() {
 
   if (isLoading || (fetchingTarget && !targetUser)) {
     return (
-      <View style={styles.container}>
+      <View className="flex bg-[#101922] pt-4">
         <Header title={t("title")} />
-        <View style={styles.centerContainer}>
+        <View className="justify-content items-center flex-1">
           <ActivityIndicator size="large" color="#0d7ff2" />
-          <Text style={styles.centerText}>{t("loading")}</Text>
+          <Text className="text-[#90adcb]">{t("loading")}</Text>
         </View>
       </View>
     );
@@ -150,29 +150,29 @@ export default function ShareLocationViewScreen() {
     targetUser?.name || targetUser?.email || t("unknown_user");
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-[#101922]">
       <Header title={t("title")} />
 
-      <View style={styles.infoContainer}>
-        <View style={styles.statusRow}>
-          <Text style={styles.statusText}>{displayName}</Text>
+      <View className="px-5 py-4">
+        <View className="flex-row items-center justify-between">
+          <Text className="text-white text-xl font-bold">{displayName}</Text>
           <View
-            style={[
-              styles.badge,
-              { backgroundColor: viewersData ? "#4ade8020" : "#ff444420" },
-            ]}
+            className={cn(
+              "flex-row items-center px-3 py-1 rounded-full",
+              viewersData ? "bg-green-500/20" : "bg-red-500/20",
+            )}
           >
             <View
-              style={[
-                styles.dot,
-                { backgroundColor: viewersData ? "#4ade80" : "#ff4444" },
-              ]}
+              className={cn(
+                "w-2 h-2 rounded-full mr-2",
+                viewersData ? "bg-green-500" : "bg-red-500",
+              )}
             />
             <Text
-              style={[
-                styles.badgeText,
-                { color: viewersData ? "#4ade80" : "#ff4444" },
-              ]}
+              className={cn(
+                "text-xs font-semibold",
+                viewersData ? "text-green-500" : "text-red-500",
+              )}
             >
               {viewersData ? t("online") : t("offline")}
             </Text>
@@ -180,17 +180,19 @@ export default function ShareLocationViewScreen() {
         </View>
 
         {lastUpdate && (
-          <Text style={styles.timeText}>
+          <Text className="text-[#90adcb] text-sm mt-1">
             {t("updated")} {lastUpdate}
           </Text>
         )}
       </View>
 
-      <View style={styles.mapWrapper}>
+      <View className="flex-1 mx-4 mb-4 rounded-2xl overflow-hidden border border-[#2e3a4c] bg-[#1a2533]">
         <MapProvider
           showUserLocation={true}
           showControls={false}
-          style={styles.map}
+          style={{
+            flex: 1,
+          }}
           goTo={
             viewersData
               ? { lat: viewersData.lat, lng: viewersData.lng }
@@ -202,134 +204,35 @@ export default function ShareLocationViewScreen() {
         />
       </View>
 
-      <View style={styles.footer}>
+      <View className="px-4 pb-8">
         {!isMeSharingWithThisUser ? (
           <TouchableOpacity
-            style={[
-              styles.primaryButton,
-              sharingInProgress && styles.disabledButton,
-            ]}
+            className={cn(
+              "h-16 rounded-xl items-center justify-center",
+              sharingInProgress ? "bg-blue-500/60" : "bg-blue-500",
+            )}
             onPress={handleSharePosition}
             disabled={sharingInProgress}
           >
             {sharingInProgress ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>{t("share_position")}</Text>
+              <Text className="text-white text-lg font-bold">
+                {t("share_position")}
+              </Text>
             )}
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={styles.dangerButton}
+            className="h-16 rounded-xl items-center justify-center bg-red-500"
             onPress={handleStopSharing}
           >
-            <Text style={styles.buttonText}>{t("stop_sharing")}</Text>
+            <Text className="text-white text-lg font-bold">
+              {t("stop_sharing")}
+            </Text>
           </TouchableOpacity>
         )}
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#101922",
-    paddingTop: 24,
-  },
-  centerContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    flex: 1,
-  },
-  centerText: {
-    marginTop: 16,
-    textAlign: "center",
-    color: "#e3e3e3",
-  },
-  infoContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-  },
-  statusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  statusText: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "700",
-    flex: 1,
-  },
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    textTransform: "uppercase",
-  },
-  timeText: {
-    color: "#90adcb",
-    fontSize: 14,
-    marginTop: 4,
-  },
-  mapWrapper: {
-    flex: 1,
-    marginHorizontal: 16,
-    marginBottom: 20,
-    borderRadius: 28,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#2e3a4c",
-    backgroundColor: "#1a2533",
-  },
-  map: {
-    flex: 1,
-  },
-  footer: {
-    paddingHorizontal: 16,
-    paddingBottom: 30,
-  },
-  primaryButton: {
-    height: 60,
-    borderRadius: 20,
-    backgroundColor: "#0d7ff2",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 8,
-    shadowColor: "#0d7ff2",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  dangerButton: {
-    height: 60,
-    borderRadius: 20,
-    backgroundColor: "#ff4444",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 4,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-  },
-});
