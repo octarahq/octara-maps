@@ -9,10 +9,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -87,107 +86,126 @@ export default function ArrivedScreen() {
   const routeCoords: { latitude: number; longitude: number }[] = [];
 
   return (
-    <View style={[styles.safe, { paddingTop: topInset }]}>
+    <View
+      className={`flex bg-${Colors.dark.backgroundDark.replace("#", "")} pt-${topInset}`}
+    >
       <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
+        className={`flex bg-${Colors.dark.backgroundDark.replace("#", "")}`}
+        contentContainerClassName="pb-4 px-4"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
+        <View className="h-14 flex-row items-center justify-between">
           <TouchableOpacity
-            style={styles.iconButton}
+            className="w-11 h-11 items-center justify-center"
             onPress={() => router.replace("/")}
             activeOpacity={0.75}
           >
             <MaterialIcons name="close" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t("arrived.tripSummary")}</Text>
-          <View style={styles.iconSpacer} />
+          <Text className="w-full text-center text-white text-[18px] font-bold">
+            {t("arrived.tripSummary")}
+          </Text>
+          <View className="w-11 h-11" />
         </View>
 
-        <View style={styles.hero}>
-          <Text style={styles.heroTitle}>{t("arrived.youHaveArrived")}</Text>
+        <View className="items-center mt-2 mb-4">
+          <Text className="text-white text-[34px] font-bold">
+            {t("arrived.youHaveArrived")}
+          </Text>
         </View>
 
-        <View style={styles.mapCard}>
+        <View className="bg-[#17232f] rounded-14 overflow-hidden border border-[#263445]">
           {hasDestination ? (
             <MapSnapshot
               pins={pins}
               lat={userPos?.latitude}
               lng={userPos?.longitude}
-              style={styles.mapSnapshot}
+              style={{
+                height: 220,
+                borderRadius: 0,
+              }}
             />
           ) : (
-            <View style={styles.mapFallback}>
+            <View className="h-56 items-center justify-center gap-2">
               <MaterialIcons
                 name="location-on"
                 size={22}
                 color={Colors.dark.primary}
               />
-              <Text style={styles.mapFallbackText}>{destinationName}</Text>
+              <Text className="text-white text-[15px] font-bold">
+                {destinationName}
+              </Text>
             </View>
           )}
         </View>
 
-        <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
-            <View style={styles.statHead}>
+        <View className="flex-row items-center gap-2 mt-3">
+          <View className="bg-[#17232f] rounded-14 overflow-hidden border border-[#263445]">
+            <View className="flex-row items-center gap-2 p-3">
               <MaterialIcons
                 name="schedule"
                 size={18}
                 color={Colors.dark.primary}
               />
-              <Text style={styles.statLabel}>{t("arrived.time")}</Text>
+              <Text className="text-white text-[15px] font-bold">
+                {t("arrived.time")}
+              </Text>
             </View>
-            <Text style={styles.statValue}>
+            <Text className="text-white text-[24px] font-bold px-4 pb-4">
               {formatDuration(totalDuration)}
             </Text>
           </View>
 
-          <View style={styles.statCard}>
-            <View style={styles.statHead}>
+          <View className="bg-[#17232f] rounded-14 overflow-hidden border border-[#263445]">
+            <View className="flex-row items-center gap-2 p-3">
               <MaterialIcons
                 name="route"
                 size={18}
                 color={Colors.dark.primary}
               />
-              <Text style={styles.statLabel}>{t("arrived.distance")}</Text>
+              <Text className="text-white text-[15px] font-bold">
+                {t("arrived.distance")}
+              </Text>
             </View>
-            <Text style={styles.statValue}>
+            <Text className="text-white text-[24px] font-bold px-4 pb-4">
               {formatDistance(totalDistance)}
             </Text>
           </View>
 
-          <View style={[styles.statCard, styles.statCardFull]}>
-            <View style={styles.statHead}>
+          <View className="bg-[#17232f] rounded-14 overflow-hidden border border-[#263445]">
+            <View className="flex-row items-center gap-2 p-3">
               <MaterialIcons
                 name="speed"
                 size={18}
                 color={Colors.dark.primary}
               />
-              <Text style={styles.statLabel}>{t("arrived.avgSpeed")}</Text>
+              <Text className="text-white text-[15px] font-bold">
+                {t("arrived.avgSpeed")}
+              </Text>
             </View>
-            <Text style={styles.statValue}>
+            <Text className="text-white text-[24px] font-bold px-4 pb-4">
               {Math.round(Math.max(0, avgSpeed))} km/h
             </Text>
           </View>
         </View>
 
-        <View style={styles.actions}>
+        <View className="flex-row items-center gap-2 mt-3">
           <TouchableOpacity
-            style={styles.primaryButton}
+            className="flex-1 items-center justify-center h-14 rounded-12 bg-primary"
             onPress={() => router.replace("/")}
             activeOpacity={0.85}
           >
-            <Text style={styles.primaryButtonText}>{t("arrived.done")}</Text>
+            <Text className="text-white text-[18px] font-bold">
+              {t("arrived.done")}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.secondaryButton}
+            className="min-h-[54px] rounded-12 bg-[#1d2b39] border border-[#2a3949] items-center justify-center px-3 py-3"
             onPress={() => showCommingSoonToast()}
             activeOpacity={0.85}
           >
-            <Text style={styles.secondaryButtonText}>
+            <Text className="text-white text-[16px] font-bold text-center">
               {t("arrived.findParking")}
             </Text>
           </TouchableOpacity>
@@ -196,168 +214,3 @@ export default function ArrivedScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: Colors.dark.backgroundDark,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: Colors.dark.backgroundDark,
-  },
-  content: {
-    paddingHorizontal: 16,
-    paddingBottom: 28,
-  },
-  header: {
-    height: 56,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  iconButton: {
-    width: 42,
-    height: 42,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconSpacer: {
-    width: 42,
-    height: 42,
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  hero: {
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 14,
-  },
-  heroTitle: {
-    color: "#fff",
-    fontSize: 34,
-    fontWeight: "800",
-    textAlign: "center",
-  },
-  heroSubtitle: {
-    marginTop: 6,
-    color: "#9aa6b2",
-    fontSize: 13,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  mapCard: {
-    backgroundColor: "#17232f",
-    borderRadius: 14,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#263445",
-  },
-  mapSnapshot: {
-    height: 220,
-    borderRadius: 0,
-  },
-  mapFallback: {
-    height: 220,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  mapFallbackText: {
-    color: "#fff",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  mapTag: {
-    position: "absolute",
-    left: 12,
-    bottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(16,25,34,0.85)",
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  mapTagText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
-  },
-  statsGrid: {
-    marginTop: 14,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  statCard: {
-    flexBasis: "48%",
-    flexGrow: 1,
-    backgroundColor: "#17232f",
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#263445",
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
-  statCardFull: {
-    flexBasis: "100%",
-  },
-  statHead: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 8,
-  },
-  statLabel: {
-    color: "#9aa6b2",
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 1,
-  },
-  statValue: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "800",
-  },
-  actions: {
-    marginTop: 20,
-    gap: 10,
-  },
-  primaryButton: {
-    height: 54,
-    borderRadius: 12,
-    backgroundColor: Colors.dark.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "800",
-  },
-  secondaryButton: {
-    minHeight: 54,
-    borderRadius: 12,
-    backgroundColor: "#1d2b39",
-    borderWidth: 1,
-    borderColor: "#2a3949",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-  },
-  secondaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-    textAlign: "center",
-  },
-});
