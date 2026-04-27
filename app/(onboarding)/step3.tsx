@@ -7,7 +7,7 @@ import { useUser } from "@/contexts/UserContext";
 import { createTranslator } from "@/i18n";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
 const { t } = createTranslator("onboarding");
 
@@ -51,23 +51,31 @@ export default function Step3() {
   }, [anon, localName, storedName, setName]);
 
   return (
-    <ThemedView style={styles.root}>
+    <ThemedView
+      className="flex-1"
+      style={{ backgroundColor: Colors.dark.background }}
+    >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-start" }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.container}>
-          <View style={styles.headlineWrapper}>
-            <ThemedText type="title" style={styles.headline}>
+        <View className="px-6 pb-[100px]">
+          <View className="pt-[100px] pb-4">
+            <ThemedText
+              type="title"
+              className="text-white font-bold text-[32px] text-left"
+            >
               {t("step3.title")}
             </ThemedText>
           </View>
 
-          <View style={styles.bodyWrapper}>
-            <ThemedText style={styles.body}>{t("step3.body")}</ThemedText>
+          <View className="mb-6">
+            <ThemedText className="text-white/60 text-[16px] text-left">
+              {t("step3.body")}
+            </ThemedText>
           </View>
 
-          <View style={styles.fieldSection}>
+          <View className="mb-6">
             <TextField
               placeholder={t("step3.enter_your_name")}
               value={localName}
@@ -78,8 +86,8 @@ export default function Step3() {
             />
           </View>
           {(localName || anon) && (
-            <View style={styles.greetingSection}>
-              <ThemedText style={styles.greeting}>
+            <View className="mb-4">
+              <ThemedText className="text-white text-[16px] italic">
                 {t("step3.greeting", {
                   name: anon ? t("step3.traveler") : localName,
                 })}
@@ -88,24 +96,32 @@ export default function Step3() {
           )}
 
           <TouchableOpacity
-            style={[
-              styles.toggleRow,
-              pressedAnon && { borderColor: Colors.dark.primary + "4D" },
-            ]}
+            className="mb-6 bg-[#1e293b] p-5 rounded-[16px] border border-transparent flex-row items-center justify-between"
+            style={[pressedAnon && { borderColor: Colors.dark.primary + "4D" }]}
             activeOpacity={0.75}
             onPress={toggleAnon}
             onPressIn={() => setPressedAnon(true)}
             onPressOut={() => setPressedAnon(false)}
           >
-            <View style={styles.left}>
-              <View style={[styles.circle, anon && styles.circleChecked]} />
-              <Text style={styles.label}>{t("step3.stay_anonymously")}</Text>
+            <View className="flex-row items-center">
+              <View
+                className="w-6 h-6 rounded-full border-2 border-[#475569] mr-3 bg-transparent"
+                style={[
+                  anon && {
+                    backgroundColor: Colors.dark.primary,
+                    borderColor: Colors.dark.primary,
+                  },
+                ]}
+              />
+              <Text className="text-[16px] font-medium text-white">
+                {t("step3.stay_anonymously")}
+              </Text>
             </View>
             <MaterialIcons
               name={!anon ? "visibility" : "visibility-off"}
               size={24}
               color={pressedAnon ? Colors.dark.primary : Colors.dark.icon}
-              style={styles.iconPlaceholder}
+              className="w-6 h-6"
             />
           </TouchableOpacity>
         </View>
@@ -113,85 +129,3 @@ export default function Step3() {
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-  },
-  container: {
-    paddingTop: 0,
-    paddingHorizontal: 24,
-    paddingBottom: 100,
-  },
-  headlineWrapper: {
-    paddingTop: 100,
-    paddingBottom: 16,
-  },
-  headline: {
-    color: Colors.dark.text,
-    fontWeight: "bold",
-    fontSize: 32,
-    textAlign: "left",
-  },
-  bodyWrapper: {
-    marginBottom: 24,
-  },
-  body: {
-    color: "rgba(255,255,255,0.6)",
-    fontSize: 16,
-    textAlign: "left",
-  },
-  fieldSection: {
-    marginBottom: 24,
-  },
-  toggleRow: {
-    marginBottom: 24,
-    backgroundColor: "#1e293b",
-    padding: 20,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "transparent",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  left: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  circle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#475569",
-    marginRight: 12,
-    backgroundColor: "transparent",
-  },
-  circleChecked: {
-    backgroundColor: Colors.dark.primary,
-    borderColor: Colors.dark.primary,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: Colors.dark.text,
-  },
-  iconPlaceholder: {
-    width: 24,
-    height: 24,
-  },
-  greetingSection: {
-    marginBottom: 16,
-  },
-  greeting: {
-    color: "#fff",
-    fontSize: 16,
-    fontStyle: "italic",
-  },
-});
