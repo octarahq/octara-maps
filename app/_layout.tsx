@@ -14,14 +14,10 @@ import Head from "expo-router/head";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { useEffect, useState } from "react";
-import {
-  StatusBar as NativeStatusBar,
-  Platform,
-  StyleSheet,
-  View,
-} from "react-native";
+import { StatusBar as NativeStatusBar, Platform, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
+import "../global.css";
 
 import { AuthProvider } from "../contexts/AuthContext";
 import { HapticSettingsProvider } from "../contexts/HapticSettingsContext";
@@ -78,8 +74,8 @@ export default function RootLayout() {
 
 function SplashScreenOverlay() {
   return (
-    <View style={styles.splashContainer}>
-      <View style={styles.logoContainer}>
+    <View className="absolute inset-0 bg-[#070b10] justify-center items-center z-[9999]">
+      <View className="items-center justify-center">
         <AppLogoIcon width={60} height={60} />
       </View>
     </View>
@@ -230,17 +226,15 @@ function InnerLayout() {
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
           <View
-            style={[
-              styles.safeArea,
-              {
-                backgroundColor:
-                  colorScheme === "dark"
-                    ? Colors.dark.backgroundDark
-                    : Colors.light.backgroundLight,
-              },
-            ]}
+            className="flex-1"
+            style={{
+              backgroundColor:
+                colorScheme === "dark"
+                  ? Colors.dark.backgroundDark
+                  : Colors.light.backgroundLight,
+            }}
           >
-            <View style={styles.slotContainer}>
+            <View className="flex-1">
               <Slot />
             </View>
           </View>
@@ -255,23 +249,3 @@ function InnerLayout() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  slotContainer: {
-    flex: 1,
-  },
-  splashContainer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.dark.backgroundDark,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 9999,
-  },
-  logoContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
