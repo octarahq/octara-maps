@@ -6,7 +6,7 @@ import { usePermissions } from "@/contexts/PermissionsContext";
 import { useUser } from "@/contexts/UserContext";
 import { createTranslator } from "@/i18n";
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
 const { t } = createTranslator("onboarding");
 
@@ -74,35 +74,50 @@ export default function Step5() {
   };
 
   return (
-    <ThemedView style={styles.root}>
+    <ThemedView
+      className="flex-1"
+      style={{ backgroundColor: Colors.dark.background }}
+    >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-start" }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <ThemedText type="title" style={styles.heading}>
+        <View className="px-6 pb-[100px]">
+          <View className="pt-[100px] pb-6">
+            <ThemedText
+              type="title"
+              className="text-white font-bold text-[36px] leading-[40px] mb-2"
+            >
               {t("step5.heading")}
             </ThemedText>
-            <ThemedText style={styles.description}>
+            <ThemedText className="text-white/70 text-[16px] leading-[22px]">
               {t("step5.description")}
             </ThemedText>
           </View>
-          <View style={styles.list}>
+          <View className="flex-col gap-3 py-4">
             {options.map((opt) => (
               <TouchableOpacity
                 key={opt.key}
+                className="flex-row items-center gap-3 border-2 border-white/10 rounded-[24px] p-4"
                 style={[
-                  styles.option,
+                  { backgroundColor: Colors.dark.background },
                   level === opt.key && { borderColor: Colors.dark.primary },
                 ]}
                 activeOpacity={0.8}
                 onPress={() => selectLevel(opt.key)}
               >
-                <View style={styles.optionText}>
-                  <Text style={styles.optionTitle}>{opt.title}</Text>
-                  {opt.tag && <Text style={styles.tag}>{opt.tag}</Text>}
-                  <Text style={styles.optionBody}>{opt.body}</Text>
+                <View className="flex-1">
+                  <Text className="text-white text-[18px] font-bold">
+                    {opt.title}
+                  </Text>
+                  {opt.tag && (
+                    <Text className="text-white text-[10px] font-bold uppercase bg-white/10 px-[6px] py-[2px] rounded-[6px] mt-[2px]">
+                      {opt.tag}
+                    </Text>
+                  )}
+                  <Text className="text-white/60 text-[14px] mt-1">
+                    {opt.body}
+                  </Text>
                 </View>
               </TouchableOpacity>
             ))}
@@ -112,74 +127,3 @@ export default function Step5() {
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-  },
-  container: {
-    paddingHorizontal: 24,
-    paddingTop: 0,
-    paddingBottom: 100,
-  },
-  header: {
-    paddingTop: 100,
-    paddingBottom: 24,
-  },
-  heading: {
-    color: Colors.dark.text,
-    fontWeight: "bold",
-    fontSize: 36,
-    lineHeight: 40,
-    marginBottom: 8,
-  },
-  description: {
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  list: {
-    flexDirection: "column",
-    gap: 12,
-    paddingVertical: 16,
-  },
-  option: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.1)",
-    borderRadius: 24,
-    padding: 16,
-    backgroundColor: Colors.dark.background,
-  },
-  optionText: {
-    flex: 1,
-  },
-  optionTitle: {
-    color: Colors.dark.text,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  tag: {
-    color: Colors.dark.text,
-    fontSize: 10,
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    backgroundColor: "rgba(255,255,255,0.1)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    marginTop: 2,
-  },
-  optionBody: {
-    color: "rgba(255,255,255,0.6)",
-    fontSize: 14,
-    marginTop: 4,
-  },
-});
