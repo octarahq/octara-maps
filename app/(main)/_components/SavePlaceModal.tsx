@@ -20,12 +20,11 @@ import {
   Modal,
   Platform,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
+  View
 } from "react-native";
 
 const PlaceIcons = [
@@ -162,15 +161,17 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.overlay}>
+        <View className="flex-1 bg-black/70 justify-end">
           <TouchableWithoutFeedback>
             <KeyboardAvoidingView
               behavior={Platform.OS === "ios" ? "padding" : "height"}
               keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 80}
-              style={styles.sheet}
+              className="bg-[#101922] rounded-t-3xl p-6"
             >
-              <View style={styles.header}>
-                <Text style={styles.title}>{modalTitle}</Text>
+              <View className="flex-row items-center justify-between mb-6">
+                <Text className="text-white text-xl font-bold">
+                  {modalTitle}
+                </Text>
                 {isEditing && (
                   <TouchableOpacity onPress={handleDelete}>
                     <TrashIcon />
@@ -178,9 +179,9 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
                 )}
               </View>
 
-              <View style={styles.nameRow}>
+              <View className="flex-row items-center gap-3">
                 {slot === "other" && (
-                  <View style={styles.iconCircle}>
+                  <View className="w-12 h-12 rounded-full bg-[#0d7ff2] items-center justify-center">
                     {(() => {
                       const IconComponent =
                         PlaceIcons.find((i) => i.id === modalSelectedIcon)
@@ -195,7 +196,7 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
                 <TextInput
                   placeholder={t("modal_name_placeholder")}
                   placeholderTextColor="#90adcb"
-                  style={styles.nameInput}
+                  className="flex-1 text-white text-[16px] bg-[#12202a] h-12 rounded-lg px-4"
                   value={modalPlaceName}
                   onChangeText={setModalPlaceName}
                 />
@@ -205,18 +206,14 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  style={styles.iconScroll}
-                  contentContainerStyle={{ paddingHorizontal: 16 }}
+                  className="mt-4 px-1"
+                  contentContainerClassName="px-[10px]"
                 >
                   {PlaceIcons.map((item) => (
                     <TouchableOpacity
                       key={item.id}
                       onPress={() => setModalSelectedIcon(item.id)}
-                      style={[
-                        styles.iconOption,
-                        modalSelectedIcon === item.id &&
-                          styles.iconOptionActive,
-                      ]}
+                      className="w-12 h-12 rounded-full bg-[#0d7ff2] items-center justify-center mr-3"
                     >
                       <item.icon
                         color={
@@ -228,11 +225,11 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
                 </ScrollView>
               )}
 
-              <View style={styles.addrBox}>
+              <View className="bg-[#12202a] rounded-lg mt-6 h-14">
                 <TextInput
                   placeholder={t("modal_addr_placeholder")}
                   placeholderTextColor="#90adcb"
-                  style={styles.addrInput}
+                  className="flex-1 text-white text-[16px] px-4"
                   value={addrText}
                   onChangeText={(txt) => {
                     setAddrText(txt);
@@ -242,7 +239,7 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
                 />
               </View>
 
-              <ScrollView style={{ maxHeight: 200 }}>
+              <ScrollView className="max-h-[200px]">
                 {addrResults.map((r, idx) => {
                   const label =
                     r.properties.name ||
@@ -254,7 +251,7 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
                   return (
                     <TouchableOpacity
                       key={idx}
-                      style={styles.addrResult}
+                      className="px-4 py-3 border-b border-[#2e3a4c]"
                       onPress={() => {
                         setAddrText(label);
                         setAddrLat(r.geometry.coordinates[1].toString());
@@ -262,10 +259,8 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
                         setAddrResults([]);
                       }}
                     >
-                      <Text style={{ color: "#fff", fontWeight: "600" }}>
-                        {label}
-                      </Text>
-                      <Text style={{ color: "#90adcb", fontSize: 12 }}>
+                      <Text className="text-white font-bold">{label}</Text>
+                      <Text className="text-[#90adcb] text-[12px]">
                         {r.properties.city}, {r.properties.country}
                       </Text>
                     </TouchableOpacity>
@@ -274,11 +269,13 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
               </ScrollView>
 
               <TouchableOpacity
-                style={[styles.saveBtn, !canSave && { opacity: 0.5 }]}
+                className={`bg-${canSave ? "primary" : "gray-600"} h-14 rounded-full items-center justify-center mt-6`}
                 onPress={handleSave}
                 disabled={!canSave}
               >
-                <Text style={styles.saveBtnText}>{t("modal_save")}</Text>
+                <Text className="text-white text-[18px] font-bold">
+                  {t("modal_save")}
+                </Text>
               </TouchableOpacity>
             </KeyboardAvoidingView>
           </TouchableWithoutFeedback>
@@ -287,106 +284,4 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    justifyContent: "flex-end",
-  },
-  sheet: {
-    backgroundColor: "#101922",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    minHeight: "50%",
-    paddingBottom: 40,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 24,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "800",
-  },
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 24,
-    marginBottom: 16,
-    backgroundColor: "#12202a",
-    marginHorizontal: 16,
-    borderRadius: 16,
-    height: 72,
-  },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "rgba(13,127,242,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  nameInput: {
-    flex: 1,
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  iconScroll: {
-    marginBottom: 24,
-  },
-  iconOption: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#12202a",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  iconOptionActive: {
-    backgroundColor: Colors.dark.primary,
-  },
-  addrBox: {
-    height: 56,
-    borderRadius: 12,
-    backgroundColor: "#12202a",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    marginHorizontal: 16,
-    marginBottom: 8,
-  },
-  addrInput: {
-    flex: 1,
-    color: "#fff",
-    fontSize: 16,
-  },
-  addrResult: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.05)",
-    marginHorizontal: 16,
-  },
-  saveBtn: {
-    backgroundColor: Colors.dark.primary,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 16,
-    marginTop: 24,
-  },
-  saveBtnText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
-  },
-});
 export default SavePlaceModal;
