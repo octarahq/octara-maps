@@ -31,7 +31,6 @@ import {
   Modal,
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -261,24 +260,28 @@ function StopRow({
 
   return (
     <View
+      className="relative overflow-visible"
       style={[
-        styles.stopRowWrapper,
         isEditing &&
           (canUseCurrentPosition || autocompleteResults.length > 0) && {
             zIndex: 200,
           },
       ]}
     >
-      <Animated.View style={[styles.plannerRow, animStyle]}>
-        <View style={[styles.plannerIconBox, iconBoxExtra]}>
+      <Animated.View
+        className="flex-row items-center gap-[14px] bg-[#12202a] rounded-[16px] px-4 py-[14px] border border-white/10"
+        style={[animStyle]}
+      >
+        <View
+          className="w-10 h-10 rounded-[10px] bg-[#1e3040] items-center justify-center"
+          style={[iconBoxExtra]}
+        >
           <MaterialIcons name={iconName as any} size={20} color={iconColor} />
         </View>
-        <View style={styles.plannerInfo}>
+        <View className="flex-1">
           <Text
-            style={[
-              styles.plannerRowLabel,
-              labelColor ? { color: labelColor } : {},
-            ]}
+            className="text-[#90adcb] text-[10px] font-semibold tracking-widest uppercase mb-[2px]"
+            style={[labelColor ? { color: labelColor } : {}]}
           >
             {rowLabel}
           </Text>
@@ -287,7 +290,7 @@ function StopRow({
               ref={inputRef}
               value={editQuery}
               onChangeText={onQueryChange}
-              style={styles.stopInput}
+              className="text-white text-[15px] font-medium py-[2px] border-b border-primary mt-[2px]"
               placeholder={t("searchPlacePlaceholder")}
               placeholderTextColor="#90adcb"
               returnKeyType="search"
@@ -295,11 +298,10 @@ function StopRow({
           ) : (
             <TouchableOpacity onPress={onEditActivate} hitSlop={4}>
               <Text
+                className="text-white text-[15px] font-semibold"
                 style={[
-                  styles.plannerRowTitle,
                   !stop.result &&
-                    !stop.isCurrentPosition &&
-                    styles.plannerRowTitlePlaceholder,
+                    !stop.isCurrentPosition && { color: "#90adcb" },
                 ]}
               >
                 {stop.isCurrentPosition
@@ -309,9 +311,9 @@ function StopRow({
             </TouchableOpacity>
           )}
         </View>
-        <View style={styles.stopActions}>
+        <View className="flex-row items-center gap-2">
           <GestureDetector gesture={panGesture}>
-            <View style={styles.dragHandle}>
+            <View className="p-1">
               <MaterialIcons
                 name="drag-handle"
                 size={22}
@@ -331,21 +333,24 @@ function StopRow({
 
       {isEditing &&
         (canUseCurrentPosition || autocompleteResults.length > 0) && (
-          <View style={styles.autocompleteDropdown}>
+          <View
+            className="absolute left-0 right-0 bg-[#0e1f2e] rounded-[10px] border border-white/10 overflow-hidden z-[200] elevation-[16]"
+            style={{ top: ITEM_HEIGHT + 2 }}
+          >
             {canUseCurrentPosition && (
               <TouchableOpacity
+                className="flex-row items-center gap-[10px] px-3 py-2"
                 style={[
-                  styles.autocompleteItem,
-                  autocompleteResults.length > 0 &&
-                    styles.autocompleteItemBorder,
+                  autocompleteResults.length > 0 && {
+                    borderBottomWidth: 1,
+                    borderBottomColor: "rgba(255,255,255,0.06)",
+                  },
                 ]}
                 onPress={onSelectCurrentPosition}
               >
                 <View
-                  style={[
-                    styles.autocompleteIconBox,
-                    { backgroundColor: "rgba(13,127,242,0.15)" },
-                  ]}
+                  className="w-9 h-9 rounded-[10px] bg-[#223649] items-center justify-center"
+                  style={[{ backgroundColor: "rgba(13,127,242,0.15)" }]}
                 >
                   <MaterialIcons
                     name="my-location"
@@ -353,11 +358,11 @@ function StopRow({
                     color={Colors.dark.primary}
                   />
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.autocompleteTitle}>
+                <View className="flex-1">
+                  <Text className="text-white text-[14px] font-medium">
                     {t("myPositionTitle")}
                   </Text>
-                  <Text style={styles.autocompleteSub}>
+                  <Text className="text-[#90adcb] text-[12px] mt-[1px]">
                     {t("useMyLocation")}
                   </Text>
                 </View>
@@ -377,22 +382,30 @@ function StopRow({
               return (
                 <TouchableOpacity
                   key={`${r.properties?.osm_id ?? ri}`}
+                  className="flex-row items-center gap-[10px] px-3 py-2"
                   style={[
-                    styles.autocompleteItem,
-                    ri < autocompleteResults.length - 1 &&
-                      styles.autocompleteItemBorder,
+                    ri < autocompleteResults.length - 1 && {
+                      borderBottomWidth: 1,
+                      borderBottomColor: "rgba(255,255,255,0.06)",
+                    },
                   ]}
                   onPress={() => onSelectResult(r)}
                 >
-                  <View style={styles.autocompleteIconBox}>
+                  <View className="w-9 h-9 rounded-[10px] bg-[#223649] items-center justify-center">
                     {getPhotonIcon(r)}
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.autocompleteTitle} numberOfLines={1}>
+                  <View className="flex-1">
+                    <Text
+                      className="text-white text-[14px] font-medium"
+                      numberOfLines={1}
+                    >
                       {rName}
                     </Text>
                     {rSub ? (
-                      <Text style={styles.autocompleteSub} numberOfLines={1}>
+                      <Text
+                        className="text-[#90adcb] text-[12px] mt-[1px]"
+                        numberOfLines={1}
+                      >
                         {rSub}
                       </Text>
                     ) : null}
@@ -1054,7 +1067,7 @@ export default function RoutePlanningScreen() {
   }, [summaryWaypoints, position]);
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-[#101922]">
       <StatusBar
         hidden
         translucent
@@ -1063,8 +1076,8 @@ export default function RoutePlanningScreen() {
       />
 
       <View
+        className="flex-row items-center justify-between px-4 pb-3 border-b"
         style={[
-          styles.header,
           {
             paddingTop: insets.top + 8,
             borderBottomColor: "rgba(255,255,255,0.08)",
@@ -1073,38 +1086,44 @@ export default function RoutePlanningScreen() {
       >
         <TouchableOpacity
           onPress={() => router.back()}
-          style={styles.iconButton}
+          className="w-12 h-12 rounded-full items-center justify-center"
         >
           <MaterialIcons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t("optionsTitle")}</Text>
-        <View style={styles.iconButton} />
+        <Text className="text-white text-[18px] font-bold flex-1 text-center">
+          {t("optionsTitle")}
+        </Text>
+        <View className="w-12 h-12 rounded-full items-center justify-center" />
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 }]}
+        contentContainerStyle={{ padding: 16, gap: 0, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         scrollEnabled={!mapExpanded}
       >
         {mapExpanded ? (
-          <View style={styles.summaryCardExpanded}>
-            <View style={styles.expandedHeader}>
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text style={styles.summaryLabel}>{t("summaryLabel")}</Text>
+          <View className="flex-col gap-0 bg-[#12202a] rounded-[16px] padding-[14px] border border-white/[0.07] mb-5">
+            <View className="flex-row items-center justify-between mb-[10px] gap-2">
+              <View className="flex-1 gap-[2px]">
+                <Text className="text-[#90adcb] text-[10px] font-semibold tracking-widest uppercase">
+                  {t("summaryLabel")}
+                </Text>
                 {selected !== "transit" && (
-                  <View style={styles.summaryRouteInfo}>
+                  <View className="flex-row items-center gap-[6px] mt-1">
                     {modesCalculating[selected] ? (
-                      <Text style={styles.summaryRouteLoading}>
+                      <Text className="text-[#90adcb] text-[13px] italic">
                         {t("calculating")}
                       </Text>
                     ) : routeResults[selected] ? (
                       <>
-                        <Text style={styles.summaryRouteDuration}>
+                        <Text className="text-white text-[15px] font-bold">
                           {formatDuration(routeResults[selected]!.duration)}
                         </Text>
-                        <Text style={styles.summaryRouteSep}>·</Text>
-                        <Text style={styles.summaryRouteDist}>
+                        <Text className="text-[#90adcb] text-[15px] mx-1">
+                          ·
+                        </Text>
+                        <Text className="text-[#90adcb] text-[13px]">
                           {formatDistance(routeResults[selected]!.distance)}
                         </Text>
                       </>
@@ -1115,7 +1134,7 @@ export default function RoutePlanningScreen() {
               <TouchableOpacity
                 onPress={toggleMapExpand}
                 hitSlop={12}
-                style={styles.expandedCloseBtn}
+                className="p-1"
               >
                 <MaterialIcons
                   name="fullscreen-exit"
@@ -1125,7 +1144,7 @@ export default function RoutePlanningScreen() {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.expandedMapBorder}>
+            <View className="rounded-[12px] border border-white/10 overflow-hidden mb-0">
               <MapSnapshot
                 pins={mapPins}
                 routeCoords={
@@ -1134,17 +1153,22 @@ export default function RoutePlanningScreen() {
                     : undefined
                 }
                 interactive
-                style={styles.expandedMapSnapshot}
+                style={{ height: 278 }}
               />
             </View>
           </View>
         ) : (
           <>
-            <View style={styles.summaryCard}>
-              <View style={styles.summaryLeft}>
-                <Text style={styles.summaryLabel}>{t("summaryLabel")}</Text>
+            <View className="flex-row gap-3 bg-[#12202a] rounded-[16px] p-4 border border-white/[0.07] mb-5">
+              <View className="flex-1 gap-[6px]">
+                <Text className="text-[#90adcb] text-[10px] font-semibold tracking-widest uppercase">
+                  {t("summaryLabel")}
+                </Text>
                 {destName ? (
-                  <Text style={styles.summaryTitle} numberOfLines={2}>
+                  <Text
+                    className="text-white text-[17px] font-bold leading-[22px]"
+                    numberOfLines={2}
+                  >
                     {destName}
                   </Text>
                 ) : null}
@@ -1158,11 +1182,14 @@ export default function RoutePlanningScreen() {
                       ? (wp.result?.name ?? t("currentPosition"))
                       : (wp.result?.name ?? t("destination"));
                   return (
-                    <View key={wp.id} style={styles.summaryRow}>
-                      <View style={styles.summaryDotCol}>
+                    <View
+                      key={wp.id}
+                      className="flex-row items-start gap-2 min-h-[20px]"
+                    >
+                      <View className="w-3 items-center pt-[3px]">
                         <View
+                          className="w-2 h-2 rounded-full bg-[#4a6a84]"
                           style={[
-                            styles.summaryDot,
                             isFirst && { backgroundColor: Colors.dark.primary },
                             isLast && {
                               backgroundColor: "#e3e3e3",
@@ -1170,13 +1197,13 @@ export default function RoutePlanningScreen() {
                             },
                           ]}
                         />
-                        {!isLast && <View style={styles.summaryLine} />}
+                        {!isLast && (
+                          <View className="w-[2px] flex-1 min-h-[10px] bg-white/[0.2] mt-[2px] -mb-1" />
+                        )}
                       </View>
                       <Text
-                        style={[
-                          styles.summaryRowText,
-                          isFirst && { color: "#fff" },
-                        ]}
+                        className="text-[#90adcb] text-[13px] flex-1 pb-1.5"
+                        style={[isFirst && { color: "#fff" }]}
                         numberOfLines={1}
                       >
                         {label}
@@ -1186,18 +1213,20 @@ export default function RoutePlanningScreen() {
                 })}
 
                 {selected !== "transit" && (
-                  <View style={styles.summaryRouteInfo}>
+                  <View className="flex-row items-center gap-[6px] mt-1">
                     {modesCalculating[selected] ? (
-                      <Text style={styles.summaryRouteLoading}>
+                      <Text className="text-[#90adcb] text-[13px] italic">
                         {t("calculating")}
                       </Text>
                     ) : routeResults[selected] ? (
                       <>
-                        <Text style={styles.summaryRouteDuration}>
+                        <Text className="text-white text-[15px] font-bold">
                           {formatDuration(routeResults[selected]!.duration)}
                         </Text>
-                        <Text style={styles.summaryRouteSep}>·</Text>
-                        <Text style={styles.summaryRouteDist}>
+                        <Text className="text-[#90adcb] text-[15px] mx-1">
+                          ·
+                        </Text>
+                        <Text className="text-[#90adcb] text-[13px]">
                           {formatDistance(routeResults[selected]!.distance)}
                         </Text>
                       </>
@@ -1207,11 +1236,12 @@ export default function RoutePlanningScreen() {
               </View>
 
               <TouchableOpacity
-                style={styles.summaryMap}
+                className="flex-1.5 bg-transparent"
+                style={{ flex: 1.5 }}
                 onPress={toggleMapExpand}
                 activeOpacity={0.85}
               >
-                <View style={styles.mapBorder}>
+                <View className="rounded-[12px] border border-white/10 overflow-hidden">
                   <MapSnapshot
                     pins={mapPins}
                     routeCoords={
@@ -1226,23 +1256,27 @@ export default function RoutePlanningScreen() {
 
             <Animated.View style={editBtnAnimStyle}>
               <TouchableOpacity
-                style={styles.editStopsButton}
+                className="flex-row items-center gap-2 self-start px-[14px] py-2 rounded-[20px] border border-white/10 bg-white/[0.04] mb-5"
                 onPress={() => setShowPlanner(true)}
                 activeOpacity={0.75}
               >
                 <MaterialIcons name="edit-road" size={18} color="#90adcb" />
-                <Text style={styles.editStopsText}>{t("editStops")}</Text>
+                <Text className="text-[#90adcb] text-[13px] font-semibold flex-1">
+                  {t("editStops")}
+                </Text>
                 <MaterialIcons name="chevron-right" size={18} color="#90adcb" />
               </TouchableOpacity>
             </Animated.View>
           </>
         )}
 
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t("modesTitle")}</Text>
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className="text-white text-[17px] font-bold">
+            {t("modesTitle")}
+          </Text>
         </View>
 
-        <View style={styles.modesList}>
+        <View className="gap-[10px]">
           {MODES.map((mode) => {
             const isSelected = selected === mode.id;
             const altsCount = routeAlternatives[mode.id]?.length ?? 0;
@@ -1251,99 +1285,88 @@ export default function RoutePlanningScreen() {
             if (isSelected && hasMultipleAlts) {
               const alternatives = routeAlternatives[mode.id] ?? [];
               return (
-                <View key={mode.id} style={styles.expandedModeCard}>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <View style={styles.modeLeft}>
-                      <View style={styles.expandedModeIconBox}>
+                <View
+                  key={mode.id}
+                  className="flex-col bg-[#12202a] rounded-[16px] p-4 border-2 border-primary mb-3 elevation-6 shadow-primary shadow-opacity-25 shadow-radius-10"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center gap-[14px] flex-1">
+                      <View className="w-12 h-12 rounded-[12px] bg-primary items-center justify-center mr-3">
                         <MaterialIcons
                           name={mode.icon as any}
                           size={28}
                           color="#fff"
                         />
                       </View>
-                      <View style={styles.modeInfo}>
-                        <View style={styles.modeLabelRow}>
-                          <Text style={styles.modeName}>
+                      <View className="flex-1">
+                        <View className="flex-row items-center gap-2">
+                          <Text className="text-white text-[15px] font-bold">
                             {t(`modes.${mode.id}.label`)}
                           </Text>
                           {getFastestMode() === mode.id ? (
-                            <View style={styles.badge}>
-                              <Text style={styles.badgeText}>
+                            <View className="bg-primary/20 rounded-[4px] px-[6px] py-[2px]">
+                              <Text className="text-primary text-[9px] font-extrabold uppercase">
                                 {t("fastest")}
                               </Text>
                             </View>
                           ) : null}
                         </View>
-                        <Text
-                          style={[
-                            styles.modeSub,
-                            { color: Colors.dark.primary },
-                          ]}
-                        >
+                        <Text className="text-primary text-[13px] mt-[2px]">
                           {t(`modes.${mode.id}.subtitle`)}
                         </Text>
                       </View>
                     </View>
                   </View>
 
-                  <View
-                    style={{
-                      height: 1,
-                      backgroundColor: "rgba(255,255,255,0.1)",
-                      marginVertical: 12,
-                    }}
-                  />
+                  <View className="h-[1px] bg-white/10 my-3" />
 
                   {alternatives.length > 1 ? (
-                    <View style={styles.alternativesDetailSection}>
+                    <View className="gap-[10px] mb-5">
                       {alternatives.map((alt, idx) => {
                         const isSelectedAlt =
                           selectedAlternativeIndex[mode.id] === idx;
                         return (
                           <TouchableOpacity
                             key={idx}
+                            className="flex-row items-center justify-between px-3 py-[10px] bg-white/[0.04] rounded-[12px] border border-white/10"
                             style={[
-                              styles.alternativeDetailRow,
-                              isSelectedAlt &&
-                                styles.alternativeDetailRowSelected,
+                              isSelectedAlt && {
+                                backgroundColor: "rgba(13,127,242,0.12)",
+                                borderColor: Colors.dark.primary,
+                                borderWidth: 2,
+                              },
                             ]}
                             onPress={() =>
                               handleSelectAlternative(mode.id, idx)
                             }
                             activeOpacity={0.8}
                           >
-                            <View style={styles.alternativeDetailLeft}>
+                            <View className="flex-row items-center gap-3 flex-1">
                               <View
+                                className="w-6 h-6 rounded-full border-2 border-gray-500 items-center justify-center"
                                 style={[
-                                  styles.radioOuter,
-                                  isSelectedAlt && styles.radioOuterSelected,
+                                  isSelectedAlt && {
+                                    borderColor: Colors.dark.primary,
+                                  },
                                 ]}
                               >
                                 {isSelectedAlt && (
-                                  <View style={styles.radioInner} />
+                                  <View className="w-[10px] h-[10px] rounded-full bg-primary" />
                                 )}
                               </View>
-                              <View style={{ flex: 1 }}>
+                              <View className="flex-1">
                                 <Text
-                                  style={[
-                                    styles.alternativeDetailTitle,
-                                    isSelectedAlt &&
-                                      styles.alternativeDetailTitleSelected,
-                                  ]}
+                                  className="text-white/80 text-[14px] font-bold"
+                                  style={[isSelectedAlt && { color: "#fff" }]}
                                 >
                                   {t("route", { n: idx + 1 })}
                                 </Text>
                                 <Text
+                                  className="text-gray-500 text-[12px] mt-[2px]"
                                   style={[
-                                    styles.alternativeDetailSub,
-                                    isSelectedAlt &&
-                                      styles.alternativeDetailSubSelected,
+                                    isSelectedAlt && {
+                                      color: Colors.dark.primary,
+                                    },
                                   ]}
                                 >
                                   {formatDistance(alt.distance)}
@@ -1351,11 +1374,8 @@ export default function RoutePlanningScreen() {
                               </View>
                             </View>
                             <Text
-                              style={[
-                                styles.alternativeDetailTime,
-                                isSelectedAlt &&
-                                  styles.alternativeDetailTimeSelected,
-                              ]}
+                              className="text-gray-500 text-[15px] font-extrabold"
+                              style={[isSelectedAlt && { color: "#fff" }]}
                             >
                               {formatDuration(alt.duration)}
                             </Text>
@@ -1371,18 +1391,29 @@ export default function RoutePlanningScreen() {
             return (
               <TouchableOpacity
                 key={mode.id}
-                style={[styles.modeCard, isSelected && styles.modeCardSelected]}
+                className="flex-row items-center justify-between bg-[#12202a] rounded-[16px] px-4 py-[14px] border border-white/[0.07] min-h-[80px]"
+                style={[
+                  isSelected && {
+                    borderWidth: 2,
+                    borderColor: Colors.dark.primary,
+                    elevation: 6,
+                    shadowColor: Colors.dark.primary,
+                    shadowOpacity: 0.25,
+                    shadowRadius: 10,
+                    shadowOffset: { width: 0, height: 4 },
+                  },
+                ]}
                 onPress={() => {
                   if (mode.id !== "transit") setSelected(mode.id);
                   else showCommingSoonToast();
                 }}
                 activeOpacity={0.85}
               >
-                <View style={styles.modeLeft}>
+                <View className="flex-row items-center gap-[14px] flex-1">
                   <View
+                    className="w-12 h-12 rounded-[12px] bg-[#1e3040] items-center justify-center"
                     style={[
-                      styles.modeIconBox,
-                      isSelected && styles.modeIconBoxSelected,
+                      isSelected && { backgroundColor: Colors.dark.primary },
                     ]}
                   >
                     <MaterialIcons
@@ -1391,20 +1422,22 @@ export default function RoutePlanningScreen() {
                       color={isSelected ? "#fff" : "#90adcb"}
                     />
                   </View>
-                  <View style={styles.modeInfo}>
-                    <View style={styles.modeLabelRow}>
-                      <Text style={styles.modeName}>
+                  <View className="flex-1">
+                    <View className="flex-row items-center gap-2">
+                      <Text className="text-white text-[15px] font-bold">
                         {t(`modes.${mode.id}.label`)}
                       </Text>
                       {isSelected && getFastestMode() === mode.id ? (
-                        <View style={styles.badge}>
-                          <Text style={styles.badgeText}>{t("fastest")}</Text>
+                        <View className="bg-primary/20 rounded-[4px] px-[6px] py-[2px]">
+                          <Text className="text-primary text-[9px] font-extrabold uppercase">
+                            {t("fastest")}
+                          </Text>
                         </View>
                       ) : null}
                     </View>
                     <Text
+                      className="text-[#90adcb] text-[13px] mt-[2px]"
                       style={[
-                        styles.modeSub,
                         mode.id === "transit" &&
                           isSelected && { color: Colors.dark.primary },
                       ]}
@@ -1414,8 +1447,8 @@ export default function RoutePlanningScreen() {
                     </Text>
                   </View>
                 </View>
-                <View style={styles.modeRight}>
-                  <Text style={styles.modeTime}>
+                <View className="items-end gap-[2px]">
+                  <Text className="text-white text-[15px] font-bold">
                     {mode.id === "transit"
                       ? "—"
                       : modesCalculating[mode.id]
@@ -1426,7 +1459,7 @@ export default function RoutePlanningScreen() {
                             ? formatDuration(routeResults[mode.id]!.duration)
                             : "—"}
                   </Text>
-                  <Text style={styles.modeDist}>
+                  <Text className="text-[#90adcb] text-[12px]">
                     {mode.id !== "transit" && routeResults[mode.id]
                       ? formatDistance(routeResults[mode.id]!.distance)
                       : ""}
@@ -1438,33 +1471,39 @@ export default function RoutePlanningScreen() {
         </View>
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
+      <View
+        className="absolute bottom-0 left-0 right-0 px-4 pt-4 bg-transparent"
+        style={[{ paddingBottom: insets.bottom + 16 }]}
+      >
         {departure ? (
           <>
-            <View style={styles.startButtonPreview}>
+            <View className="flex-row items-center gap-[6px] mb-[10px] px-1">
               <MaterialIcons name="info-outline" size={18} color="#90adcb" />
-              <Text style={styles.startButtonPreviewText}>
+              <Text className="text-[#90adcb] text-[12px] flex-1">
                 {t("customDepartureInfo")}
               </Text>
             </View>
             <TouchableOpacity
-              style={[styles.startButton, { backgroundColor: "#1a2f42" }]}
+              className="bg-[#1a2f42] rounded-[16px] h-[56px] flex-row items-center justify-center gap-[10px]"
               onPress={handleStartNavigation}
               activeOpacity={0.8}
             >
               <MaterialIcons name="near-me" size={22} color="#90adcb" />
-              <Text style={[styles.startButtonText, { color: "#90adcb" }]}>
+              <Text className="text-[#90adcb] text-[17px] font-extrabold">
                 {t("startNavigation")}
               </Text>
             </TouchableOpacity>
           </>
         ) : (
           <TouchableOpacity
-            style={styles.startButton}
+            className="bg-primary rounded-[16px] h-[56px] flex-row items-center justify-center gap-[10px] elevation-10 shadow-primary shadow-opacity-40 shadow-radius-[16px] shadow-offset-[0,6]"
+            style={{ backgroundColor: Colors.dark.primary }}
             onPress={handleStartNavigation}
             activeOpacity={0.9}
           >
-            <Text style={styles.startButtonText}>{t("startNavigation")}</Text>
+            <Text className="text-white text-[17px] font-extrabold">
+              {t("startNavigation")}
+            </Text>
             <MaterialIcons name="near-me" size={22} color="#fff" />
           </TouchableOpacity>
         )}
@@ -1476,8 +1515,11 @@ export default function RoutePlanningScreen() {
         statusBarTranslucent
         onRequestClose={() => setShowPlanner(false)}
       >
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <View style={[styles.modalContainer, { paddingTop: insets.top }]}>
+        <GestureHandlerRootView className="flex-1">
+          <View
+            className="flex-1 bg-[#101922]"
+            style={[{ paddingTop: insets.top }]}
+          >
             <StatusBar
               hidden
               translucent
@@ -1486,23 +1528,27 @@ export default function RoutePlanningScreen() {
             />
 
             <View
-              style={[
-                styles.header,
-                { borderBottomColor: "rgba(255,255,255,0.08)" },
-              ]}
+              className="flex-row items-center justify-between px-4 pb-3 border-b"
+              style={[{ borderBottomColor: "rgba(255,255,255,0.08)" }]}
             >
               <TouchableOpacity
                 onPress={() => setShowPlanner(false)}
-                style={styles.iconButton}
+                className="w-12 h-12 rounded-full items-center justify-center"
               >
                 <MaterialIcons name="arrow-back" size={24} color="#fff" />
               </TouchableOpacity>
-              <Text style={styles.headerTitle}>{t("planner")}</Text>
-              <View style={styles.iconButton}></View>
+              <Text className="text-white text-[18px] font-bold flex-1 text-center">
+                {t("planner")}
+              </Text>
+              <View className="w-12 h-12 rounded-full items-center justify-center"></View>
             </View>
 
             <ScrollView
-              contentContainerStyle={styles.plannerScroll}
+              contentContainerStyle={{
+                padding: 16,
+                gap: 10,
+                paddingBottom: 20,
+              }}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
               scrollEnabled={scrollEnabled}
@@ -1549,7 +1595,7 @@ export default function RoutePlanningScreen() {
               })}
 
               <TouchableOpacity
-                style={styles.addStopButton}
+                className="flex-row items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-white/12 py-[18px] mt-1"
                 onPress={addStop}
                 activeOpacity={0.7}
               >
@@ -1558,25 +1604,29 @@ export default function RoutePlanningScreen() {
                   size={22}
                   color="#90adcb"
                 />
-                <Text style={styles.addStopText}>{t("addStop")}</Text>
+                <Text className="text-[#90adcb] text-[15px] font-bold">
+                  {t("addStop")}
+                </Text>
               </TouchableOpacity>
             </ScrollView>
 
             {!keyboardVisible && (
               <View
-                style={[
-                  styles.plannerFooter,
-                  { paddingBottom: insets.bottom + 12 },
-                ]}
+                className="bg-[#12202a] rounded-t-[24px] border-t border-white/[0.07] p-4 gap-3"
+                style={[{ paddingBottom: insets.bottom + 12 }]}
               >
-                <View style={styles.plannerMiniMap}>
-                  <View style={styles.mapBorder}>
+                <View className="relative">
+                  <View className="rounded-[12px] border border-white/10 overflow-hidden">
                     <MapSnapshot pins={mapPins} />
                   </View>
                 </View>
 
                 <TouchableOpacity
-                  style={[styles.calcButton, !canSave && { opacity: 0.4 }]}
+                  className="bg-primary rounded-[16px] h-[56px] flex-row items-center justify-center gap-[10px] elevation-8 shadow-primary shadow-opacity-35 shadow-radius-[12px] shadow-offset-[0,4]"
+                  style={{
+                    backgroundColor: Colors.dark.primary,
+                    opacity: canSave ? 1 : 0.4,
+                  }}
                   onPress={() => {
                     if (!canSave) return;
                     setWaypoints((prev) => [
@@ -1596,7 +1646,7 @@ export default function RoutePlanningScreen() {
                   activeOpacity={0.9}
                 >
                   <MaterialIcons name="check" size={22} color="#fff" />
-                  <Text style={styles.calcButtonText}>
+                  <Text className="text-white text-[17px] font-extrabold">
                     {canSave ? t("save") : t("saveNotEnough")}
                   </Text>
                 </TouchableOpacity>
@@ -1608,600 +1658,4 @@ export default function RoutePlanningScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#101922" },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-  },
-  iconButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
-    flex: 1,
-    textAlign: "center",
-  },
-  scrollContent: { padding: 16, gap: 0 },
-  summaryCard: {
-    flexDirection: "row",
-    gap: 12,
-    backgroundColor: "#12202a",
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
-    marginBottom: 20,
-  },
-  summaryCardExpanded: {
-    flexDirection: "column",
-    gap: 0,
-    backgroundColor: "#12202a",
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
-    marginBottom: 20,
-  },
-  expandedHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-    gap: 8,
-  },
-  expandedCloseBtn: {
-    padding: 4,
-  },
-  expandedMapBorder: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    overflow: "hidden",
-    marginBottom: 0,
-  },
-  expandedMapSnapshot: {
-    height: 278,
-  },
-  summaryLeft: { flex: 1.5, gap: 6 },
-  summaryLabel: {
-    color: "#90adcb",
-    fontSize: 10,
-    fontWeight: "600",
-    letterSpacing: 1,
-  },
-  summaryTitle: {
-    color: "#fff",
-    fontSize: 17,
-    fontWeight: "700",
-    lineHeight: 22,
-  },
-  summaryRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-    minHeight: 20,
-  },
-  summaryDotCol: {
-    width: 12,
-    alignItems: "center",
-    paddingTop: 3,
-  },
-  summaryDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#4a6a84",
-  },
-  summaryLine: {
-    width: 2,
-    flex: 1,
-    minHeight: 10,
-    backgroundColor: "rgba(144,173,203,0.2)",
-    marginTop: 2,
-    marginBottom: -4,
-  },
-  summaryRowText: { color: "#90adcb", fontSize: 13, flex: 1, paddingBottom: 6 },
-  summaryRouteInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 6,
-  },
-  summaryRouteDuration: { color: "#fff", fontSize: 15, fontWeight: "700" },
-  summaryRouteSep: { color: "#90adcb", fontSize: 13 },
-  summaryRouteDist: { color: "#90adcb", fontSize: 13 },
-  summaryRouteLoading: { color: "#90adcb", fontSize: 13, fontStyle: "italic" },
-  summaryRouteError: { color: "#ff6666", fontSize: 13 },
-  summaryMap: {
-    flex: 1,
-    minHeight: 90,
-  },
-  mapBorder: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    overflow: "hidden",
-  },
-  summaryMapPlaceholder: { flex: 1, backgroundColor: "#1a2b3a" },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  sectionTitle: { color: "#fff", fontSize: 17, fontWeight: "700" },
-  settingsLink: { color: Colors.dark.primary, fontSize: 14, fontWeight: "600" },
-  modesList: { gap: 10 },
-  modeCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#12202a",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
-    minHeight: 80,
-  },
-  modeCardSelected: {
-    borderWidth: 2,
-    borderColor: Colors.dark.primary,
-    shadowColor: Colors.dark.primary,
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
-  },
-  expandedModeCard: {
-    flexDirection: "column",
-    backgroundColor: "#12202a",
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 2,
-    borderColor: Colors.dark.primary,
-    marginBottom: 12,
-    shadowColor: Colors.dark.primary,
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
-  },
-  expandedModeIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: Colors.dark.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  modeLeft: { flexDirection: "row", alignItems: "center", gap: 14, flex: 1 },
-  modeIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "#1e3040",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modeIconBoxSelected: { backgroundColor: Colors.dark.primary },
-  modeInfo: { flex: 1 },
-  modeLabelRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  modeName: { color: "#fff", fontSize: 15, fontWeight: "700" },
-  badge: {
-    backgroundColor: "rgba(13,127,242,0.2)",
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  badgeText: {
-    color: Colors.dark.primary,
-    fontSize: 9,
-    fontWeight: "800",
-    textTransform: "uppercase",
-  },
-  modeSub: { color: "#90adcb", fontSize: 13, marginTop: 2 },
-  modeRight: { alignItems: "flex-end", gap: 2 },
-  modeTime: { color: "#fff", fontSize: 15, fontWeight: "700" },
-  modeDist: { color: "#90adcb", fontSize: 12 },
-  footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    backgroundColor: "transparent",
-  },
-  startButton: {
-    backgroundColor: Colors.dark.primary,
-    borderRadius: 16,
-    height: 56,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    shadowColor: Colors.dark.primary,
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 10,
-  },
-  startButtonText: {
-    color: "#fff",
-    fontSize: 17,
-    fontWeight: "800",
-  },
-  startButtonPreview: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 10,
-    paddingHorizontal: 4,
-  },
-  startButtonPreviewText: {
-    color: "#90adcb",
-    fontSize: 12,
-    flex: 1,
-  },
-  destName: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  destAddress: {
-    color: "#90adcb",
-    fontSize: 14,
-    marginTop: 2,
-  },
-  editStopsButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    alignSelf: "flex-start",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    backgroundColor: "rgba(255,255,255,0.04)",
-    marginBottom: 20,
-  },
-  editStopsText: {
-    color: "#90adcb",
-    fontSize: 13,
-    fontWeight: "600",
-    flex: 1,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "#101922",
-  },
-  plannerScroll: {
-    padding: 16,
-    gap: 10,
-    paddingBottom: 20,
-  },
-  plannerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    backgroundColor: "#12202a",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
-  },
-  plannerRowDest: {
-    borderColor: "rgba(13,127,242,0.3)",
-  },
-  plannerIconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: "#1e3040",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  plannerInfo: { flex: 1 },
-  plannerRowLabel: {
-    color: "#90adcb",
-    fontSize: 10,
-    fontWeight: "600",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-    marginBottom: 2,
-  },
-  plannerRowTitle: {
-    color: "#fff",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  addStopButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderStyle: "dashed",
-    borderColor: "rgba(255,255,255,0.12)",
-    paddingVertical: 18,
-    marginTop: 4,
-  },
-  addStopText: {
-    color: "#90adcb",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  plannerRowTitlePlaceholder: { color: "#90adcb" },
-  stopInput: {
-    color: "#fff",
-    fontSize: 15,
-    fontWeight: "500",
-    paddingVertical: 2,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.primary,
-    marginTop: 2,
-  },
-  stopActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  dragHandle: {
-    padding: 4,
-  },
-  autocompleteDropdown: {
-    position: "absolute",
-    top: ITEM_HEIGHT + 2,
-    left: 0,
-    right: 0,
-    backgroundColor: "#0e1f2e",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-    overflow: "hidden",
-    zIndex: 200,
-    elevation: 16,
-  },
-  stopRowWrapper: {
-    position: "relative",
-    overflow: "visible",
-  },
-  autocompleteItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  autocompleteIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#223649",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  autocompleteItemBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.06)",
-  },
-  autocompleteTitle: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  autocompleteSub: {
-    color: "#90adcb",
-    fontSize: 12,
-    marginTop: 1,
-  },
-  plannerFooter: {
-    backgroundColor: "#12202a",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderTopWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
-    padding: 16,
-    gap: 12,
-  },
-  plannerMiniMap: {
-    position: "relative",
-  },
-  plannerMiniMapOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 10,
-    paddingBottom: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  plannerMiniMapText: {
-    color: "#fff",
-    fontSize: 11,
-    fontWeight: "500",
-  },
-  plannerSummaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 4,
-  },
-  plannerSummaryLabel: { color: "#90adcb", fontSize: 12, fontWeight: "500" },
-  plannerSummaryValue: { color: "#fff", fontSize: 22, fontWeight: "800" },
-  plannerSummaryUnit: { color: "#90adcb", fontSize: 13, fontWeight: "400" },
-  calcButton: {
-    backgroundColor: Colors.dark.primary,
-    borderRadius: 16,
-    height: 56,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    shadowColor: Colors.dark.primary,
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
-  },
-  calcButtonText: {
-    color: "#fff",
-    fontSize: 17,
-    fontWeight: "800",
-  },
-  alternativesSection: {
-    paddingHorizontal: 16,
-    marginTop: 16,
-  },
-  alternativesTitle: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
-    marginBottom: 12,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  alternativesScroll: {
-    gap: 10,
-    paddingBottom: 8,
-  },
-  alternativeCard: {
-    backgroundColor: "#12202a",
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.1)",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    minWidth: 130,
-  },
-  alternativeCardSelected: {
-    borderColor: Colors.dark.primary,
-    backgroundColor: "rgba(13,127,242,0.1)",
-  },
-  alternativeIndex: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  alternativeIndexText: {
-    color: "#90adcb",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  alternativeIndexTextSelected: {
-    color: Colors.dark.primary,
-    backgroundColor: "rgba(13,127,242,0.2)",
-  },
-  alternativeInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  alternativeDuration: {
-    color: "#fff",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  alternativeDurationSelected: {
-    color: Colors.dark.primary,
-  },
-  alternativeDistance: {
-    color: "#90adcb",
-    fontSize: 12,
-  },
-  alternativeDistanceSelected: {
-    color: Colors.dark.primary,
-  },
-  alternativesDetailSection: {
-    gap: 10,
-    marginBottom: 20,
-  },
-  alternativeDetailRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-  alternativeDetailRowSelected: {
-    backgroundColor: "rgba(13,127,242,0.12)",
-    borderColor: Colors.dark.primary,
-    borderWidth: 2,
-  },
-  alternativeDetailLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-  radioOuter: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#6b7280",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  radioOuterSelected: {
-    borderColor: Colors.dark.primary,
-  },
-  radioInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.dark.primary,
-  },
-  alternativeDetailTitle: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  alternativeDetailTitleSelected: {
-    color: "#fff",
-  },
-  alternativeDetailSub: {
-    color: "#6b7280",
-    fontSize: 12,
-    marginTop: 2,
-  },
-  alternativeDetailSubSelected: {
-    color: Colors.dark.primary,
-  },
-  alternativeDetailTime: {
-    color: "#6b7280",
-    fontSize: 15,
-    fontWeight: "800",
-  },
-  alternativeDetailTimeSelected: {
-    color: "#fff",
-  },
-});
+// NativeWind migration complete
