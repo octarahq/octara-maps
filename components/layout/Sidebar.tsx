@@ -15,7 +15,6 @@ import {
   Pressable,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -57,17 +56,17 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
       animationType="none"
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+      <View className="absolute inset-0">
+        <Pressable className="absolute inset-0" onPress={onClose} />
 
         <Animated.View
           entering={SlideInLeft.duration(300)}
           exiting={SlideOutLeft.duration(300)}
-          style={styles.sidebar}
+          className="w-80 h-full bg-[#101922] rounded-r-[40px] shadow-[10px_0_15px_rgba(0,0,0,0.5)] elevation-20"
         >
-          <SafeAreaView style={styles.safeArea}>
-            <View style={styles.header}>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <SafeAreaView className="flex-1">
+            <View className="p-5 items-end">
+              <TouchableOpacity onPress={onClose} className="p-2">
                 <CloseIcon
                   width={24}
                   height={24}
@@ -78,19 +77,21 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
 
             <ScrollView
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollContent}
+              contentContainerStyle={{ paddingBottom: 20 }}
             >
-              <View style={styles.profileSection}>
+              <View className="px-6 mb-10">
                 <AvatarImg size={64} />
-                <Text style={styles.userName}>{displayName}</Text>
-                <Text style={styles.userEmail}>
+                <Text className="text-white text-[20px] font-bold tracking-tighter">
+                  {displayName}
+                </Text>
+                <Text className="text-white/60 text-[12px] mt-1">
                   {user?.email || "Connectez-vous pour plus de fonctionnalités"}
                 </Text>
               </View>
 
-              <View style={styles.navContainer}>
+              <View className="px-4 gap-2">
                 <TouchableOpacity
-                  style={[styles.navItem]}
+                  className="flex-row items-center px-4 py-3.5 rounded-[16px] gap-4"
                   onPress={() => handleNavigation("/(main)/settings")}
                 >
                   <SettingsIcon
@@ -98,11 +99,13 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
                     height={24}
                     color="rgba(255,255,255,0.6)"
                   />
-                  <Text style={[styles.navText]}>Paramètres</Text>
+                  <Text className="text-white/60 text-[14px] font-medium">
+                    Paramètres
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.navItem}
+                  className="flex-row items-center px-4 py-3.5 rounded-[16px] gap-4"
                   onPress={() => {
                     onClose();
                     router.push("/(main)/trip_history");
@@ -113,11 +116,13 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
                     height={24}
                     color="rgba(255,255,255,0.6)"
                   />
-                  <Text style={styles.navText}>Historique des trajets</Text>
+                  <Text className="text-white/60 text-[14px] font-medium">
+                    Historique des trajets
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.navItem}
+                  className="flex-row items-center px-4 py-3.5 rounded-[16px] gap-4"
                   onPress={() => {
                     onClose();
                     router.push("/(main)/(search)/search?tab=saved");
@@ -128,14 +133,16 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
                     height={24}
                     color="rgba(255,255,255,0.6)"
                   />
-                  <Text style={styles.navText}>Lieux enregistrés</Text>
+                  <Text className="text-white/60 text-[14px] font-medium">
+                    Lieux enregistrés
+                  </Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
 
-            <View style={styles.footer}>
+            <View className="p-6 border-t border-white/[0.05] mt-auto">
               <TouchableOpacity
-                style={styles.logoutButton}
+                className="flex-row items-center gap-4 py-3 rounded-[16px]"
                 onPress={user?.email ? handleLogout : handleLogin}
               >
                 {user?.email ? (
@@ -144,10 +151,8 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
                   <AvatarIcon width={24} height={24} color="#0d7ff2" />
                 )}
                 <Text
-                  style={{
-                    ...styles.logoutText,
-                    color: user?.email ? "#ff6b6b" : "#0d7ff2",
-                  }}
+                  className="text-[14px] font-bold"
+                  style={{ color: user?.email ? "#ff6b6b" : "#0d7ff2" }}
                 >
                   {user?.email ? "Déconnexion" : "Se connecter"}
                 </Text>
@@ -159,110 +164,3 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  sidebar: {
-    width: 320,
-    height: "100%",
-    backgroundColor: "#101922",
-    borderTopRightRadius: 40,
-    borderBottomRightRadius: 40,
-    shadowColor: "#000",
-    shadowOffset: { width: 10, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
-    elevation: 20,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 20,
-  },
-  header: {
-    padding: 20,
-    alignItems: "flex-end",
-  },
-  closeButton: {
-    padding: 8,
-  },
-  profileSection: {
-    paddingHorizontal: 24,
-    marginBottom: 40,
-  },
-  userName: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    letterSpacing: -0.5,
-  },
-  userEmail: {
-    color: "rgba(255,255,255,0.6)",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  badgeContainer: {
-    marginTop: 12,
-    flexDirection: "row",
-  },
-  badge: {
-    backgroundColor: "rgba(13,127,242,0.2)",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(13,127,242,0.3)",
-  },
-  badgeText: {
-    color: "#0d7ff2",
-    fontSize: 10,
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  navContainer: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  navItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 16,
-    gap: 16,
-  },
-  navText: {
-    color: "rgba(255,255,255,0.6)",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  footer: {
-    padding: 24,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.05)",
-    marginTop: "auto",
-  },
-  logoutButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    paddingVertical: 12,
-    borderRadius: 16,
-  },
-  logoutText: {
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  versionText: {
-    color: "rgba(255,255,255,0.2)",
-    fontSize: 10,
-    textTransform: "uppercase",
-    letterSpacing: 2,
-    marginTop: 16,
-    paddingLeft: 4,
-  },
-});
