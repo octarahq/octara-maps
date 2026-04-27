@@ -1,6 +1,6 @@
 import { Colors } from "@/constants/theme";
 import { useThemeColor } from "@/hooks/use-theme-color";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
 export type PageIndicatorsProps = {
   total: number;
@@ -15,34 +15,19 @@ export default function PageIndicators({
   const inactiveColor = "rgba(255,255,255,0.2)";
 
   return (
-    <View style={styles.container}>
+    <View className="flex-row items-center justify-center gap-2 py-4">
       {Array.from({ length: total }).map((_, index) => (
         <View
           key={index}
+          className="h-[6px] rounded-full"
           style={[
-            styles.dot,
             {
               backgroundColor: index === current ? activeColor : inactiveColor,
+              width: index === current ? 24 : 6,
             },
-            index === current && { width: 24 },
           ]}
         />
       ))}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 16,
-  },
-  dot: {
-    height: 6,
-    width: 6,
-    borderRadius: 3,
-  },
-});

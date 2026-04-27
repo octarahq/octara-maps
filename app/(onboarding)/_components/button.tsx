@@ -34,16 +34,21 @@ export default function OnboardingButton({
 
   return (
     <HapticTouchable
+      className="flex-1 h-[56px] rounded-[28px] items-center justify-center"
       style={[
-        styles.button,
+        styles.shadow,
         { backgroundColor: background },
-        isDisabled && styles.buttonDisabled,
+        isDisabled && styles.shadowDisabled,
         style,
       ]}
       onPress={handlePress}
       {...rest}
     >
-      <Text style={[styles.text, { color }]} numberOfLines={1}>
+      <Text
+        className="text-[18px] font-bold"
+        style={{ color }}
+        numberOfLines={1}
+      >
         {title}
       </Text>
     </HapticTouchable>
@@ -51,24 +56,15 @@ export default function OnboardingButton({
 }
 
 const styles = StyleSheet.create({
-  button: {
-    flex: 1,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
+  shadow: {
     shadowColor: Colors.dark.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 4,
   },
-  buttonDisabled: {
+  shadowDisabled: {
     shadowOpacity: 0,
     elevation: 0,
-  },
-  text: {
-    fontSize: 18,
-    fontWeight: "bold",
   },
 });
