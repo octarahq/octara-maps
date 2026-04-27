@@ -7,7 +7,7 @@ import { createTranslator } from "@/i18n";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { usePermissions } from "../../contexts/PermissionsContext";
 
 const { t } = createTranslator("onboarding");
@@ -114,27 +114,33 @@ export default function Step4() {
   ];
 
   return (
-    <ThemedView style={styles.root}>
+    <ThemedView
+      className="flex-1"
+      style={{ backgroundColor: Colors.dark.background }}
+    >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-start" }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <ThemedText type="title" style={styles.heading}>
+        <View className="px-6 pb-[100px]">
+          <View className="pt-[100px] pb-8">
+            <ThemedText
+              type="title"
+              className="text-white font-bold text-[36px] leading-[40px] mb-2"
+            >
               {t("step4.heading")}
             </ThemedText>
-            <ThemedText style={styles.description}>
+            <ThemedText className="text-[#a1a1a1] text-[16px] leading-[22px]">
               {t("step4.description")}
             </ThemedText>
           </View>
 
-          <View style={styles.list}>
+          <View className="flex-col gap-4 mb-6">
             {items.map((item) => (
               <TouchableOpacity
                 key={item.key}
+                className="flex-row items-center gap-4 bg-[#111111] rounded-[24px] p-4 border border-white/5 justify-between min-h-[92px]"
                 style={[
-                  styles.item,
                   pressed[item.key] && {
                     borderColor: Colors.dark.primary + "4D",
                   },
@@ -153,17 +159,21 @@ export default function Step4() {
                 onPressIn={() => onPressIn(item.key)}
                 onPressOut={() => onPressOut(item.key)}
               >
-                <View style={styles.itemLeft}>
-                  <View style={styles.iconCircle}>
+                <View className="flex-row items-center gap-4">
+                  <View className="w-[56px] h-[56px] rounded-full bg-primary/10 border border-primary/20 items-center justify-center">
                     <MaterialIcons
                       name={item.icon as any}
                       size={28}
                       color={Colors.dark.primary}
                     />
                   </View>
-                  <View style={styles.itemText}>
-                    <Text style={styles.itemTitle}>{item.title}</Text>
-                    <Text style={styles.itemBody}>{item.body}</Text>
+                  <View className="flex-col justify-center shrink min-w-0">
+                    <Text className="text-white text-[18px] font-bold">
+                      {item.title}
+                    </Text>
+                    <Text className="text-[#a1a1a1] text-[14px] mt-1 flex-wrap">
+                      {item.body}
+                    </Text>
                   </View>
                 </View>
               </TouchableOpacity>
@@ -183,84 +193,3 @@ export default function Step4() {
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-  },
-  container: {
-    paddingHorizontal: 24,
-    paddingTop: 0,
-    paddingBottom: 100,
-  },
-  header: {
-    paddingTop: 100,
-    paddingBottom: 32,
-  },
-  heading: {
-    color: Colors.dark.text,
-    fontWeight: "bold",
-    fontSize: 36,
-    lineHeight: 40,
-    marginBottom: 8,
-  },
-  description: {
-    color: "#a1a1a1",
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  list: {
-    flexDirection: "column",
-    gap: 16,
-    marginBottom: 24,
-  },
-  item: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    backgroundColor: "#111111",
-    borderRadius: 24,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
-    justifyContent: "space-between",
-    minHeight: 92,
-  },
-  itemLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.dark.primary + "1A",
-    borderWidth: 1,
-    borderColor: Colors.dark.primary + "33",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  itemText: {
-    flexDirection: "column",
-    justifyContent: "center",
-    flexShrink: 1,
-    minWidth: 0,
-  },
-  itemTitle: {
-    color: Colors.dark.text,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  itemBody: {
-    color: "#a1a1a1",
-    fontSize: 14,
-    marginTop: 4,
-    flexWrap: "wrap",
-  },
-});
