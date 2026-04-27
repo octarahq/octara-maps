@@ -6,14 +6,7 @@ import { telemetryNavigationStart } from "@/services/TelemetryService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useRef } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, Switch, Text, View } from "react-native";
 
 function SettingsSection({
   title,
@@ -29,61 +22,27 @@ function SettingsSection({
   }[];
 }) {
   return (
-    <View style={{ width: "100%", marginTop: 16 }}>
-      <Text
-        style={{
-          fontSize: 10,
-          fontWeight: "700",
-          textTransform: "uppercase",
-          letterSpacing: 2,
-          color: "#64748b",
-          marginBottom: 16,
-          paddingHorizontal: 8,
-        }}
-      >
+    <View className="w-full mt-4">
+      <Text className="text-[10px] font-bold uppercase tracking-[2px] text-[#64748b] mb-4 px-2">
         {title}
       </Text>
 
-      <View
-        style={{
-          backgroundColor: "#1a2530",
-          borderRadius: 12,
-          overflow: "hidden",
-        }}
-      >
+      <View className="bg-[#1a2530] rounded-[12px] overflow-hidden">
         {items.map((item, index) => (
           <React.Fragment key={index}>
             <Pressable
               onPress={item.onClick}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: 16,
-              }}
+              className="flex-row items-center justify-between p-4"
             >
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
-              >
-                <View
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 20,
-                    backgroundColor: "rgba(255,255,255,0.06)",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
+              <View className="flex-row items-center gap-3">
+                <View className="w-10 h-10 rounded-[20px] bg-white/5 items-center justify-center">
                   <MaterialIcons name={item.icon} size={20} color="#0d7ff2" />
                 </View>
                 <View>
-                  <Text
-                    style={{ color: "#fff", fontSize: 14, fontWeight: "500" }}
-                  >
+                  <Text className="text-white text-[14px] font-medium">
                     {item.title}
                   </Text>
-                  <Text style={{ color: "#64748b", fontSize: 12 }}>
+                  <Text className="text-[#64748b] text-[12px]">
                     {item.description}
                   </Text>
                 </View>
@@ -101,13 +60,7 @@ function SettingsSection({
             </Pressable>
 
             {index < items.length - 1 && (
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: "rgba(255,255,255,0.06)",
-                  marginHorizontal: 16,
-                }}
-              />
+              <View className="h-[1px] bg-white/5 mx-4" />
             )}
           </React.Fragment>
         ))}
@@ -130,24 +83,26 @@ export default function SettingsScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
+      <View className="flex-1 bg-[#101922] p-5 justify-center items-center">
         <ActivityIndicator size="large" color="#0d7ff2" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View className="flex-1 bg-[#101922] p-5">
+      <View className="w-full flex-row items-center gap-4">
         <Pressable
           onPress={() => {
             router.back();
           }}
-          style={{ padding: 8 }}
+          className="p-2"
         >
           <MaterialIcons name="arrow-back" size={24} color="#0d7ff2" />
         </Pressable>
-        <Text style={styles.title}>{t("title")}</Text>
+        <Text className="text-white text-[24px] font-bold mb-2">
+          {t("title")}
+        </Text>
       </View>
 
       <SettingsSection
@@ -272,65 +227,3 @@ export default function SettingsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#101922",
-    padding: 20,
-  },
-  header: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  loginContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 16,
-    borderWidth: 2,
-    borderColor: "#0d7ff2",
-  },
-  title: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  email: {
-    color: "#ccc",
-    fontSize: 14,
-    marginBottom: 24,
-  },
-  button: {
-    backgroundColor: "#0d7ff2",
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 25,
-    minWidth: 200,
-    alignItems: "center",
-  },
-  logoutButton: {
-    backgroundColor: "#ff3b30",
-    marginTop: 20,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  backButton: {
-    position: "absolute",
-    bottom: 40,
-  },
-  backButtonText: {
-    color: "#0d7ff2",
-    fontSize: 14,
-  },
-});
