@@ -13,7 +13,6 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import React from "react";
 import {
   StatusBar,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -39,7 +38,7 @@ export default function MainScreen() {
 
   return (
     <MapProvider style={{ flex: 1 }}>
-      <View style={styles.container} pointerEvents="box-none">
+      <View className="flex-1 bg-transparent" pointerEvents="box-none">
         <StatusBar
           hidden
           translucent
@@ -67,67 +66,75 @@ export default function MainScreen() {
             setBlockMap(index > 0);
           }}
         >
-          <BottomSheetView style={styles.sheetContent}>
-            <Text style={styles.sheetTitle}>
+          <BottomSheetView className="p-4 items-start">
+            <Text className="text-white text-[18px] font-bold mb-5">
               {pos?.position?.city
                 ? t("sheet.exploreCity", { city: pos.position.city })
                 : t("sheet.exploreArea")}
             </Text>
-            <View style={styles.itemsContainer}>
+            <View className="flex-row w-full justify-between">
               <TouchableOpacity
-                style={styles.item}
+                className="items-center w-[22%]"
                 onPress={() => {
                   telemetryFeatureUsed("home_explore_gas");
                   showCommingSoonToast();
                 }}
               >
-                <View style={styles.itemBox}>
+                <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
                   <GasIcon />
                 </View>
 
-                <Text style={styles.itemLabel}>{t("items.gas")}</Text>
+                <Text className="text-white/60 text-[12px] mt-1.5">
+                  {t("items.gas")}
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.item}
+                className="items-center w-[22%]"
                 onPress={() => {
                   telemetryFeatureUsed("home_explore_food");
                   showCommingSoonToast();
                 }}
               >
-                <View style={styles.itemBox}>
+                <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
                   <FoodIcon />
                 </View>
 
-                <Text style={styles.itemLabel}>{t("items.food")}</Text>
+                <Text className="text-white/60 text-[12px] mt-1.5">
+                  {t("items.food")}
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.item}
+                className="items-center w-[22%]"
                 onPress={() => {
                   telemetryFeatureUsed("home_explore_coffee");
                   showCommingSoonToast();
                 }}
               >
-                <View style={styles.itemBox}>
+                <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
                   <CoffeeIcon />
                 </View>
 
-                <Text style={styles.itemLabel}>{t("items.coffee")}</Text>
+                <Text className="text-white/60 text-[12px] mt-1.5">
+                  {t("items.coffee")}
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.item}
+                className="items-center w-[22%]"
                 onPress={() => {
                   telemetryFeatureUsed("home_explore_parking");
                   showCommingSoonToast();
                 }}
               >
-                <View style={styles.itemBox}>
+                <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
                   <ParkingIcon />
                 </View>
 
-                <Text style={styles.itemLabel}>{t("items.parking")}</Text>
+                <Text className="text-white/60 text-[12px] mt-1.5">
+                  {t("items.parking")}
+                </Text>
               </TouchableOpacity>
             </View>
           </BottomSheetView>
@@ -136,34 +143,3 @@ export default function MainScreen() {
     </MapProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "transparent" },
-  sheetContent: {
-    padding: 16,
-    alignItems: "flex-start",
-  },
-  sheetTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 20,
-  },
-  itemsContainer: {
-    flexDirection: "row",
-    width: "100%",
-    justifyContent: "space-between",
-  },
-  item: { alignItems: "center", width: "22%" },
-  itemBox: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  itemLabel: { color: "rgba(255,255,255,0.6)", fontSize: 12, marginTop: 6 },
-});
