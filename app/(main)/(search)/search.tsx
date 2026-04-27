@@ -18,7 +18,6 @@ import {
   ImageBackground,
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -90,11 +89,18 @@ export function SearchResult({
   onArrowPress?: () => void;
 }) {
   return (
-    <TouchableOpacity style={styles.listItem} onPress={onPress}>
-      <View style={styles.itemIcon}>{icon}</View>
-      <View style={styles.itemBody}>
-        <Text style={styles.itemTitle}>{title}</Text>
-        {subtitle ? <Text style={styles.itemSub}>{subtitle}</Text> : null}
+    <TouchableOpacity
+      className="flex-row items-center py-3 px-1 rounded-[12px]"
+      onPress={onPress}
+    >
+      <View className="w-12 h-12 rounded-[12px] bg-[#223649] items-center justify-center mr-3">
+        {icon}
+      </View>
+      <View className="flex-1">
+        <Text className="text-white font-bold">{title}</Text>
+        {subtitle ? (
+          <Text className="text-[#90adcb] text-[12px]">{subtitle}</Text>
+        ) : null}
       </View>
       {onArrowPress ? (
         <TouchableOpacity onPress={onArrowPress} hitSlop={8}>
@@ -240,7 +246,7 @@ export default function SearchScreen() {
   }, [query, position?.latitude, position?.longitude]);
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-[#101922]">
       <StatusBar
         hidden
         translucent
@@ -248,41 +254,46 @@ export default function SearchScreen() {
         barStyle="light-content"
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={[styles.header, { paddingTop: topInset }]}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 64 }}>
+        <View
+          className="flex-row items-center px-3 pb-3"
+          style={{ paddingTop: topInset }}
+        >
           <TouchableOpacity
             onPress={() => router.back()}
-            style={styles.backButton}
+            className="w-10 h-10 items-center justify-center"
           >
             <BackIcon />
           </TouchableOpacity>
-          <Text style={styles.title}>{t("title")}</Text>
+          <Text className="flex-1 text-white text-center text-[18px] font-bold">
+            {t("title")}
+          </Text>
           <TouchableOpacity
-            style={styles.avatar}
+            className="w-10 h-10 rounded-[20px] bg-[#0d7ff2]/10 items-center justify-center"
             onPress={() => router.push("/(main)/settings")}
           >
             <AvatarImg size={40} />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.searchArea}>
+        <View className="px-3">
           {mode !== "saved" && (
-            <View style={styles.searchBox}>
-              <Text style={styles.searchIcon}>
+            <View className="h-14 rounded-[12px] bg-[#12202a] flex-row items-center px-3 mb-3">
+              <Text className="text-[#90adcb] mr-2">
                 <SearchIcon />
               </Text>
               <TextInput
                 autoFocus={initialMount.current}
                 placeholder={t("placeholder")}
                 placeholderTextColor="#90adcb"
-                style={styles.input}
+                className="flex-1 text-white text-[16px]"
                 value={query}
                 onChangeText={setQuery}
               />
             </View>
           )}
           {mode === "search" && compact && (
-            <View style={styles.resultsList}>
+            <View className="mt-2 px-3">
               <ScrollView keyboardShouldPersistTaps="handled">
                 {filteredAmenities.length > 0 &&
                   filteredAmenities.slice(0, 10).map((a) => (
@@ -443,7 +454,7 @@ export default function SearchScreen() {
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                style={styles.chips}
+                className="mb-3"
               >
                 {[
                   { icon: <GasIcon />, label: t("chip_gas") },
@@ -454,18 +465,20 @@ export default function SearchScreen() {
                 ].map((c) => (
                   <TouchableOpacity
                     key={c.label}
-                    style={styles.chip}
+                    className="bg-[#223649] px-3.5 py-2 rounded-[8px] mr-2 flex-row items-center"
                     onPress={() => showCommingSoonToast()}
                   >
-                    <View style={styles.chipIcon}>{c.icon}</View>
-                    <Text style={styles.chipLabel}>{c.label}</Text>
+                    <View className="mr-2 w-6 h-6 items-center justify-center">
+                      {c.icon}
+                    </View>
+                    <Text className="text-white font-semibold">{c.label}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
 
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>
+              <View className="mt-2">
+                <View className="flex-row justify-between items-center px-1 mb-2">
+                  <Text className="text-white text-[16px] font-bold">
                     {t("recent_searches")}
                   </Text>
                   {recentTrips.length > 0 ? (
@@ -479,7 +492,7 @@ export default function SearchScreen() {
                         setVisibleRecentCount(5);
                       }}
                     >
-                      <Text style={styles.clear}>{t("clear_all")}</Text>
+                      <Text className="text-[#0d7ff2]">{t("clear_all")}</Text>
                     </TouchableOpacity>
                   ) : null}
                 </View>
@@ -531,186 +544,218 @@ export default function SearchScreen() {
                 )}
               </View>
 
-              <View style={styles.exploreSection}>
-                <Text style={styles.sectionTitle}>{t("explore_nearby")}</Text>
-                <View style={styles.grid}>
+              <View className="mt-4 px-3">
+                <Text className="text-white text-[16px] font-bold mb-2">
+                  {t("explore_nearby")}
+                </Text>
+                <View className="flex-row flex-wrap justify-between">
                   <TouchableOpacity
-                    style={styles.card}
+                    className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
                     onPress={() => showCommingSoonToast()}
                   >
                     <ImageBackground
                       source={topDiningImg}
-                      style={styles.cardImage}
+                      className="absolute inset-0 rounded-[16px]"
                       imageStyle={{ borderRadius: 16 }}
                     >
-                      <View style={styles.cardOverlay} />
+                      <View className="absolute inset-0 bg-black/40 rounded-[16px]" />
                     </ImageBackground>
-                    <Text style={styles.cardText}>{t("card_top_dining")}</Text>
+                    <Text className="text-white font-bold z-10">
+                      {t("card_top_dining")}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={styles.card}
+                    className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
                     onPress={() => showCommingSoonToast()}
                   >
                     <ImageBackground
                       source={nightlifeImg}
-                      style={styles.cardImage}
+                      className="absolute inset-0 rounded-[16px]"
                       imageStyle={{ borderRadius: 16 }}
                     >
-                      <View style={styles.cardOverlay} />
+                      <View className="absolute inset-0 bg-black/40 rounded-[16px]" />
                     </ImageBackground>
-                    <Text style={styles.cardText}>{t("card_nightlife")}</Text>
+                    <Text className="text-white font-bold z-10">
+                      {t("card_nightlife")}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={styles.card}
+                    className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
                     onPress={() => showCommingSoonToast()}
                   >
                     <ImageBackground
                       source={natureImg}
-                      style={styles.cardImage}
+                      className="absolute inset-0 rounded-[16px]"
                       imageStyle={{ borderRadius: 16 }}
                     >
-                      <View style={styles.cardOverlay} />
+                      <View className="absolute inset-0 bg-black/40 rounded-[16px]" />
                     </ImageBackground>
-                    <Text style={styles.cardText}>{t("card_nature")}</Text>
+                    <Text className="text-white font-bold z-10">
+                      {t("card_nature")}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={styles.card}
+                    className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
                     onPress={() => showCommingSoonToast()}
                   >
                     <ImageBackground
                       source={shoppingImg}
-                      style={styles.cardImage}
+                      className="absolute inset-0 rounded-[16px]"
                       imageStyle={{ borderRadius: 16 }}
                     >
-                      <View style={styles.cardOverlay} />
+                      <View className="absolute inset-0 bg-black/40 rounded-[16px]" />
                     </ImageBackground>
-                    <Text style={styles.cardText}>{t("card_shopping")}</Text>
+                    <Text className="text-white font-bold z-10">
+                      {t("card_shopping")}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
             </>
           )}
           {mode === "explore" && !compact && (
-            <View style={styles.exploreSection}>
-              <Text style={styles.sectionTitle}>{t("explore_nearby")}</Text>
-              <View style={styles.grid}>
+            <View className="mt-4 px-3">
+              <Text className="text-white text-[16px] font-bold mb-2">
+                {t("explore_nearby")}
+              </Text>
+              <View className="flex-row flex-wrap justify-between">
                 <TouchableOpacity
-                  style={styles.card}
+                  className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
                   onPress={() => showCommingSoonToast()}
                 >
                   <ImageBackground
                     source={topDiningImg}
-                    style={styles.cardImage}
+                    className="absolute inset-0 rounded-[16px]"
                     imageStyle={{ borderRadius: 16 }}
                   >
-                    <View style={styles.cardOverlay} />
+                    <View className="absolute inset-0 bg-black/40 rounded-[16px]" />
                   </ImageBackground>
-                  <Text style={styles.cardText}>{t("card_top_dining")}</Text>
+                  <Text className="text-white font-bold z-10">
+                    {t("card_top_dining")}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.card}
+                  className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
                   onPress={() => showCommingSoonToast()}
                 >
                   <ImageBackground
                     source={nightlifeImg}
-                    style={styles.cardImage}
+                    className="absolute inset-0 rounded-[16px]"
                     imageStyle={{ borderRadius: 16 }}
                   >
-                    <View style={styles.cardOverlay} />
+                    <View className="absolute inset-0 bg-black/40 rounded-[16px]" />
                   </ImageBackground>
-                  <Text style={styles.cardText}>{t("card_nightlife")}</Text>
+                  <Text className="text-white font-bold z-10">
+                    {t("card_nightlife")}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.card}
+                  className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
                   onPress={() => showCommingSoonToast()}
                 >
                   <ImageBackground
                     source={natureImg}
-                    style={styles.cardImage}
+                    className="absolute inset-0 rounded-[16px]"
                     imageStyle={{ borderRadius: 16 }}
                   >
-                    <View style={styles.cardOverlay} />
+                    <View className="absolute inset-0 bg-black/40 rounded-[16px]" />
                   </ImageBackground>
-                  <Text style={styles.cardText}>{t("card_nature")}</Text>
+                  <Text className="text-white font-bold z-10">
+                    {t("card_nature")}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.card}
+                  className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
                   onPress={() => showCommingSoonToast()}
                 >
                   <ImageBackground
                     source={shoppingImg}
-                    style={styles.cardImage}
+                    className="absolute inset-0 rounded-[16px]"
                     imageStyle={{ borderRadius: 16 }}
                   >
-                    <View style={styles.cardOverlay} />
+                    <View className="absolute inset-0 bg-black/40 rounded-[16px]" />
                   </ImageBackground>
-                  <Text style={styles.cardText}>{t("card_shopping")}</Text>
+                  <Text className="text-white font-bold z-10">
+                    {t("card_shopping")}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.card}
+                  className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
                   onPress={() => showCommingSoonToast()}
                 >
                   <ImageBackground
                     source={cultureImg}
-                    style={styles.cardImage}
+                    className="absolute inset-0 rounded-[16px]"
                     imageStyle={{ borderRadius: 16 }}
                   >
-                    <View style={styles.cardOverlay} />
+                    <View className="absolute inset-0 bg-black/40 rounded-[16px]" />
                   </ImageBackground>
-                  <Text style={styles.cardText}>{t("card_culture")}</Text>
+                  <Text className="text-white font-bold z-10">
+                    {t("card_culture")}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.card}
+                  className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
                   onPress={() => showCommingSoonToast()}
                 >
                   <ImageBackground
                     source={activityImg}
-                    style={styles.cardImage}
+                    className="absolute inset-0 rounded-[16px]"
                     imageStyle={{ borderRadius: 16 }}
                   >
-                    <View style={styles.cardOverlay} />
+                    <View className="absolute inset-0 bg-black/40 rounded-[16px]" />
                   </ImageBackground>
-                  <Text style={styles.cardText}>{t("card_activities")}</Text>
+                  <Text className="text-white font-bold z-10">
+                    {t("card_activities")}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.card}
+                  className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
                   onPress={() => showCommingSoonToast()}
                 >
                   <ImageBackground
                     source={foodImg}
-                    style={styles.cardImage}
+                    className="absolute inset-0 rounded-[16px]"
                     imageStyle={{ borderRadius: 16 }}
                   >
-                    <View style={styles.cardOverlay} />
+                    <View className="absolute inset-0 bg-black/40 rounded-[16px]" />
                   </ImageBackground>
-                  <Text style={styles.cardText}>{t("card_food")}</Text>
+                  <Text className="text-white font-bold z-10">
+                    {t("card_food")}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.card}
+                  className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
                   onPress={() => showCommingSoonToast()}
                 >
                   <ImageBackground
                     source={socialImg}
-                    style={styles.cardImage}
+                    className="absolute inset-0 rounded-[16px]"
                     imageStyle={{ borderRadius: 16 }}
                   >
-                    <View style={styles.cardOverlay} />
+                    <View className="absolute inset-0 bg-black/40 rounded-[16px]" />
                   </ImageBackground>
-                  <Text style={styles.cardText}>{t("card_social")}</Text>
+                  <Text className="text-white font-bold z-10">
+                    {t("card_social")}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
           )}
           {mode === "saved" && !compact && (
-            <View style={styles.favMain}>
-              <View style={{ paddingVertical: 8, paddingBottom: 12 }}>
-                <Text style={styles.favHeadline}>{t("saved_header")}</Text>
-                <Text style={styles.favDesc}>{t("saved_desc")}</Text>
+            <View className="px-3 pb-3">
+              <View className="py-2 pb-3">
+                <Text className="text-white text-[32px] font-extrabold mb-2">
+                  {t("saved_header")}
+                </Text>
+                <Text className="text-[#9fb7d3] text-[16px] max-w-[280px]">
+                  {t("saved_desc")}
+                </Text>
               </View>
 
-              <View style={styles.favCardsContainer}>
+              <View className="mt-3 flex-col">
                 <TouchableOpacity
-                  style={styles.favCard}
+                  className="rounded-[12px] bg-[#0f1720] border border-white/[0.04] p-3 overflow-hidden mb-3"
                   onPress={() => {
                     if (saved.home) {
                       router.push({
@@ -735,14 +780,14 @@ export default function SearchScreen() {
                     }
                   }}
                 >
-                  <View style={styles.favCardHeader}>
-                    <View style={{ flexDirection: "column", flex: 1 }}>
-                      <View style={styles.favTitleRow}>
-                        <View style={styles.favIconPlaceholder}>
+                  <View className="flex-row justify-between items-start">
+                    <View className="flex-col flex-1">
+                      <View className="flex-row items-center">
+                        <View className="w-9 h-9 rounded-[10px] bg-[#0d7ff2]/8 items-center justify-center mr-2">
                           <HomeIcon color={Colors.dark.primary} />
                         </View>
                         <Text
-                          style={[styles.favCardTitle, { flexShrink: 1 }]}
+                          className="text-white text-[20px] font-extrabold ml-2 shrink"
                           numberOfLines={1}
                           ellipsizeMode="tail"
                         >
@@ -750,7 +795,7 @@ export default function SearchScreen() {
                         </Text>
                       </View>
                       <Text
-                        style={styles.favCardSub}
+                        className="text-[#90adcb] text-[14px]"
                         numberOfLines={1}
                         ellipsizeMode="tail"
                       >
@@ -759,7 +804,7 @@ export default function SearchScreen() {
                     </View>
 
                     <TouchableOpacity
-                      style={styles.favAddButton}
+                      className="w-11 h-11 rounded-[22px] bg-[#0d7ff2] items-center justify-center"
                       onPress={() => {
                         setModalSlot("home");
                         setModalEditingIndex(null);
@@ -784,7 +829,7 @@ export default function SearchScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.favCard}
+                  className="rounded-[12px] bg-[#0f1720] border border-white/[0.04] p-3 overflow-hidden mb-3"
                   onPress={() => {
                     if (saved.work) {
                       router.push({
@@ -809,14 +854,14 @@ export default function SearchScreen() {
                     }
                   }}
                 >
-                  <View style={styles.favCardHeader}>
-                    <View style={{ flexDirection: "column", flex: 1 }}>
-                      <View style={styles.favTitleRow}>
-                        <View style={styles.favIconPlaceholder}>
+                  <View className="flex-row justify-between items-start">
+                    <View className="flex-col flex-1">
+                      <View className="flex-row items-center">
+                        <View className="w-9 h-9 rounded-[10px] bg-[#0d7ff2]/8 items-center justify-center mr-2">
                           <WorkIcon color={Colors.dark.primary} />
                         </View>
                         <Text
-                          style={[styles.favCardTitle, { flexShrink: 1 }]}
+                          className="text-white text-[20px] font-extrabold ml-2 shrink"
                           numberOfLines={1}
                           ellipsizeMode="tail"
                         >
@@ -824,7 +869,7 @@ export default function SearchScreen() {
                         </Text>
                       </View>
                       <Text
-                        style={styles.favCardSub}
+                        className="text-[#90adcb] text-[14px]"
                         numberOfLines={1}
                         ellipsizeMode="tail"
                       >
@@ -833,7 +878,7 @@ export default function SearchScreen() {
                     </View>
 
                     <TouchableOpacity
-                      style={styles.favAddButton}
+                      className="w-11 h-11 rounded-[22px] bg-[#0d7ff2] items-center justify-center"
                       onPress={() => {
                         setModalSlot("work");
                         setModalEditingIndex(null);
@@ -864,7 +909,7 @@ export default function SearchScreen() {
                   return (
                     <TouchableOpacity
                       key={idx}
-                      style={styles.favCard}
+                      className="rounded-[12px] bg-[#0f1720] border border-white/[0.04] p-3 overflow-hidden mb-3"
                       onPress={() => {
                         router.push({
                           pathname: "/(main)/place",
@@ -877,14 +922,14 @@ export default function SearchScreen() {
                         });
                       }}
                     >
-                      <View style={styles.favCardHeader}>
-                        <View style={{ flexDirection: "column", flex: 1 }}>
-                          <View style={styles.favTitleRow}>
-                            <View style={styles.favIconPlaceholder}>
+                      <View className="flex-row justify-between items-start">
+                        <View className="flex-col flex-1">
+                          <View className="flex-row items-center">
+                            <View className="w-9 h-9 rounded-[10px] bg-[#0d7ff2]/8 items-center justify-center mr-2">
                               <IconComp color={Colors.dark.primary} />
                             </View>
                             <Text
-                              style={[styles.favCardTitle, { flexShrink: 1 }]}
+                              className="text-white text-[20px] font-extrabold ml-2 shrink"
                               numberOfLines={1}
                               ellipsizeMode="tail"
                             >
@@ -892,7 +937,7 @@ export default function SearchScreen() {
                             </Text>
                           </View>
                           <Text
-                            style={styles.favCardSub}
+                            className="text-[#90adcb] text-[14px]"
                             numberOfLines={1}
                             ellipsizeMode="tail"
                           >
@@ -900,7 +945,7 @@ export default function SearchScreen() {
                           </Text>
                         </View>
                         <TouchableOpacity
-                          style={styles.favAddButton}
+                          className="w-11 h-11 rounded-[22px] bg-[#0d7ff2] items-center justify-center"
                           onPress={() => {
                             setModalSlot("other");
                             setModalEditingIndex(idx);
@@ -919,14 +964,14 @@ export default function SearchScreen() {
                       {place.lat && place.lng && place.address ? (
                         <MapSnapshot lat={place.lat} lng={place.lng} />
                       ) : (
-                        <View style={styles.favMapPreview} />
+                        <View className="w-full h-[120px] rounded-[12px] mt-2 bg-[#12202a]" />
                       )}
                     </TouchableOpacity>
                   );
                 })}
 
                 <TouchableOpacity
-                  style={styles.favAddPlaceButton}
+                  className="mt-3 py-3.5 rounded-full border border-dashed border-white/[0.06] items-center justify-center"
                   onPress={() => {
                     setModalSlot("other");
                     setModalEditingIndex(null);
@@ -939,7 +984,7 @@ export default function SearchScreen() {
                     setModalVisible(true);
                   }}
                 >
-                  <Text style={styles.favAddPlaceText}>
+                  <Text className="text-[#9fb7d3] font-semibold">
                     {t("modal_add_place")}
                   </Text>
                 </TouchableOpacity>
@@ -950,17 +995,14 @@ export default function SearchScreen() {
       </ScrollView>
 
       {!compact && (
-        <View style={styles.bottomNav}>
+        <View className="absolute bottom-0 left-0 right-0 flex-row justify-around bg-[#101922]/90 py-2">
           <TouchableOpacity
-            style={styles.navButton}
+            className="items-center"
             onPress={() => setMode("explore")}
           >
             <CompassIcon active={mode === "explore"} />
             <Text
-              style={[
-                styles.navLabel,
-                mode === "explore" ? styles.navActive : {},
-              ]}
+              className={`text-white text-[10px] mt-0.5 uppercase shrink-0 ${mode === "explore" ? "text-[#0d7ff2]" : ""}`}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -968,15 +1010,12 @@ export default function SearchScreen() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.navButton}
+            className="items-center"
             onPress={() => setMode("search")}
           >
             <SearchIcon active={mode === "search"} />
             <Text
-              style={[
-                styles.navLabel,
-                mode === "search" ? styles.navActive : {},
-              ]}
+              className={`text-white text-[10px] mt-0.5 uppercase shrink-0 ${mode === "search" ? "text-[#0d7ff2]" : ""}`}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -984,15 +1023,12 @@ export default function SearchScreen() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.navButton}
+            className="items-center"
             onPress={() => setMode("saved")}
           >
             <BookmarkIcon active={mode === "saved"} />
             <Text
-              style={[
-                styles.navLabel,
-                mode === "saved" ? styles.navActive : {},
-              ]}
+              className={`text-white text-[10px] mt-0.5 uppercase shrink-0 ${mode === "saved" ? "text-[#0d7ff2]" : ""}`}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -1018,209 +1054,3 @@ export default function SearchScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#101922" },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingBottom: 12,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  backText: { color: "#fff", fontSize: 20 },
-  title: {
-    flex: 1,
-    color: "#fff",
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  spacer: { width: 40 },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(13,127,242,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  searchArea: { paddingHorizontal: 12 },
-  searchBox: {
-    height: 56,
-    borderRadius: 12,
-    backgroundColor: "#12202a",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    marginBottom: 12,
-  },
-  searchIcon: { color: "#90adcb", marginRight: 8 },
-  input: { flex: 1, color: "#fff", fontSize: 16 },
-  chips: { marginBottom: 12 },
-  chip: {
-    backgroundColor: "#223649",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginRight: 8,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  chipIcon: {
-    marginRight: 8,
-    width: 24,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  chipLabel: { color: "#fff", fontWeight: "600" },
-  section: { marginTop: 8 },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 4,
-    marginBottom: 8,
-  },
-  sectionTitle: { color: "#fff", fontSize: 16, fontWeight: "700" },
-  clear: { color: "#0d7ff2" },
-  listItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    borderRadius: 12,
-  },
-  itemIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "#223649",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  itemBody: { flex: 1 },
-  itemTitle: { color: "#fff", fontWeight: "700" },
-  itemSub: { color: "#90adcb", fontSize: 12 },
-  itemAction: { color: "#9fb7d3", marginLeft: 8 },
-  exploreSection: { marginTop: 16, paddingHorizontal: 12 },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  card: {
-    width: "48%",
-    aspectRatio: 16 / 9,
-    borderRadius: 16,
-    backgroundColor: "#334155",
-    marginBottom: 12,
-    justifyContent: "flex-end",
-    padding: 8,
-  },
-  cardOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: 16,
-  },
-  cardImage: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 16,
-  },
-  cardText: { color: "#fff", fontWeight: "700", zIndex: 1 },
-  resultsList: { marginTop: 8, paddingHorizontal: 12 },
-  favMain: { paddingHorizontal: 12, paddingBottom: 12 },
-  favHeadline: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "800",
-    marginBottom: 8,
-  },
-  favDesc: { color: "#9fb7d3", fontSize: 16, maxWidth: 280 },
-  favCardsContainer: { marginTop: 12, flexDirection: "column" },
-  favCard: {
-    borderRadius: 12,
-    backgroundColor: "#0f1720",
-    borderColor: "rgba(255,255,255,0.04)",
-    borderWidth: 1,
-    padding: 12,
-    overflow: "hidden",
-    marginBottom: 12,
-  },
-  favCardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  favTitleRow: { flexDirection: "row", alignItems: "center" },
-  favIconPlaceholder: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "rgba(13,127,242,0.08)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  favCardTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "800",
-    marginLeft: 8,
-  },
-  favCardSub: { color: "#90adcb", fontSize: 14 },
-  favAddButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.dark.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  favMapPreview: {
-    width: "100%",
-    height: 120,
-    borderRadius: 12,
-    marginTop: 8,
-    backgroundColor: "#12202a",
-  },
-  favAddPlaceButton: {
-    marginTop: 12,
-    paddingVertical: 14,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderStyle: "dashed",
-    borderColor: "rgba(255,255,255,0.06)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  favAddPlaceText: { color: "#9fb7d3", fontWeight: "600" },
-  bottomNav: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: "rgba(16,25,34,0.9)",
-    paddingVertical: 8,
-  },
-  navButton: { alignItems: "center" },
-  navActive: { color: Colors.dark.primary },
-  navIcon: { color: "#fff", fontSize: 20 },
-  navLabel: {
-    color: "#fff",
-    fontSize: 10,
-    marginTop: 2,
-    textTransform: "uppercase",
-    flexShrink: 0,
-  },
-  scrollContent: { paddingBottom: 64 },
-});
