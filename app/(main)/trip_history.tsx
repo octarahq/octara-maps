@@ -8,7 +8,7 @@ import {
 import { getRecentTrips } from "@/utils/recentTrips";
 import { router } from "expo-router";
 import React, { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { SearchResult } from "./(search)/search";
 
 export default function TripHistoryScreen() {
@@ -32,14 +32,12 @@ export default function TripHistoryScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-[#101922]">
       <Header title={t("title")} />
       {recentTrips.length === 0 ? (
-        <View style={{ padding: 12 }}>
-          <Text style={{ color: "#90adcb" }}>{t("emptyState.title")}</Text>
-          <Text style={{ color: "#90adcb" }}>
-            {t("emptyState.description")}
-          </Text>
+        <View className="p-3">
+          <Text className="text-[#90adcb]">{t("emptyState.title")}</Text>
+          <Text className="text-[#90adcb]">{t("emptyState.description")}</Text>
         </View>
       ) : (
         recentTrips.map((r) => (
@@ -68,65 +66,3 @@ export default function TripHistoryScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#101922",
-    padding: 20,
-  },
-  header: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  loginContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 16,
-    borderWidth: 2,
-    borderColor: "#0d7ff2",
-  },
-  title: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  email: {
-    color: "#ccc",
-    fontSize: 14,
-    marginBottom: 24,
-  },
-  button: {
-    backgroundColor: "#0d7ff2",
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 25,
-    minWidth: 200,
-    alignItems: "center",
-  },
-  logoutButton: {
-    backgroundColor: "#ff3b30",
-    marginTop: 20,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  backButton: {
-    position: "absolute",
-    bottom: 40,
-  },
-  backButtonText: {
-    color: "#0d7ff2",
-    fontSize: 14,
-  },
-});
