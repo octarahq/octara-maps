@@ -3,28 +3,34 @@ import { ThemedView } from "@/components/themed-view";
 import { Colors } from "@/constants/theme";
 import { createTranslator } from "@/i18n";
 import { MaterialIcons } from "@expo/vector-icons";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 const { t } = createTranslator("onboarding");
 
 export default function Step2() {
   return (
-    <ThemedView style={styles.root}>
+    <ThemedView
+      className="flex-1"
+      style={{ backgroundColor: Colors.dark.background }}
+    >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-start" }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.container}>
-          <View style={styles.headlineWrapper}>
-            <ThemedText type="title" style={styles.headline}>
+        <View className="pb-[100px]">
+          <View className="px-6 pt-[100px] pb-4">
+            <ThemedText
+              type="title"
+              className="text-white font-bold text-[32px] text-left mb-4"
+            >
               {t("step2.efficiency")}{" "}
-              <ThemedText style={styles.highlight}>
+              <ThemedText className="text-primary font-bold text-[32px]">
                 {t("step2.redefined")}
               </ThemedText>
             </ThemedText>
           </View>
 
-          <View style={styles.features}>
+          <View className="flex-1 p-6 gap-4">
             {[
               {
                 icon: "navigation",
@@ -42,19 +48,22 @@ export default function Step2() {
                 body: t("step2.feature3_body"),
               },
             ].map((feat, idx) => (
-              <View key={idx} style={styles.featureItem}>
-                <View style={styles.iconWrapper}>
+              <View
+                key={idx}
+                className="flex-row items-start gap-4 p-4 rounded-[16px] border border-white/10 bg-white/5"
+              >
+                <View className="w-[56px] h-[56px] rounded-full bg-primary/10 items-center justify-center">
                   <MaterialIcons
                     name={feat.icon as any}
                     size={24}
                     color={Colors.dark.primary}
                   />
                 </View>
-                <View style={styles.featureText}>
-                  <ThemedText style={styles.featureTitle}>
+                <View className="flex-1 justify-center">
+                  <ThemedText className="text-white text-[18px] font-bold mb-1">
                     {feat.title}
                   </ThemedText>
-                  <ThemedText style={styles.featureBody}>
+                  <ThemedText className="text-white/60 text-[14px]">
                     {feat.body}
                   </ThemedText>
                 </View>
@@ -66,84 +75,3 @@ export default function Step2() {
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-  },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-    textAlign: "center",
-  },
-  headline: {
-    color: Colors.dark.text,
-    fontWeight: "bold",
-    fontSize: 32,
-    textAlign: "left",
-    marginBottom: 16,
-  },
-  body: {
-    color: "rgba(255,255,255,0.6)",
-    fontSize: 18,
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  container: {
-    paddingBottom: 100,
-  },
-  headlineWrapper: {
-    paddingHorizontal: 24,
-    paddingTop: 100,
-    paddingBottom: 16,
-  },
-  features: {
-    flex: 1,
-    padding: 24,
-    gap: 16,
-  },
-  featureItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 16,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    backgroundColor: "rgba(255,255,255,0.05)",
-  },
-  iconWrapper: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "rgba(13,127,242,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  featureText: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  featureTitle: {
-    color: Colors.dark.text,
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  highlight: {
-    color: Colors.dark.primary,
-    fontWeight: "bold",
-    fontSize: 32,
-  },
-  featureBody: {
-    color: "rgba(255,255,255,0.6)",
-    fontSize: 14,
-  },
-});
