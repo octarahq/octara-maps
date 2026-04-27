@@ -12,6 +12,7 @@ import {
   telemetryNavigationStart,
   telemetryNavigationStop,
 } from "@/services/TelemetryService";
+import { cn } from "@/utils/cn";
 import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { addRecentTrip } from "@/utils/recentTrips";
 import { snapPointsPercent } from "@/utils/snapPoints";
@@ -28,12 +29,11 @@ import {
   Animated,
   Easing,
   StatusBar,
-  StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
   View,
-  useWindowDimensions,
+  useWindowDimensions
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
@@ -1292,17 +1292,17 @@ export default function StandardNavigationScreen() {
   }, [smoothedSpeedDiff, limitNum, isCarMode]);
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-black">
       <StatusBar
         hidden
         barStyle="light-content"
         translucent
         backgroundColor="transparent"
       />
-      <View style={styles.mapArea}>
+      <View className="flex-1">
         <ShadcnMap ref={mapRef} initialZoom={2} onMapMessage={handleMapMsg} />
-        <View style={styles.topCardOverlay} pointerEvents="box-none">
-          <Svg height={320} style={styles.topGradient} pointerEvents="none">
+        <View className="absolute inset-0 items-center">
+          <Svg height={320} className="pointer-events-none" width="100%">
             <Defs>
               <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="0.6">
                 <Stop offset="0" stopColor={warningColor} stopOpacity="0.96" />
@@ -1311,9 +1311,9 @@ export default function StandardNavigationScreen() {
             </Defs>
             <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
           </Svg>
-          <View style={styles.topCard}>
-            <View style={styles.topCardContent}>
-              <View style={styles.topCardIcon}>
+          <View className="absolute top-0 left-0 right-0">
+            <View className="mx-4 mt-12 rounded-xl bg-[#12202a]/80 p-4 flex-row items-center">
+              <View className="w-12 h-12 mr-4 items-center justify-center">
                 {approachingStep &&
                 (approachingStep.maneuver?.type === "roundabout" ||
                   approachingStep.maneuver?.type === "rotary" ||
@@ -1323,8 +1323,8 @@ export default function StandardNavigationScreen() {
                   String(approachingStep.maneuver?.type)
                     .toLowerCase()
                     .includes("rotary")) ? (
-                  <View style={styles.roundBadgeTop}>
-                    <Text style={styles.roundBadgeTopText}>
+                  <View className="w-12 h-12 rounded-full bg-[#0d7ff2] items-center justify-center">
+                    <Text className="text-white font-bold">
                       {typeof approachingStep.maneuver?.exit === "number"
                         ? String(approachingStep.maneuver.exit)
                         : ""}
@@ -1338,13 +1338,13 @@ export default function StandardNavigationScreen() {
                   />
                 )}
               </View>
-              <View style={styles.topCardText}>
-                <View style={styles.topCardMetaRow}>
-                  <Text style={styles.topCardInstruction}>
+              <View className="flex-1">
+                <View className="flex-row items-center">
+                  <Text className="text-white text-lg font-medium">
                     {stepInstruction}
                   </Text>
                 </View>
-                <Text style={styles.topCardDistance} numberOfLines={2}>
+                <Text className="text-gray-400" numberOfLines={2}>
                   {stepDistanceLabel}
                 </Text>
               </View>
@@ -1354,16 +1354,9 @@ export default function StandardNavigationScreen() {
       </View>
 
       {isCarMode && speedLimit && (
-        <Animated.View
-          style={[
-            styles.speedLimitContainer,
-            {
-              bottom: speedPanelBottom,
-            },
-          ]}
-        >
-          <View style={styles.speedLimitSign}>
-            <Text style={styles.speedLimitText}>{speedLimit}</Text>
+        <Animated.View className="absolute left-4 items-center justify-center rounded-full bg-[#12202a]/80">
+          <View className="w-16 h-16 items-center justify-center rounded-full bg-[#0d7ff2]">
+            <Text className="text-white font-bold">{speedLimit}</Text>
           </View>
         </Animated.View>
       )}
@@ -1392,23 +1385,21 @@ export default function StandardNavigationScreen() {
         style={{ borderRadius: 30, overflow: "hidden" }}
         handleIndicatorStyle={{ backgroundColor: "rgba(255,255,255,0.3)" }}
       >
-        <BottomSheetView
-          style={[styles.bottomSheet, { paddingBottom: insets.bottom + 16 }]}
-        >
-          <View style={styles.statsRow}>
+        <BottomSheetView className="flex-1 px-4">
+          <View className="flex-row items-center justify-between">
             <View>
-              <Text style={styles.statsValue}>
+              <Text className="text-white text-lg font-medium">
                 {routeService.isCalculating
                   ? "…"
                   : formatDuration(totalDuration)}
               </Text>
-              <Text style={styles.statsLabel} numberOfLines={1}>
+              <Text className="text-gray-400" numberOfLines={1}>
                 {formatDistance(totalDistance)}
                 {etaLabel ? ` • ${t("eta", { time: etaLabel })}` : ""}
               </Text>
             </View>
             <TouchableOpacity
-              style={styles.addStopButton}
+              className="flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2"
               onPress={() => {
                 showCommingSoonToast();
               }}
@@ -1419,97 +1410,97 @@ export default function StandardNavigationScreen() {
                 size={18}
                 color={Colors.dark.primary}
               />
-              <Text style={styles.addStopText}>{t("addStop")}</Text>
+              <Text className="text-white"> {t("addStop")}</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.actionRowButtons}>
+          <View className="flex-row items-center justify-content">
             {!following ? (
               <TouchableOpacity
-                style={[styles.primaryButton, { flex: 1 }]}
+                className="flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2"
                 onPress={() => setFollowing(true)}
                 activeOpacity={0.8}
               >
                 <MaterialIcons name="my-location" size={18} color="#fff" />
-                <Text style={styles.primaryButtonText}>{t("recenter")}</Text>
+                <Text className="text-white">{t("recenter")}</Text>
               </TouchableOpacity>
             ) : (
               <>
                 <TouchableOpacity
-                  style={styles.secondaryButton}
+                  className="flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2"
                   onPress={handleRoutes}
                   activeOpacity={0.8}
                 >
                   <MaterialIcons name="alt-route" size={18} color="#fff" />
-                  <Text style={styles.secondaryButtonText}>{t("route")}</Text>
+                  <Text className="text-white">{t("route")}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.primaryButton}
+                  className="flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2"
                   onPress={handleStopTrip}
                   activeOpacity={0.8}
                 >
                   <MaterialIcons name="stop" size={18} color="#fff" />
-                  <Text style={styles.primaryButtonText}>{t("stopTrip")}</Text>
+                  <Text className="text-white">{t("stopTrip")}</Text>
                 </TouchableOpacity>
               </>
             )}
           </View>
 
-          <View style={styles.divider} />
+          <View className="h-px bg-gray-600" />
 
-          <View style={styles.optionColumn}>
-            <View style={styles.optionHeader}>
-              <Text style={styles.optionTitle}>{t("mapStyle")}</Text>
+          <View className="flex-1 py-4">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-white font-medium">{t("mapStyle")}</Text>
               <MaterialIcons name="layers" size={20} color="#8a8a8a" />
             </View>
 
-            <View style={styles.gridContainer}>
+            <View className="flex-row items-center justify-start mb-4">
               <TouchableOpacity
-                style={[
-                  styles.gridButton,
-                  baseLayer === "standard" && styles.gridButtonActive,
-                ]}
+                className={cn(
+                  "flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2",
+                  baseLayer === "standard" && "bg-[#0d7ff2]",
+                )}
                 onPress={() => layers.setMapType("standard")}
               >
                 <Text
-                  style={[
-                    styles.gridButtonText,
-                    baseLayer === "standard" && styles.gridButtonTextActive,
-                  ]}
+                  className={cn(
+                    "text-white",
+                    baseLayer === "standard" && "text-white",
+                  )}
                 >
                   {t("layerStandard")}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[
-                  styles.gridButton,
-                  baseLayer === "satellite" && styles.gridButtonActive,
-                ]}
+                className={cn(
+                  "flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2 ml-3",
+                  baseLayer === "satellite" && "bg-[#0d7ff2]",
+                )}
                 onPress={() => layers.setMapType("satellite")}
               >
                 <Text
-                  style={[
-                    styles.gridButtonText,
-                    baseLayer === "satellite" && styles.gridButtonTextActive,
-                  ]}
+                  className={cn(
+                    "text-white",
+                    baseLayer === "satellite" && "text-white",
+                  )}
                 >
                   {t("layerSatellite")}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[
-                  styles.gridButton,
-                  baseLayer === "terrain" && styles.gridButtonActive,
-                ]}
+                className={cn(
+                  "flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2 ml-3",
+                  baseLayer === "terrain" && "bg-[#0d7ff2]",
+                )}
                 onPress={() => layers.setMapType("terrain")}
               >
                 <Text
-                  style={[
-                    styles.gridButtonText,
-                    baseLayer === "terrain" && styles.gridButtonTextActive,
-                  ]}
+                  className={cn(
+                    "text-white",
+                    baseLayer === "terrain" && "text-white",
+                  )}
                 >
                   {t("layerTerrain")}
                 </Text>
@@ -1517,8 +1508,8 @@ export default function StandardNavigationScreen() {
             </View>
 
             {baseLayer !== "satellite" && (
-              <View style={styles.switchRow}>
-                <Text style={styles.switchLabel}>{t("darkMode")}</Text>
+              <View className="flex-row items-center justify-between mb-4">
+                <Text className="text-white">{t("darkMode")}</Text>
                 <Switch
                   value={themeMode === "dark"}
                   onValueChange={() => layers.setDarkTheme(!layers.darkTheme)}
@@ -1528,9 +1519,9 @@ export default function StandardNavigationScreen() {
               </View>
             )}
 
-            <View style={styles.volumeSection}>
-              <View style={styles.optionHeader}>
-                <Text style={styles.optionTitle}>{t("guideVolume")}</Text>
+            <View className="flex-1">
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-white">{t("guideVolume")}</Text>
                 <TouchableOpacity
                   onPress={async () => {
                     await Speech.speak(t("guideVolumeSample"), {
@@ -1542,57 +1533,57 @@ export default function StandardNavigationScreen() {
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.volumeGrid}>
+              <View className="flex-row items-center justify-between">
                 <TouchableOpacity
-                  style={[
-                    styles.volumeButton,
-                    guideMode === "off" && styles.volumeButtonActive,
-                  ]}
+                  className={cn(
+                    "flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2",
+                    guideMode === "off" && "bg-[#0d7ff2]",
+                  )}
                   onPress={() => setGuideMode("off")}
                 >
                   <Text
-                    style={[
-                      styles.volumeButtonText,
-                      guideMode === "off" && styles.volumeButtonTextActive,
-                    ]}
+                    className={cn(
+                      "text-white",
+                      guideMode === "off" && "text-white",
+                    )}
                   >
                     {t("volumeMute")}
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[
-                    styles.volumeButton,
-                    guideMode === "alert" && styles.volumeButtonActive,
-                  ]}
+                  className={cn(
+                    "flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2 ml-3",
+                    guideMode === "alert" && "bg-[#0d7ff2]",
+                  )}
                   onPress={() => {
                     setGuideMode("alert");
                   }}
                 >
                   <Text
-                    style={[
-                      styles.volumeButtonText,
-                      guideMode === "alert" && styles.volumeButtonTextActive,
-                    ]}
+                    className={cn(
+                      "text-white",
+                      guideMode === "alert" && "text-white",
+                    )}
                   >
                     {t("volumeAlerts")}
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[
-                    styles.volumeButton,
-                    guideMode === "all" && styles.volumeButtonActiveFull,
-                  ]}
+                  className={cn(
+                    "flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2 ml-3",
+                    guideMode === "all" && "bg-[#0d7ff2]",
+                  )}
                   onPress={() => {
                     setGuideMode("all");
                   }}
                 >
                   <Text
-                    style={[
-                      styles.volumeButtonTextFull,
-                      guideMode === "all" && styles.volumeButtonTextActive,
-                    ]}
+                    className={cn(
+                      "text-white",
+                      guideMode === "all" && "text-white",
+                    )}
                   >
                     {t("volumeFull")}
                   </Text>
@@ -1619,11 +1610,11 @@ export default function StandardNavigationScreen() {
             if (typeof idx === "number" && idx < 0) setShowStepsSheet(false);
           }}
         >
-          <View style={{ paddingHorizontal: 20 }}>
-            <View style={styles.statsRow}>
+          <View className="px-5">
+            <View className="flex-row items-center justify-between py-4">
               <View>
-                <Text style={styles.statsValue}>{t("route")}</Text>
-                <Text style={styles.statsLabel}>
+                <Text className="text-white">{t("steps")}</Text>
+                <Text className="text-gray-400">
                   {t("stepsCount", {
                     count: routeService.getNavigationData()?.steps?.length ?? 0,
                   })}
@@ -1662,11 +1653,11 @@ export default function StandardNavigationScreen() {
                 maneuverType.includes("rotary");
 
               return (
-                <View style={styles.stepRow}>
-                  <View style={styles.stepIndex}>
+                <View className="flex-row items-center py-3">
+                  <View className="mr-3">
                     {isRound ? (
-                      <View style={styles.roundBadge}>
-                        <Text style={styles.roundBadgeText}>
+                      <View className="w-8 h-8 rounded-full bg-[#0d7ff2] items-center justify-center">
+                        <Text className="text-white">
                           {typeof s.maneuver?.exit === "number"
                             ? String(s.maneuver.exit)
                             : ""}
@@ -1680,11 +1671,11 @@ export default function StandardNavigationScreen() {
                       />
                     )}
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.stepInstruction} numberOfLines={2}>
+                  <View className="flex-1">
+                    <Text className="text-white" numberOfLines={2}>
                       {formatStepInstruction(s) || s.instruction || "-"}
                     </Text>
-                    <Text style={styles.stepMeta}>
+                    <Text className="text-gray-400">
                       {formatDistance(s.distance)} •{" "}
                       {formatDuration(s.duration)}
                     </Text>
@@ -1698,402 +1689,3 @@ export default function StandardNavigationScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#101922",
-    position: "relative",
-  },
-  mapArea: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  mapSnapshot: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  topCardOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 25,
-    paddingTop: 48,
-    paddingHorizontal: 16,
-    paddingBottom: 24,
-  },
-  topGradient: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: -1,
-  },
-  topCard: {
-    backgroundColor: "rgba(18,32,42,0.92)",
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
-    shadowColor: "#000",
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 14,
-  },
-  topCardContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  topCardIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 14,
-    backgroundColor: Colors.dark.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  topCardText: {
-    flex: 1,
-    flexDirection: "column",
-  },
-  topCardMetaRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    justifyContent: "space-between",
-  },
-  topCardInstruction: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "700",
-    lineHeight: 28,
-    letterSpacing: -0.5,
-  },
-  topCardNextHint: {
-    color: Colors.dark.primary,
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  topCardMeta: {
-    color: "#90adcb",
-    fontSize: 11,
-    fontWeight: "600",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
-  topCardDistance: {
-    color: "#9aa4b2",
-    fontSize: 17,
-    fontWeight: "500",
-    lineHeight: 22,
-    marginTop: 4,
-  },
-  floatingControls: {
-    position: "absolute",
-    right: 16,
-    top: 130,
-    gap: 10,
-    zIndex: 25,
-  },
-  fabButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: "rgba(17,17,17,0.7)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.18)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  fabPrimary: {
-    backgroundColor: Colors.dark.primary,
-  },
-  bottomSheet: {
-    flex: 1,
-    zIndex: 20,
-    padding: 20,
-    paddingTop: 24,
-  },
-  statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    marginBottom: 16,
-  },
-  statsValue: {
-    color: "#fff",
-    fontSize: 30,
-    fontWeight: "700",
-  },
-  statsLabel: {
-    color: "#90adcb",
-    fontSize: 13,
-    marginTop: 2,
-  },
-  statsTrailing: {
-    alignItems: "flex-end",
-  },
-  statsTrailingLabel: {
-    color: "#90adcb",
-    fontSize: 10,
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
-  statsTrailingValue: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 22,
-  },
-  actionRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  secondaryButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    borderRadius: 16,
-    paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-    backgroundColor: "rgba(255,255,255,0.04)",
-  },
-  primaryButton: {
-    flex: 1.5,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    borderRadius: 16,
-    paddingVertical: 14,
-    backgroundColor: Colors.dark.primary,
-  },
-  secondaryButtonText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 14,
-  },
-  primaryButtonText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 14,
-  },
-  bottomIndicator: {
-    marginTop: 16,
-    alignItems: "center",
-  },
-  bottomIndicatorBar: {
-    width: 120,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.1)",
-  },
-  handleBar: {
-    width: 48,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    alignSelf: "center",
-    marginBottom: 12,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.04)",
-    marginVertical: 12,
-    borderRadius: 1,
-  },
-  mapStyleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 12,
-  },
-  mapStyleButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.03)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-  },
-  mapStyleButtonActive: {
-    backgroundColor: "rgba(13,127,242,0.14)",
-    borderColor: "rgba(13,127,242,0.28)",
-  },
-  mapStyleText: { color: "#fff", fontWeight: "700", fontSize: 12 },
-  themeToggle: {
-    marginLeft: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.03)",
-  },
-  themeToggleText: { color: "#fff", fontSize: 12, marginLeft: 6 },
-  actionRowButtons: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 6,
-  },
-  tertiaryButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    borderRadius: 12,
-    paddingVertical: 12,
-    backgroundColor: "rgba(255,255,255,0.03)",
-  },
-  tertiaryButtonText: { color: "#fff", fontWeight: "700", fontSize: 14 },
-  volumeSection: { marginTop: 12 },
-  volumeGrid: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#12202a",
-    padding: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
-  },
-  volumeButton: {
-    flex: 1,
-    marginHorizontal: 4,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: "center",
-    backgroundColor: "transparent",
-  },
-  volumeButtonText: { color: "#9aa4b2", fontWeight: "700", fontSize: 13 },
-  volumeButtonTextFull: { color: "#9aa4b2", fontWeight: "700", fontSize: 13 },
-  volumeButtonActive: { backgroundColor: "rgba(255,255,255,0.04)" },
-  volumeButtonFull: {},
-  volumeButtonActiveFull: { backgroundColor: Colors.dark.primary },
-  volumeButtonTextActive: { color: "#fff" },
-  optionColumn: { marginBottom: 8 },
-  optionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  optionTitle: {
-    color: "#90adcb",
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  gridContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#12202a",
-    padding: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
-  },
-  gridButton: {
-    flex: 1,
-    marginHorizontal: 4,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: "center",
-    backgroundColor: "transparent",
-  },
-  gridButtonActive: { backgroundColor: "rgba(255,255,255,0.04)" },
-  gridButtonText: { color: "#9aa4b2", fontWeight: "700", fontSize: 13 },
-  gridButtonTextActive: { color: "#fff" },
-  switchRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  switchLabel: { color: "#c1c8cf", fontSize: 13, fontWeight: "600" },
-  stepRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: "#0e2230",
-    marginBottom: 8,
-  },
-  stepIndex: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.06)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  roundBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  roundBadgeText: { color: "#000", fontWeight: "700" },
-  roundBadgeTop: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  roundBadgeTopText: { color: "#000", fontWeight: "700", fontSize: 16 },
-  stepIndexText: { color: "#fff", fontWeight: "700" },
-  stepInstruction: { color: "#fff", fontSize: 14 },
-  stepMeta: { color: "#90adcb", fontSize: 12, marginTop: 4 },
-  addStopButton: {
-    backgroundColor: "rgba(13, 127, 242, 0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(13, 127, 242, 0.2)",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  addStopText: {
-    color: Colors.dark.primary,
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  speedLimitContainer: {
-    position: "absolute",
-    right: 16,
-    zIndex: 100,
-  },
-  speedLimitSign: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#fff",
-    borderWidth: 6,
-    borderColor: "#e01e1e",
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  speedLimitText: {
-    color: "#000",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-});
