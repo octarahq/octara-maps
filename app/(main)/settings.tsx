@@ -4,9 +4,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { createTranslator } from "@/i18n";
 import { telemetryNavigationStart } from "@/services/TelemetryService";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
 import React, { useEffect, useRef } from "react";
-import { ActivityIndicator, Pressable, Switch, Text, View } from "react-native";
+import {
+  ActionSheetIOS,
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  Switch,
+  Text,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function SettingsSection({
   title,
@@ -19,6 +29,10 @@ function SettingsSection({
     description: string;
     onValueChange?: (value: boolean) => void;
     onClick?: () => void;
+    selectOptions?: { label: string; value: string }[];
+    selectedValue?: string;
+    onSelectChange?: (val: string) => void;
+    selectTitle?: string;
   }[];
 }) {
   return (
@@ -49,7 +63,7 @@ function SettingsSection({
               </View>
               {item.onValueChange ? (
                 <Switch
-                  value
+                  value={false} // Placeholder to suppress warning if needed, but normally should pass item.value
                   onValueChange={item.onValueChange}
                   trackColor={{ false: "#334155", true: "#0d7ff2" }}
                   thumbColor="#fff"
@@ -58,6 +72,28 @@ function SettingsSection({
                 <MaterialIcons name="chevron-right" size={20} color="#64748b" />
               )}
             </Pressable>
+            {item.selectOptions && Platform.OS === "android" && (
+              <View style={{ width: 0, height: 0, overflow: "hidden" }}>
+                <Picker
+                  selectedValue={item.selectedValue}
+                  onValueChange={(val) => item.onSelectChange?.(val)}
+                  prompt={item.selectTitle}
+                  style={{ opacity: 0 }}
+                  ref={(ref) => {
+                    // @ts-ignore
+                    item._pickerRef = ref;
+                  }}
+                >
+                  {item.selectOptions.map((opt) => (
+                    <Picker.Item
+                      key={opt.value}
+                      label={opt.label}
+                      value={opt.value}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            )}
 
             {index < items.length - 1 && (
               <View className="h-[1px] bg-white/5 mx-4" />
@@ -72,10 +108,8 @@ function SettingsSection({
 export default function SettingsScreen() {
   const { t } = createTranslator("settings");
   const { isLoading } = useAuth();
-  const selectModeRef = useRef<BottomSelectHandle>(null);
-  const selectVoiceRef = useRef<BottomSelectHandle>(null);
-  const selectCardThemeRef = useRef<BottomSelectHandle>(null);
   const { settings, setSettings } = useUser();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     telemetryNavigationStart("settings_screen");
@@ -89,8 +123,53 @@ export default function SettingsScreen() {
     );
   }
 
+  const handleSelectPress = (item: any) => {
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: [...item.selectOptions.map((o: any) => o.label), "Annuler"],
+          cancelButtonIndex: item.selectOptions.length,
+          title: item.selectTitle,
+        },
+        (buttonIndex) => {
+          if (buttonIndex < item.selectOptions.length) {
+            item.onSelectChange?.(item.selectOptions[buttonIndex].value);
+          }
+        }
+      );
+    } else {
+      if (item._pickerRef) {
+        item._pickerRef.focus();
+      }
+    }
+  };
+
+  const transportOptions = [
+    { label: t("transportations_mode.car"), value: "car" },
+    { label: t("transportations_mode.bike"), value: "bike" },
+    { label: t("transportations_mode.walk"), value: "walk" },
+    { label: t("transportations_mode.transit"), value: "transit" },
+  ];
+
+  const voiceOptions = [
+    { label: t("voice_guidance.none"), value: "none" },
+    { label: t("voice_guidance.alert"), value: "alert" },
+    { label: t("voice_guidance.all"), value: "all" },
+  ];
+
+  const themeOptions = [
+    { label: t("map_theme.standard"), value: "standard" },
+    { label: t("map_theme.standard_dark"), value: "standard_dark" },
+    { label: t("map_theme.satelite"), value: "satelite" },
+    { label: t("map_theme.terrain"), value: "terrain" },
+    { label: t("map_theme.terrain_dark"), value: "terrain_dark" },
+  ];
+
   return (
-    <View className="flex-1 bg-[#101922] p-5">
+    <View
+      className="flex-1 bg-[#101922] p-5"
+      style={{ paddingTop: Math.max(insets.top, 20) }}
+    >
       <View className="w-full flex-row items-center gap-4">
         <Pressable
           onPress={() => {
@@ -112,24 +191,48 @@ export default function SettingsScreen() {
             title: t("sections.0.settings.0.title"),
             description: t(`transportations_mode.${settings.favTransportMode}`),
             icon: "directions-car",
-            onClick: () => {
-              if (selectModeRef.current) selectModeRef.current.open();
+            selectTitle: "Choisir un mode de transport",
+            selectOptions: transportOptions,
+            selectedValue: settings.favTransportMode,
+            onSelectChange: (val) =>
+              setSettings({
+                ...settings,
+                favTransportMode: val as UserProfile["settings"]["favTransportMode"],
+              }),
+            onClick: function () {
+              handleSelectPress(this);
             },
           },
           {
             title: t("sections.0.settings.1.title"),
             description: t("sections.0.settings.1.description"),
             icon: "volume-up",
-            onClick: () => {
-              if (selectVoiceRef.current) selectVoiceRef.current.open();
+            selectTitle: "Choisir la methode de guidage par voix",
+            selectOptions: voiceOptions,
+            selectedValue: settings.voice,
+            onSelectChange: (val) =>
+              setSettings({
+                ...settings,
+                voice: val as UserProfile["settings"]["voice"],
+              }),
+            onClick: function () {
+              handleSelectPress(this);
             },
           },
           {
             title: t("sections.0.settings.2.title"),
             description: t("sections.0.settings.2.description"),
             icon: "map",
-            onClick: () => {
-              if (selectCardThemeRef.current) selectCardThemeRef.current.open();
+            selectTitle: "Choisir le thème de la carte",
+            selectOptions: themeOptions,
+            selectedValue: settings.mapStyle,
+            onSelectChange: (val) =>
+              setSettings({
+                ...settings,
+                mapStyle: val as UserProfile["settings"]["mapStyle"],
+              }),
+            onClick: function () {
+              handleSelectPress(this);
             },
           },
         ]}
@@ -149,81 +252,7 @@ export default function SettingsScreen() {
         ]}
       />
 
-      <BottomSelect
-        ref={selectModeRef}
-        title="Choisir un mode de transport"
-        items={[
-          { key: "car", label: t("transportations_mode.car"), value: "car" },
-          { key: "bike", label: t("transportations_mode.bike"), value: "bike" },
-          { key: "walk", label: t("transportations_mode.walk"), value: "walk" },
-          {
-            key: "transit",
-            label: t("transportations_mode.transit"),
-            value: "transit",
-          },
-        ]}
-        mode="single"
-        initialSelected={settings.favTransportMode}
-        onChange={(sel) =>
-          setSettings({
-            ...settings,
-            favTransportMode:
-              sel as UserProfile["settings"]["favTransportMode"],
-          })
-        }
-      />
-      <BottomSelect
-        ref={selectVoiceRef}
-        title="Choisir la methode de guidage par voix"
-        items={[
-          { key: "none", label: t("voice_guidance.none"), value: "none" },
-          { key: "alert", label: t("voice_guidance.alert"), value: "alert" },
-          { key: "all", label: t("voice_guidance.all"), value: "all" },
-        ]}
-        mode="single"
-        initialSelected={settings.voice}
-        onChange={(sel) =>
-          setSettings({
-            ...settings,
-            voice: sel as UserProfile["settings"]["voice"],
-          })
-        }
-      />
-      <BottomSelect
-        ref={selectCardThemeRef}
-        title="Choisir le thème de la carte"
-        items={[
-          {
-            key: "standard",
-            label: t("map_theme.standard"),
-            value: "standard",
-          },
-          {
-            key: "standard_dark",
-            label: t("map_theme.standard_dark"),
-            value: "standard_dark",
-          },
-          {
-            key: "satelite",
-            label: t("map_theme.satelite"),
-            value: "satelite",
-          },
-          { key: "terrain", label: t("map_theme.terrain"), value: "terrain" },
-          {
-            key: "terrain_dark",
-            label: t("map_theme.terrain_dark"),
-            value: "terrain_dark",
-          },
-        ]}
-        mode="single"
-        initialSelected={settings.mapStyle}
-        onChange={(sel) =>
-          setSettings({
-            ...settings,
-            mapStyle: sel as UserProfile["settings"]["mapStyle"],
-          })
-        }
-      />
+
     </View>
   );
 }

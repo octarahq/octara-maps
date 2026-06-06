@@ -269,7 +269,7 @@ export default function SearchScreen() {
             {t("title")}
           </Text>
           <TouchableOpacity
-            className="w-10 h-10 rounded-[20px] bg-[#0d7ff2]/10 items-center justify-center"
+            className="w-10 h-10 rounded-[20px] bg-[#0d7ff2]/10 items-center justify-center overflow-hidden"
             onPress={() => router.push("/(main)/settings")}
           >
             <AvatarImg size={40} />

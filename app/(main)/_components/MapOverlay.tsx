@@ -20,6 +20,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 
 interface MapOverlayProps {
@@ -35,6 +36,7 @@ export default function MapOverlay({
   const { vibration } = useHapticSettings();
   const { saved } = useUser();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const impactStyle = React.useMemo(() => {
     const force = vibration.force ?? 1;
@@ -154,6 +156,7 @@ export default function MapOverlay({
         <View
           className="absolute top-0 left-0 right-0 z-50"
           pointerEvents="auto"
+          style={{ paddingTop: Math.max(insets.top, 16) }}
         >
           <View
             className="flex-row items-center justify-between mb-3 px-3"
@@ -166,7 +169,7 @@ export default function MapOverlay({
               <Text className="text-white text-lg font-bold">Octara Maps</Text>
             </View>
             <TouchableOpacity
-              className="w-10 h-10 rounded-full bg-[#0d7ff2] items-center justify-center"
+              className="w-10 h-10 rounded-full bg-[#0d7ff2] items-center justify-center overflow-hidden"
               onPress={handleAvatarPress}
             >
               <AvatarImg size={40} />
@@ -175,7 +178,7 @@ export default function MapOverlay({
 
           <View className="px-3" pointerEvents="auto">
             <TouchableOpacity
-              className="h-12 rounded-14 bg-white/[0.3] px-4 justify-center"
+              className="h-12 rounded-[14px] bg-white/[0.3] px-4 justify-center"
               activeOpacity={1}
               onPress={() => {
                 triggerHaptic();
@@ -206,7 +209,7 @@ export default function MapOverlay({
               <TouchableOpacity
                 key={c.id}
                 className={cn(
-                  "h-12 rounded-14 bg-white/[0.3] px-4 justify-center",
+                  "h-12 rounded-[14px] bg-white/[0.3] px-4 flex-row items-center gap-2 justify-center",
                   i !== chips.length - 1 && "mr-3",
                 )}
                 activeOpacity={0.7}
