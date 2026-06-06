@@ -4,16 +4,18 @@ import { useAuth } from "@/hooks/useAuth";
 import { createTranslator } from "@/i18n";
 import { telemetryNavigationStart } from "@/services/TelemetryService";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActionSheetIOS,
   ActivityIndicator,
+  Modal,
   Platform,
   Pressable,
+  ScrollView,
   Switch,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -72,28 +74,6 @@ function SettingsSection({
                 <MaterialIcons name="chevron-right" size={20} color="#64748b" />
               )}
             </Pressable>
-            {item.selectOptions && Platform.OS === "android" && (
-              <View style={{ width: 0, height: 0, overflow: "hidden" }}>
-                <Picker
-                  selectedValue={item.selectedValue}
-                  onValueChange={(val) => item.onSelectChange?.(val)}
-                  prompt={item.selectTitle}
-                  style={{ opacity: 0 }}
-                  ref={(ref) => {
-                    // @ts-ignore
-                    item._pickerRef = ref;
-                  }}
-                >
-                  {item.selectOptions.map((opt) => (
-                    <Picker.Item
-                      key={opt.value}
-                      label={opt.label}
-                      value={opt.value}
-                    />
-                  ))}
-                </Picker>
-              </View>
-            )}
 
             {index < items.length - 1 && (
               <View className="h-[1px] bg-white/5 mx-4" />
@@ -110,6 +90,8 @@ export default function SettingsScreen() {
   const { isLoading } = useAuth();
   const { settings, setSettings } = useUser();
   const insets = useSafeAreaInsets();
+
+  const [activeSelect, setActiveSelect] = useState<any>(null);
 
   useEffect(() => {
     telemetryNavigationStart("settings_screen");
@@ -138,9 +120,7 @@ export default function SettingsScreen() {
         }
       );
     } else {
-      if (item._pickerRef) {
-        item._pickerRef.focus();
-      }
+      setActiveSelect(item);
     }
   };
 
@@ -252,7 +232,65 @@ export default function SettingsScreen() {
         ]}
       />
 
-
+      {activeSelect && Platform.OS !== "ios" && (
+        <Modal
+          transparent={true}
+          visible={!!activeSelect}
+          animationType="fade"
+          onRequestClose={() => setActiveSelect(null)}
+        >
+          <Pressable
+            className="flex-1 bg-black/60 justify-center items-center p-6"
+            onPress={() => setActiveSelect(null)}
+          >
+            <Pressable
+              className="w-full max-w-[340px] bg-[#1a2530] rounded-[16px] overflow-hidden"
+              onPress={(e) => e.stopPropagation()}
+            >
+              <View className="p-5 border-b border-white/5">
+                <Text className="text-white text-[18px] font-bold">
+                  {activeSelect.selectTitle}
+                </Text>
+              </View>
+              <ScrollView className="max-h-[300px]">
+                {activeSelect.selectOptions.map((opt: any) => (
+                  <TouchableOpacity
+                    key={opt.value}
+                    className="flex-row items-center p-5 border-b border-white/5"
+                    onPress={() => {
+                      activeSelect.onSelectChange?.(opt.value);
+                      setActiveSelect(null);
+                    }}
+                  >
+                    <View
+                      className={`w-5 h-5 rounded-full border-2 items-center justify-center mr-4 ${
+                        activeSelect.selectedValue === opt.value
+                          ? "border-[#0d7ff2]"
+                          : "border-white/30"
+                      }`}
+                    >
+                      {activeSelect.selectedValue === opt.value && (
+                        <View className="w-2.5 h-2.5 rounded-full bg-[#0d7ff2]" />
+                      )}
+                    </View>
+                    <Text className="text-white text-[16px]">{opt.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+              <View className="p-2 flex-row justify-end">
+                <TouchableOpacity
+                  className="px-4 py-3"
+                  onPress={() => setActiveSelect(null)}
+                >
+                  <Text className="text-[#0d7ff2] font-bold text-[16px]">
+                    ANNULER
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
+      )}
     </View>
   );
 }
