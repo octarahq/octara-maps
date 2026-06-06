@@ -1,6 +1,6 @@
 import { addressSvg } from "@/assets/icons/svgStrings";
 import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, View } from "react-native";
 import { WebView, WebViewProps } from "react-native-webview";
 
 const WebWebView = React.forwardRef<any, WebViewProps>(
@@ -440,11 +440,11 @@ const ShadcnMap = React.forwardRef<any, Props>(
     const WebComponent = Platform.OS === "web" ? WebWebView : WebView;
 
     return (
-      <View style={styles.container}>
+      <View className="flex-1 bg-black">
         <WebComponent
           originWhitelist={["*"]}
           source={{ html }}
-          style={styles.webview}
+          className="flex-1 w-full h-full bg-black"
           javaScriptEnabled
           domStorageEnabled
           ref={ref}
@@ -467,15 +467,3 @@ ShadcnMap.displayName = "ShadcnMap";
 
 export default ShadcnMap;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  webview: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-    backgroundColor: "#000",
-  },
-});
