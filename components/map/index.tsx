@@ -2,7 +2,6 @@ import ShadcnMap from "@/components/ShadcnMap";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   LayoutChangeEvent,
-  StyleSheet,
   View,
   useWindowDimensions,
 } from "react-native";
@@ -215,13 +214,13 @@ function MapProviderContent({
 
   return (
     <MapCtx.Provider value={controls}>
-      <View style={[styles.container, style]} onLayout={onLayout}>
+      <View className="flex-1 min-h-[100px]" style={style} onLayout={onLayout}>
         <ShadcnMap
           ref={webviewRef}
           initialZoom={initialZoom}
           onMapMessage={handleMapMsg}
         />
-        <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+        <View className="absolute inset-0" pointerEvents="box-none">
           {children}
           {showControls && <Controls />}
         </View>
@@ -230,12 +229,3 @@ function MapProviderContent({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, minHeight: 100 },
-  sheetContainer: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  rightControls: { position: "absolute", right: 12, top: "40%", zIndex: 80 },
-});
