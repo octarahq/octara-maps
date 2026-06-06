@@ -1,22 +1,21 @@
-import BottomSelect, { BottomSelectHandle } from "@/components/ui/BottomSelect";
-import { UserProfile, useUser } from "@/contexts/UserContext";
+import { useUser } from "@/contexts/UserContext";
 import { useAuth } from "@/hooks/useAuth";
 import { createTranslator } from "@/i18n";
 import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import Constants from "expo-constants";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ActionSheetIOS,
-  ActivityIndicator,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
+    ActionSheetIOS,
+    ActivityIndicator,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -93,9 +92,7 @@ export default function SettingsScreen() {
 
   const [activeSelect, setActiveSelect] = useState<any>(null);
 
-  useEffect(() => {
-    /* telemetry removed */;
-  }, []);
+  useEffect(() => {}, []);
 
   if (isLoading) {
     return (
@@ -117,7 +114,7 @@ export default function SettingsScreen() {
           if (buttonIndex < item.selectOptions.length) {
             item.onSelectChange?.(item.selectOptions[buttonIndex].value);
           }
-        }
+        },
       );
     } else {
       setActiveSelect(item);
@@ -148,7 +145,9 @@ export default function SettingsScreen() {
   return (
     <View
       className="flex-1 bg-[#101922] p-5"
-      style={{ paddingTop: Math.max(insets.top, Constants.statusBarHeight) + 20 }}
+      style={{
+        paddingTop: Math.max(insets.top, Constants.statusBarHeight) + 20,
+      }}
     >
       <View className="w-full flex-row items-center gap-4">
         <Pressable

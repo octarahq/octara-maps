@@ -1,12 +1,12 @@
 import { SavePlaceModal } from "@/app/(main)/_components/SavePlaceModal";
 import {
-  AddressIcon,
-  BackIcon,
-  BookmarkIcon,
-  CallIcon,
-  DirectionsIcon,
-  ShareIcon,
-  WebIcon,
+    AddressIcon,
+    BackIcon,
+    BookmarkIcon,
+    CallIcon,
+    DirectionsIcon,
+    ShareIcon,
+    WebIcon,
 } from "@/assets/icons";
 import ScheduleIcon from "@/assets/icons/ScheduleIcon";
 import MapSnapshot from "@/components/MapSnapshot";
@@ -19,17 +19,17 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  ImageBackground,
-  Linking,
-  Platform,
-  ScrollView,
-  Share,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions,
+    ActivityIndicator,
+    ImageBackground,
+    Linking,
+    Platform,
+    ScrollView,
+    Share,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
+    useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -72,10 +72,7 @@ export default function PlaceDetailScreen() {
           ? { url: webUrl, message: placeTitle }
           : { message: `${placeTitle}\n${webUrl}` },
       );
-      /* telemetry removed */;
-    } catch {
-      /* telemetry removed */;
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -86,7 +83,6 @@ export default function PlaceDetailScreen() {
       }
       const startTime = Date.now();
       try {
-        /* telemetry removed */;
         const data = await FreePlaceDetailsService.fetchById(
           osm_type as "N" | "W" | "R",
           parseInt(osm_id as string),
@@ -94,11 +90,9 @@ export default function PlaceDetailScreen() {
         setDetails(data);
 
         const duration = Date.now() - startTime;
-        /* telemetry removed */;
       } catch (error) {
         const duration = Date.now() - startTime;
         const errorMsg = error instanceof Error ? error.message : String(error);
-        /* telemetry removed */;
       } finally {
         setLoading(false);
       }
@@ -228,7 +222,6 @@ export default function PlaceDetailScreen() {
             <TouchableOpacity
               className="flex-1 h-[56px] bg-primary rounded-[12px] flex-row items-center justify-center gap-2"
               onPress={() => {
-                /* telemetry removed */;
                 router.push({
                   pathname: "/(main)/routePlanning",
                   params: {
@@ -248,7 +241,6 @@ export default function PlaceDetailScreen() {
             <TouchableOpacity
               className="w-[56px] h-[56px] bg-[#223649] rounded-[12px] items-center justify-center"
               onPress={() => {
-                /* telemetry removed */;
                 setSaveModalVisible(true);
               }}
             >
@@ -258,7 +250,6 @@ export default function PlaceDetailScreen() {
               <TouchableOpacity
                 className="w-[56px] h-[56px] bg-[#223649] rounded-[12px] items-center justify-center"
                 onPress={() => {
-                  /* telemetry removed */;
                   Linking.openURL(`tel:${details.phone}`);
                 }}
               >
@@ -269,7 +260,6 @@ export default function PlaceDetailScreen() {
               <TouchableOpacity
                 className="w-[56px] h-[56px] bg-[#223649] rounded-[12px] items-center justify-center"
                 onPress={() => {
-                  /* telemetry removed */;
                   WebBrowser.openBrowserAsync(details.website!);
                 }}
               >
@@ -311,7 +301,6 @@ export default function PlaceDetailScreen() {
                 <TouchableOpacity
                   className="flex-row gap-4"
                   onPress={() => {
-                    /* telemetry removed */;
                     setHoursModalVisible(true);
                   }}
                 >

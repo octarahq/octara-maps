@@ -6,12 +6,7 @@ import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
-import {
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type RouteParams = {
@@ -74,9 +69,7 @@ export default function ArrivedScreen() {
     return [{ lat: destLat, lng: destLng, type: "destination" as const }];
   }, [hasDestination, destLat, destLng]);
 
-  React.useEffect(() => {
-    /* telemetry removed */;
-  }, [params.mode, totalDistance, totalDuration]);
+  React.useEffect(() => {}, [params.mode, totalDistance, totalDuration]);
 
   const routeCoords: { latitude: number; longitude: number }[] = [];
 

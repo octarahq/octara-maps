@@ -13,22 +13,22 @@ import { addRecentTrip } from "@/utils/recentTrips";
 import { snapPointsPercent } from "@/utils/snapPoints";
 import { MaterialIcons } from "@expo/vector-icons";
 import BottomSheet, {
-  BottomSheetFlatList,
-  BottomSheetView,
+    BottomSheetFlatList,
+    BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import * as Localization from "expo-localization";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Speech from "expo-speech";
 import React from "react";
 import {
-  Animated,
-  Easing,
-  StatusBar,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions
+    Animated,
+    Easing,
+    StatusBar,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View,
+    useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
@@ -165,7 +165,6 @@ export default function StandardNavigationScreen() {
   React.useEffect(() => {
     if (!navigationStartTrackedRef.current && mapReady && position) {
       navigationStartTrackedRef.current = true;
-      /* telemetry removed */;
     }
   }, [mapReady, position, mode]);
 
@@ -424,7 +423,6 @@ export default function StandardNavigationScreen() {
           waitingForRouteRef.current = true;
           lastLeftPositionRef.current = currentPos;
           lastOffRouteRecalcAtRef.current = now;
-          /* telemetry removed */;
 
           offRouteRecalcInFlightRef.current = true;
           lastOffRouteRecalcAtRef.current = now;
@@ -722,8 +720,6 @@ export default function StandardNavigationScreen() {
       reliableDurationForSummary > 0
         ? (reliableDistanceForSummary / reliableDurationForSummary) * 3.6
         : Math.max(0, (position.speed ?? 0) * 3.6);
-
-    /* telemetry removed */;
 
     const startLatParam =
       startCoordinate?.latitude ??

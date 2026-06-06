@@ -1,25 +1,25 @@
 import {
-  AddressIcon,
-  CommercialIcon,
-  FoodIcon,
-  GasIcon,
-  HealthIcon,
-  ParkingIcon,
+    AddressIcon,
+    CommercialIcon,
+    FoodIcon,
+    GasIcon,
+    HealthIcon,
+    ParkingIcon,
 } from "@/assets/icons";
 import Header from "@/components/layout/Header";
 import { usePosition } from "@/contexts/PositionContext";
 import { createTranslator } from "@/i18n";
 import OverpassService, {
-  NeerAmenityResponse,
+    NeerAmenityResponse,
 } from "@/services/OverpassService";
 import { router } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export default function POISearchScreen() {
@@ -30,9 +30,7 @@ export default function POISearchScreen() {
   const { loading, position } = usePosition();
   const hasFetchedRef = useRef(false);
 
-  useEffect(() => {
-    /* telemetry removed */;
-  }, []);
+  useEffect(() => {}, []);
 
   useEffect(() => {
     console.log("test", hasFetchedRef.current, position);
@@ -62,7 +60,9 @@ export default function POISearchScreen() {
         <Header title={t("title")} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#e3e3e3" />
-          <Text className="mt-4 text-center text-[#e3e3e3]">{t("loading")}</Text>
+          <Text className="mt-4 text-center text-[#e3e3e3]">
+            {t("loading")}
+          </Text>
         </View>
       </View>
     );
@@ -74,7 +74,9 @@ export default function POISearchScreen() {
 
       <ScrollView contentContainerClassName="p-4 pb-10">
         <View className="flex-row justify-between items-center">
-          <Text className="text-[#e3e3e3] text-lg font-bold">Nearby Classic</Text>
+          <Text className="text-[#e3e3e3] text-lg font-bold">
+            Nearby Classic
+          </Text>
           {loading && <ActivityIndicator size="small" color="#e3e3e3" />}
         </View>
 
@@ -141,13 +143,21 @@ export default function POISearchScreen() {
               }
             >
               <View className="flex-row items-center mt-4 p-4 rounded-3xl border border-[#2e3a4c] bg-[#1a2533]">
-                <View className="w-12 h-12 rounded-full bg-[#2e3a4c] justify-center items-center mr-4">{PlaceIcon}</View>
+                <View className="w-12 h-12 rounded-full bg-[#2e3a4c] justify-center items-center mr-4">
+                  {PlaceIcon}
+                </View>
                 {/* On limite le texte à sa colonne pour éviter qu'il pousse l'écran */}
                 <View className="flex-1">
-                  <Text className="text-[#e3e3e3] text-base font-bold" numberOfLines={1}>
+                  <Text
+                    className="text-[#e3e3e3] text-base font-bold"
+                    numberOfLines={1}
+                  >
                     {result.tags.name || "Unknown Restaurant"}
                   </Text>
-                  <Text className="text-[#e3e3e3] text-sm mt-1" numberOfLines={1}>
+                  <Text
+                    className="text-[#e3e3e3] text-sm mt-1"
+                    numberOfLines={1}
+                  >
                     {result.tags.cuisine || result.tags.amenity}
                   </Text>
                 </View>
@@ -159,4 +169,3 @@ export default function POISearchScreen() {
     </View>
   );
 }
-

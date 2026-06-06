@@ -23,9 +23,7 @@ export default function TripHistoryScreen() {
     };
   }, []);
 
-  useEffect(() => {
-    /* telemetry removed */;
-  }, []);
+  useEffect(() => {}, []);
 
   return (
     <View className="flex-1 bg-[#101922]">
@@ -43,7 +41,6 @@ export default function TripHistoryScreen() {
             title={r.name || r.address || ""}
             subtitle={r.address || ""}
             onPress={() => {
-              /* telemetry removed */;
               router.push({
                 pathname: "/(main)/place",
                 params: {

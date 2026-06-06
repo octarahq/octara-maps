@@ -1,13 +1,13 @@
 import {
-  AddressIcon,
-  BusStopIcon,
-  CityIcon,
-  CommercialIcon,
-  FoodIcon,
-  GasIcon,
-  HealthIcon,
-  ParkingIcon,
-  TrainStationIcon,
+    AddressIcon,
+    BusStopIcon,
+    CityIcon,
+    CommercialIcon,
+    FoodIcon,
+    GasIcon,
+    HealthIcon,
+    ParkingIcon,
+    TrainStationIcon,
 } from "@/assets/icons";
 import MapSnapshot, { WaypointPin } from "@/components/MapSnapshot";
 import { Colors } from "@/constants/theme";
@@ -19,37 +19,37 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
-  Keyboard,
-  KeyboardEvent,
-  LayoutAnimation,
-  Modal,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Keyboard,
+    KeyboardEvent,
+    LayoutAnimation,
+    Modal,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import {
-  Gesture,
-  GestureDetector,
-  GestureHandlerRootView,
+    Gesture,
+    GestureDetector,
+    GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import Animated, {
-  Easing,
-  interpolate,
-  runOnJS,
-  SharedValue,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
+    Easing,
+    interpolate,
+    runOnJS,
+    SharedValue,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Coordinate } from "../../services/RouteService";
 import { useRouteService } from "../../services/RouteService";
 import {
-  PhotonFeature,
-  SearchEngineService,
+    PhotonFeature,
+    SearchEngineService,
 } from "../../services/SearchEngineService";
 
 const { t } = createTranslator("routePlanning");
@@ -783,8 +783,6 @@ export default function RoutePlanningScreen() {
       .filter((c): c is Coordinate => c !== null);
 
     try {
-      /* telemetry removed */;
-
       if (coords.length > 2) {
         await routeService.getMultiStepRoute(coords, navigationModeForIntent);
       } else {
@@ -808,7 +806,6 @@ export default function RoutePlanningScreen() {
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      /* telemetry removed */;
     }
 
     router.push({
@@ -912,8 +909,6 @@ export default function RoutePlanningScreen() {
     const modes: ("car" | "walk" | "bike")[] = ["car", "walk", "bike"];
     setModesCalculating({ car: true, walk: true, bike: true });
 
-    /* telemetry removed */;
-
     let completed = 0;
     let successCount = 0;
     const distances: number[] = [];
@@ -953,7 +948,6 @@ export default function RoutePlanningScreen() {
               },
             }));
           } else {
-            /* telemetry removed */;
             setRouteErrors((prev) => ({
               ...prev,
               [mode as TransportMode]: t("errorNoRoute"),
@@ -962,7 +956,7 @@ export default function RoutePlanningScreen() {
         } catch (error) {
           const errorMsg =
             error instanceof Error ? error.message : String(error);
-          /* telemetry removed */;
+
           setRouteErrors((prev) => ({
             ...prev,
             [mode as TransportMode]: errorMsg,
@@ -970,7 +964,6 @@ export default function RoutePlanningScreen() {
         } finally {
           completed++;
           if (completed === modes.length) {
-            /* telemetry removed */;
           }
         }
 

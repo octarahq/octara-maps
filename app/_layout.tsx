@@ -30,7 +30,6 @@ import UpdateDialog from "@/components/UpdateDialog";
 import { UpdateProvider } from "@/contexts/UpdateContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
-
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -96,8 +95,6 @@ function InnerLayout() {
   useEffect(() => {
     if (!isLoading && hasFinishedOnboarding) {
       try {
-
-        /* telemetry removed */;
       } catch {}
     }
   }, [isLoading, hasFinishedOnboarding, privacy]);

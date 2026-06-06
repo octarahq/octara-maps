@@ -8,11 +8,11 @@ import { snapPointsPercent } from "@/utils/snapPoints";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import React from "react";
 import {
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
+    useWindowDimensions,
 } from "react-native";
 import MapOverlay from "./_components/MapOverlay";
 
@@ -28,9 +28,7 @@ export default function MainScreen() {
   const [isSidebarVisible, setSidebarVisible] = React.useState(false);
   const pos = usePosition();
 
-  React.useEffect(() => {
-    /* telemetry removed */;
-  }, []);
+  React.useEffect(() => {}, []);
 
   return (
     <MapProvider style={{ flex: 1 }}>
@@ -72,7 +70,6 @@ export default function MainScreen() {
               <TouchableOpacity
                 className="items-center w-[22%]"
                 onPress={() => {
-                  /* telemetry removed */;
                   showCommingSoonToast();
                 }}
               >
@@ -88,7 +85,6 @@ export default function MainScreen() {
               <TouchableOpacity
                 className="items-center w-[22%]"
                 onPress={() => {
-                  /* telemetry removed */;
                   showCommingSoonToast();
                 }}
               >
@@ -104,7 +100,6 @@ export default function MainScreen() {
               <TouchableOpacity
                 className="items-center w-[22%]"
                 onPress={() => {
-                  /* telemetry removed */;
                   showCommingSoonToast();
                 }}
               >
@@ -120,7 +115,6 @@ export default function MainScreen() {
               <TouchableOpacity
                 className="items-center w-[22%]"
                 onPress={() => {
-                  /* telemetry removed */;
                   showCommingSoonToast();
                 }}
               >

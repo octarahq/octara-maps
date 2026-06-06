@@ -8,11 +8,11 @@ import { cn } from "@/utils/cn";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Text,
-  ToastAndroid,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Text,
+    ToastAndroid,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export default function ShareLocationViewScreen() {
@@ -34,9 +34,7 @@ export default function ShareLocationViewScreen() {
   const [fetchingTarget, setFetchingTarget] = useState(true);
   const [sharingInProgress, setSharingInProgress] = useState(false);
 
-  useEffect(() => {
-    /* telemetry removed */;
-  }, []);
+  useEffect(() => {}, []);
 
   useEffect(() => {
     if (!isLoading && !user) {

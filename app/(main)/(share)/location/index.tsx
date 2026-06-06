@@ -7,13 +7,13 @@ import { OctaraService, OctaraUser } from "@/services/OctaraService";
 import { router } from "expo-router";
 import React, { useEffect } from "react";
 import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TextInput,
-  ToastAndroid,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    ScrollView,
+    Text,
+    TextInput,
+    ToastAndroid,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export default function ShareLocationScreen() {
@@ -29,9 +29,7 @@ export default function ShareLocationScreen() {
       ? U
       : never
   >([]);
-  useEffect(() => {
-    /* telemetry removed */;
-  }, []);
+  useEffect(() => {}, []);
 
   useEffect(() => {
     if (!user) {

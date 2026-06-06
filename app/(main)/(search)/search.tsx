@@ -5,42 +5,42 @@ import { useUser } from "@/contexts/UserContext";
 import { createTranslator } from "@/i18n";
 import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { clearRecentTrips, getRecentTrips } from "@/utils/recentTrips";
+import Constants from "expo-constants";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
-  ImageBackground,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ImageBackground,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import Constants from "expo-constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
-  AddPlaceIcon,
-  AddressIcon,
-  AmenityIcon,
-  ArrowRightIcon,
-  BatimentIcon,
-  BusStopIcon,
-  CoffeeIcon,
-  CommercialIcon,
-  EditIcon,
-  EvIcon,
-  FoodIcon,
-  GasIcon,
-  HealthIcon,
-  HistoryIcon,
-  HomeIcon,
-  ParkingIcon,
-  SchoolIcon,
-  SearchIcon,
-  StarIcon,
-  TrainStationIcon,
-  WorkIcon,
+    AddPlaceIcon,
+    AddressIcon,
+    AmenityIcon,
+    ArrowRightIcon,
+    BatimentIcon,
+    BusStopIcon,
+    CoffeeIcon,
+    CommercialIcon,
+    EditIcon,
+    EvIcon,
+    FoodIcon,
+    GasIcon,
+    HealthIcon,
+    HistoryIcon,
+    HomeIcon,
+    ParkingIcon,
+    SchoolIcon,
+    SearchIcon,
+    StarIcon,
+    TrainStationIcon,
+    WorkIcon,
 } from "@/assets/icons";
 
 import BackIcon from "@/assets/icons/BackIcon";
@@ -58,8 +58,8 @@ import { AvatarImg } from "@/components/AvatarImg";
 import MapSnapshot from "@/components/MapSnapshot";
 import OverPassAmenityList from "../../../assets/config/poiList";
 import {
-  PhotonFeature,
-  SearchEngineService,
+    PhotonFeature,
+    SearchEngineService,
 } from "../../../services/SearchEngineService";
 
 const PlaceIcons = [
@@ -185,8 +185,6 @@ export default function SearchScreen() {
     const startTime = Date.now();
     const t = setTimeout(async () => {
       try {
-        /* telemetry removed */;
-
         const results = await SearchEngineService.photonSearch(q, {
           limit: 10,
           lat: position?.latitude,
@@ -198,7 +196,6 @@ export default function SearchScreen() {
           setAddressResults(results);
 
           const duration = Date.now() - startTime;
-          /* telemetry removed */;
         }
       } catch (error) {
         if (mounted) {
@@ -212,9 +209,7 @@ export default function SearchScreen() {
             errorMsg.includes("timeout") ||
             errorMsg.includes("fetch")
           ) {
-            /* telemetry removed */;
           } else {
-            /* telemetry removed */;
           }
         }
       }
@@ -387,7 +382,6 @@ export default function SearchScreen() {
                         title={title || t("unknown_place")}
                         subtitle={subtitle}
                         onPress={() => {
-                          /* telemetry removed */;
                           router.push({
                             pathname: "/(main)/place",
                             params: {
@@ -402,7 +396,6 @@ export default function SearchScreen() {
                           });
                         }}
                         onArrowPress={() => {
-                          /* telemetry removed */;
                           router.push({
                             pathname: "/(main)/routePlanning",
                             params: {
@@ -461,7 +454,6 @@ export default function SearchScreen() {
                   {recentTrips.length > 0 ? (
                     <TouchableOpacity
                       onPress={async () => {
-                        /* telemetry removed */;
                         await clearRecentTrips();
                         setRecentTrips([]);
                         setVisibleRecentCount(5);
@@ -485,7 +477,6 @@ export default function SearchScreen() {
                       title={r.name || r.address || ""}
                       subtitle={r.address || ""}
                       onPress={() => {
-                        /* telemetry removed */;
                         router.push({
                           pathname: "/(main)/place",
                           params: {
@@ -504,7 +495,6 @@ export default function SearchScreen() {
                   <TouchableOpacity
                     style={{ padding: 8 }}
                     onPress={() => {
-                      /* telemetry removed */;
                       setVisibleRecentCount((c) => Math.min(10, c + 5));
                     }}
                   >
