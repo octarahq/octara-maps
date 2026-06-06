@@ -9,7 +9,6 @@ import React from "react";
 import {
     Platform,
     Pressable,
-    StyleSheet,
     Text,
     TouchableOpacity,
     useWindowDimensions,
@@ -68,58 +67,50 @@ export default function Controls() {
 
   return (
     <>
-      <View style={styles.buttonContainer} pointerEvents="box-none">
-        <View style={styles.container}>
+      <View className="absolute right-3 top-[40%] z-[80]" pointerEvents="box-none">
+        <View className="flex-col gap-3 items-center">
           <BlurView
             intensity={50}
-            style={[
-              styles.zoomGroup,
-              { backgroundColor: containerBg, borderColor: containerBorder },
-            ]}
+            className="flex-col rounded-2xl overflow-hidden border shadow-lg"
+            style={{ backgroundColor: containerBg, borderColor: containerBorder }}
           >
             <TouchableOpacity
-              style={[
-                styles.zoomButton,
-                {
-                  borderBottomColor: isLightMap
-                    ? "rgba(0,0,0,0.12)"
-                    : "rgba(255,255,255,0.1)",
-                },
-              ]}
+              className="w-12 h-12 items-center justify-center border-b"
+              style={{
+                borderBottomColor: isLightMap
+                  ? "rgba(0,0,0,0.12)"
+                  : "rgba(255,255,255,0.1)",
+              }}
               onPress={() => {
                 triggerHaptic();
                 m.zoomIn();
               }}
             >
-              <Text style={[styles.icon, { color: iconColor }]}>+</Text>
+              <Text className="text-[24px] leading-[24px]" style={{ color: iconColor }}>+</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[
-                styles.zoomButton,
-                {
-                  borderBottomColor: isLightMap
-                    ? "rgba(0,0,0,0.12)"
-                    : "rgba(255,255,255,0.1)",
-                },
-              ]}
+              className="w-12 h-12 items-center justify-center border-b"
+              style={{
+                borderBottomColor: isLightMap
+                  ? "rgba(0,0,0,0.12)"
+                  : "rgba(255,255,255,0.1)",
+              }}
               onPress={() => {
                 triggerHaptic();
                 m.zoomOut();
               }}
             >
-              <Text style={[styles.icon, { color: iconColor }]}>−</Text>
+              <Text className="text-[24px] leading-[24px]" style={{ color: iconColor }}>−</Text>
             </TouchableOpacity>
           </BlurView>
 
           <BlurView
             intensity={50}
-            style={[
-              styles.largeButtonWrapper,
-              { backgroundColor: containerBg, borderColor: containerBorder },
-            ]}
+            className="rounded-2xl overflow-hidden border shadow-lg"
+            style={{ backgroundColor: containerBg, borderColor: containerBorder }}
           >
             <TouchableOpacity
-              style={styles.largeButton}
+              className="w-12 h-12 items-center justify-center"
               onPress={() => {
                 triggerHaptic();
                 centerOnUser();
@@ -131,13 +122,11 @@ export default function Controls() {
 
           <BlurView
             intensity={50}
-            style={[
-              styles.largeButtonWrapper,
-              { backgroundColor: containerBg, borderColor: containerBorder },
-            ]}
+            className="rounded-2xl overflow-hidden border shadow-lg"
+            style={{ backgroundColor: containerBg, borderColor: containerBorder }}
           >
             <TouchableOpacity
-              style={styles.largeButton}
+              className="w-12 h-12 items-center justify-center"
               onPress={() => {
                 triggerHaptic();
                 layers.openLayers();
@@ -150,9 +139,9 @@ export default function Controls() {
       </View>
 
       {layers.layersOpen && (
-        <View style={styles.sheetWrapper}>
+        <View className="absolute inset-0 z-[100]">
           <Pressable
-            style={StyleSheet.absoluteFill}
+            className="absolute inset-0"
             onPress={layers.closeLayers}
             accessibilityLabel="Dismiss layers panel"
           />
@@ -178,79 +167,3 @@ export default function Controls() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "column",
-    gap: 12,
-    alignItems: "center",
-  },
-  zoomGroup: {
-    flexDirection: "column",
-    borderRadius: 16,
-    overflow: "hidden",
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 4 },
-      },
-      android: {
-        elevation: 0,
-      },
-    }),
-  },
-  zoomButton: {
-    width: 48,
-    height: 48,
-    alignItems: "center",
-    justifyContent: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.1)",
-  },
-  largeButtonWrapper: {
-    borderRadius: 16,
-    overflow: "hidden",
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 4 },
-      },
-      android: {
-        elevation: 0,
-      },
-    }),
-  },
-  largeButton: {
-    width: 48,
-    height: 48,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  icon: { color: "#fff", fontSize: 24, lineHeight: 24 },
-  primary: { color: "#0d7ff2" },
-  buttonContainer: {
-    position: "absolute",
-    right: 12,
-    top: "40%",
-    zIndex: 80,
-  },
-  sheetWrapper: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 100,
-  },
-});
