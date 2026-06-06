@@ -1,13 +1,14 @@
 import ShadcnMap from "@/components/ShadcnMap";
 import { MapLayersContext } from "@/components/map/MapLayersContext";
 import React, { useRef } from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
 import {
   departureSvg,
   destinationSvg,
   waypointSvg,
 } from "@/assets/icons/svgStrings";
+import { cn } from "@/utils/cn";
 
 export type WaypointPin = {
   lat: number;
@@ -24,6 +25,7 @@ interface Props {
   zoom?: number;
   interactive?: boolean;
   style?: any;
+  className?: string;
 }
 
 function MapSnapshotInner({
@@ -34,6 +36,7 @@ function MapSnapshotInner({
   zoom = 11,
   interactive = false,
   style,
+  className,
 }: Props) {
   const ref = useRef<any>(null);
   const [mapReady, setMapReady] = React.useState(false);
@@ -186,7 +189,7 @@ function MapSnapshotInner({
 
   return (
     <View
-      style={[styles.container, style]}
+      className={cn("overflow-hidden rounded-2xl", className)}
       pointerEvents={interactive ? "auto" : "none"}
     >
       <ShadcnMap
@@ -200,13 +203,3 @@ function MapSnapshotInner({
 
 const MapSnapshot = React.memo(MapSnapshotInner);
 export default MapSnapshot;
-
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    height: 120,
-    borderRadius: 12,
-    overflow: "hidden",
-    backgroundColor: "#12202a",
-  },
-});

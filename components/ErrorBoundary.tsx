@@ -1,6 +1,6 @@
 import { telemetryCrash, TelemetryService } from "@/services/TelemetryService";
 import React from "react";
-import { Button, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Button, ScrollView, Text, View } from "react-native";
 
 interface Props {
   children: React.ReactNode;
@@ -49,31 +49,37 @@ export class ErrorBoundary extends React.Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <View style={styles.container}>
-          <ScrollView style={styles.content}>
-            <Text style={styles.title}>Oops! Something went wrong</Text>
+        <View className="flex-1 bg-[#f5f5f5] p-4 pt-12">
+          <ScrollView className="flex-1">
+            <Text className="text-[24px] font-bold mb-4 text-[#333]">
+              Oops! Something went wrong
+            </Text>
 
-            <View style={styles.errorBox}>
-              <Text style={styles.errorTitle}>{this.state.error?.message}</Text>
+            <View className="bg-[#fff] rounded-[8px] p-3 mb-4 border-l-[4px] border-l-[#ff3b30]">
+              <Text className="text-[14px] font-semibold text-[#ff3b30] mb-2">
+                {this.state.error?.message}
+              </Text>
 
               {this.state.errorInfo && (
-                <Text style={styles.stackTrace}>
+                <Text className="text-[11px] text-[#555] font-mono leading-[16px]">
                   {this.state.errorInfo.componentStack}
                 </Text>
               )}
 
               {this.state.error?.stack && (
-                <Text style={styles.stackTrace}>{this.state.error.stack}</Text>
+                <Text className="text-[11px] text-[#555] font-mono leading-[16px]">
+                  {this.state.error.stack}
+                </Text>
               )}
             </View>
 
-            <Text style={styles.info}>
+            <Text className="text-[14px] text-[#666] leading-[20px] mb-5">
               This error has been reported to our monitoring system. We&pos;ll
               investigate and fix it as soon as possible.
             </Text>
           </ScrollView>
 
-          <View style={styles.buttonContainer}>
+          <View className="p-4 bg-[#fff] border-t border-[#ddd]">
             <Button
               title="Try again"
               onPress={this.handleReload}
@@ -87,55 +93,5 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return this.props.children;
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    paddingTop: 50,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-    color: "#333",
-  },
-  errorBox: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: "#ff3b30",
-  },
-  errorTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#ff3b30",
-    marginBottom: 8,
-  },
-  stackTrace: {
-    fontSize: 11,
-    color: "#555",
-    fontFamily: "Courier New",
-    lineHeight: 16,
-  },
-  info: {
-    fontSize: 14,
-    color: "#666",
-    lineHeight: 20,
-    marginBottom: 20,
-  },
-  buttonContainer: {
-    padding: 16,
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: "#ddd",
-  },
-});
 
 export default ErrorBoundary;
