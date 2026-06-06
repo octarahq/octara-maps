@@ -18,7 +18,6 @@ import React, { useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -60,28 +59,28 @@ export default function POISearchScreen() {
 
   if (results === null) {
     return (
-      <View style={styles.container}>
+      <View className="flex-1 pt-6 bg-[#101922]">
         <Header title={t("title")} />
-        <View style={styles.centerContainer}>
+        <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#e3e3e3" />
-          <Text style={styles.centerText}>{t("loading")}</Text>
+          <Text className="mt-4 text-center text-[#e3e3e3]">{t("loading")}</Text>
         </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 pt-6 bg-[#101922]">
       <Header title={t("title")} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.headerRow}>
-          <Text style={styles.sectionTitle}>Nearby Classic</Text>
+      <ScrollView contentContainerClassName="p-4 pb-10">
+        <View className="flex-row justify-between items-center">
+          <Text className="text-[#e3e3e3] text-lg font-bold">Nearby Classic</Text>
           {loading && <ActivityIndicator size="small" color="#e3e3e3" />}
         </View>
 
         {results.length === 0 && (
-          <Text style={styles.noResultsText}>{t("no_results")}</Text>
+          <Text className="text-[#e3e3e3] text-sm mt-2">{t("no_results")}</Text>
         )}
 
         {results.map((result) => {
@@ -142,14 +141,14 @@ export default function POISearchScreen() {
                 })
               }
             >
-              <View style={styles.card}>
-                <View style={styles.iconWrapper}>{PlaceIcon}</View>
+              <View className="flex-row items-center mt-4 p-4 rounded-3xl border border-[#2e3a4c] bg-[#1a2533]">
+                <View className="w-12 h-12 rounded-full bg-[#2e3a4c] justify-center items-center mr-4">{PlaceIcon}</View>
                 {/* On limite le texte à sa colonne pour éviter qu'il pousse l'écran */}
-                <View style={styles.textWrapper}>
-                  <Text style={styles.placeName} numberOfLines={1}>
+                <View className="flex-1">
+                  <Text className="text-[#e3e3e3] text-base font-bold" numberOfLines={1}>
                     {result.tags.name || "Unknown Restaurant"}
                   </Text>
-                  <Text style={styles.placeType} numberOfLines={1}>
+                  <Text className="text-[#e3e3e3] text-sm mt-1" numberOfLines={1}>
                     {result.tags.cuisine || result.tags.amenity}
                   </Text>
                 </View>
@@ -162,71 +161,3 @@ export default function POISearchScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 24,
-    backgroundColor: "#101922",
-  },
-  centerContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    flex: 1,
-  },
-  centerText: {
-    marginTop: 16,
-    textAlign: "center",
-    color: "#e3e3e3",
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  sectionTitle: {
-    color: "#e3e3e3",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  noResultsText: {
-    color: "#e3e3e3",
-    fontSize: 14,
-    marginTop: 8,
-  },
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 16,
-    padding: 16,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "#2e3a4c",
-    backgroundColor: "#1a2533",
-  },
-  iconWrapper: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#2e3a4c",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  textWrapper: {
-    flex: 1,
-  },
-  placeName: {
-    color: "#e3e3e3",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  placeType: {
-    color: "#e3e3e3",
-    fontSize: 14,
-    marginTop: 4,
-  },
-});
