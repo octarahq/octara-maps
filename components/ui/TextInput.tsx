@@ -2,10 +2,8 @@ import { Colors } from "@/constants/theme";
 import { useHapticSettings } from "@/contexts/HapticSettingsContext";
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
-import {
   Platform,
   TextInput as RNTextInput,
-  StyleSheet,
   TextInputProps,
   Vibration,
 } from "react-native";
@@ -41,30 +39,15 @@ export function TextField({ style, placeholder, ...rest }: TextFieldProps) {
         }
       }}
       onBlur={() => setFocused(false)}
-      style={[styles.input, focused && styles.focused, style]}
+      className="h-16 rounded-2xl px-6 text-[18px] font-medium bg-[#1e293b] text-white"
+      style={[
+        focused ? { borderWidth: 2, borderColor: Colors.dark.primary } : { borderWidth: 0 },
+        style
+      ]}
       placeholder={placeholder}
-      placeholderTextColor={styles.placeholder.color}
+      placeholderTextColor="rgba(255,255,255,0.5)"
       {...rest}
     />
   );
 }
 
-const styles = StyleSheet.create({
-  input: {
-    height: 64,
-    borderRadius: 16,
-    paddingHorizontal: 24,
-    fontSize: 18,
-    fontWeight: "500",
-    backgroundColor: "#1e293b",
-    color: "#fff",
-    borderWidth: 0,
-  },
-  placeholder: {
-    color: "rgba(255,255,255,0.5)",
-  },
-  focused: {
-    borderWidth: 2,
-    borderColor: Colors.dark.primary,
-  },
-});
