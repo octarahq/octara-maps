@@ -2,6 +2,7 @@ import { Colors } from "@/constants/theme";
 import { useHapticSettings } from "@/contexts/HapticSettingsContext";
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
+import {
   Platform,
   TextInput as RNTextInput,
   TextInputProps,
