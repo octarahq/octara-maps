@@ -20,6 +20,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Constants from "expo-constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 
@@ -156,7 +157,7 @@ export default function MapOverlay({
         <View
           className="absolute top-0 left-0 right-0 z-50"
           pointerEvents="auto"
-          style={{ paddingTop: Math.max(insets.top, 16) }}
+          style={{ paddingTop: Math.max(insets.top, Constants.statusBarHeight) + 16 }}
         >
           <View
             className="flex-row items-center justify-between mb-3 px-3"

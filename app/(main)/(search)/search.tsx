@@ -23,6 +23,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Constants from "expo-constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -115,7 +116,7 @@ export default function SearchScreen() {
   const { t } = createTranslator("search");
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const topInset = Math.max(insets.top - 10, 4);
+  const topInset = Math.max(insets.top, Constants.statusBarHeight) + 16;
   const { mode: modeParam } = useLocalSearchParams();
   const initialMode =
     modeParam === "explore"

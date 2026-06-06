@@ -5,6 +5,7 @@ import { createTranslator } from "@/i18n";
 import { telemetryNavigationStart } from "@/services/TelemetryService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import Constants from "expo-constants";
 import React, { useEffect, useState } from "react";
 import {
   ActionSheetIOS,
@@ -65,7 +66,7 @@ function SettingsSection({
               </View>
               {item.onValueChange ? (
                 <Switch
-                  value={false} // Placeholder to suppress warning if needed, but normally should pass item.value
+                  value={false}
                   onValueChange={item.onValueChange}
                   trackColor={{ false: "#334155", true: "#0d7ff2" }}
                   thumbColor="#fff"
@@ -138,17 +139,17 @@ export default function SettingsScreen() {
   ];
 
   const themeOptions = [
-    { label: t("map_theme.standard"), value: "standard" },
-    { label: t("map_theme.standard_dark"), value: "standard_dark" },
-    { label: t("map_theme.satelite"), value: "satelite" },
-    { label: t("map_theme.terrain"), value: "terrain" },
-    { label: t("map_theme.terrain_dark"), value: "terrain_dark" },
+    { label: t("map_styles.standard"), value: "standard" },
+    { label: t("map_styles.standard_dark"), value: "standard_dark" },
+    { label: t("map_styles.satelite"), value: "satelite" },
+    { label: t("map_styles.terrain"), value: "terrain" },
+    { label: t("map_styles.terrain_dark"), value: "terrain_dark" },
   ];
 
   return (
     <View
       className="flex-1 bg-[#101922] p-5"
-      style={{ paddingTop: Math.max(insets.top, 20) }}
+      style={{ paddingTop: Math.max(insets.top, Constants.statusBarHeight) + 20 }}
     >
       <View className="w-full flex-row items-center gap-4">
         <Pressable
@@ -171,49 +172,49 @@ export default function SettingsScreen() {
             title: t("sections.0.settings.0.title"),
             description: t(`transportations_mode.${settings.favTransportMode}`),
             icon: "directions-car",
-            selectTitle: "Choisir un mode de transport",
-            selectOptions: transportOptions,
-            selectedValue: settings.favTransportMode,
-            onSelectChange: (val) =>
-              setSettings({
-                ...settings,
-                favTransportMode: val as UserProfile["settings"]["favTransportMode"],
+            onClick: () =>
+              handleSelectPress({
+                selectTitle: "Choisir un mode de transport",
+                selectOptions: transportOptions,
+                selectedValue: settings.favTransportMode,
+                onSelectChange: (val: any) =>
+                  setSettings({
+                    ...settings,
+                    favTransportMode: val,
+                  }),
               }),
-            onClick: function () {
-              handleSelectPress(this);
-            },
           },
           {
             title: t("sections.0.settings.1.title"),
             description: t("sections.0.settings.1.description"),
             icon: "volume-up",
-            selectTitle: "Choisir la methode de guidage par voix",
-            selectOptions: voiceOptions,
-            selectedValue: settings.voice,
-            onSelectChange: (val) =>
-              setSettings({
-                ...settings,
-                voice: val as UserProfile["settings"]["voice"],
+            onClick: () =>
+              handleSelectPress({
+                selectTitle: "Choisir la methode de guidage par voix",
+                selectOptions: voiceOptions,
+                selectedValue: settings.voice,
+                onSelectChange: (val: any) =>
+                  setSettings({
+                    ...settings,
+                    voice: val,
+                  }),
               }),
-            onClick: function () {
-              handleSelectPress(this);
-            },
           },
           {
             title: t("sections.0.settings.2.title"),
             description: t("sections.0.settings.2.description"),
             icon: "map",
-            selectTitle: "Choisir le thème de la carte",
-            selectOptions: themeOptions,
-            selectedValue: settings.mapStyle,
-            onSelectChange: (val) =>
-              setSettings({
-                ...settings,
-                mapStyle: val as UserProfile["settings"]["mapStyle"],
+            onClick: () =>
+              handleSelectPress({
+                selectTitle: "Choisir le thème de la carte",
+                selectOptions: themeOptions,
+                selectedValue: settings.mapStyle,
+                onSelectChange: (val: any) =>
+                  setSettings({
+                    ...settings,
+                    mapStyle: val,
+                  }),
               }),
-            onClick: function () {
-              handleSelectPress(this);
-            },
           },
         ]}
       />
