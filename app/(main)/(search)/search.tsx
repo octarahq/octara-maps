@@ -427,16 +427,16 @@ export default function SearchScreen() {
                 className="mb-3"
               >
                 {[
-                  { icon: <GasIcon />, label: t("chip_gas") },
-                  { icon: <ParkingIcon />, label: t("chip_parking") },
-                  { icon: <CoffeeIcon />, label: t("chip_coffee") },
-                  { icon: <EvIcon />, label: t("chip_ev") },
-                  { icon: <FoodIcon />, label: t("chip_food") },
+                  { icon: <GasIcon />, label: t("chip_gas"), amenity: "fuel" },
+                  { icon: <ParkingIcon />, label: t("chip_parking"), amenity: "parking" },
+                  { icon: <CoffeeIcon />, label: t("chip_coffee"), amenity: "cafe" },
+                  { icon: <EvIcon />, label: t("chip_ev"), amenity: "charging_station" },
+                  { icon: <FoodIcon />, label: t("chip_food"), amenity: "restaurant|fast_food|cafe" },
                 ].map((c) => (
                   <TouchableOpacity
                     key={c.label}
                     className="bg-[#223649] px-3.5 py-2 rounded-[8px] mr-2 flex-row items-center"
-                    onPress={() => showCommingSoonToast()}
+                    onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: c.amenity, title: c.label } })}
                   >
                     <View className="mr-2 w-6 h-6 items-center justify-center">
                       {c.icon}
@@ -512,7 +512,7 @@ export default function SearchScreen() {
                 <View className="flex-row flex-wrap justify-between">
                   <TouchableOpacity
                     className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
-                    onPress={() => showCommingSoonToast()}
+                    onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "restaurant|cafe", title: t("card_top_dining") } })}
                   >
                     <ImageBackground
                       source={topDiningImg}
@@ -527,7 +527,7 @@ export default function SearchScreen() {
                   </TouchableOpacity>
                   <TouchableOpacity
                     className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
-                    onPress={() => showCommingSoonToast()}
+                    onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "bar|pub|nightclub", title: t("card_nightlife") } })}
                   >
                     <ImageBackground
                       source={nightlifeImg}
@@ -542,7 +542,7 @@ export default function SearchScreen() {
                   </TouchableOpacity>
                   <TouchableOpacity
                     className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
-                    onPress={() => showCommingSoonToast()}
+                    onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "park|forest|nature_reserve", title: t("card_nature") } })}
                   >
                     <ImageBackground
                       source={natureImg}
@@ -557,7 +557,7 @@ export default function SearchScreen() {
                   </TouchableOpacity>
                   <TouchableOpacity
                     className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
-                    onPress={() => showCommingSoonToast()}
+                    onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "marketplace|mall|supermarket|clothes", title: t("card_shopping") } })}
                   >
                     <ImageBackground
                       source={shoppingImg}
@@ -582,7 +582,7 @@ export default function SearchScreen() {
               <View className="flex-row flex-wrap justify-between">
                 <TouchableOpacity
                   className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
-                  onPress={() => showCommingSoonToast()}
+                  onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "restaurant|cafe", title: t("card_top_dining") } })}
                 >
                   <ImageBackground
                     source={topDiningImg}
@@ -597,7 +597,7 @@ export default function SearchScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
-                  onPress={() => showCommingSoonToast()}
+                  onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "bar|pub|nightclub", title: t("card_nightlife") } })}
                 >
                   <ImageBackground
                     source={nightlifeImg}
@@ -612,7 +612,7 @@ export default function SearchScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
-                  onPress={() => showCommingSoonToast()}
+                  onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "park|forest|nature_reserve", title: t("card_nature") } })}
                 >
                   <ImageBackground
                     source={natureImg}
@@ -627,7 +627,7 @@ export default function SearchScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2"
-                  onPress={() => showCommingSoonToast()}
+                  onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "marketplace|mall|supermarket|clothes", title: t("card_shopping") } })}
                 >
                   <ImageBackground
                     source={shoppingImg}

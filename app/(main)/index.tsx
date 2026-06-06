@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import MapProvider from "@/components/map";
 import { usePosition } from "@/contexts/PositionContext";
 import { createTranslator } from "@/i18n";
+import { router } from "expo-router";
 import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { snapPointsPercent } from "@/utils/snapPoints";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
@@ -69,9 +70,10 @@ export default function MainScreen() {
             <View className="flex-row w-full justify-between">
               <TouchableOpacity
                 className="items-center w-[22%]"
-                onPress={() => {
-                  showCommingSoonToast();
-                }}
+                  onPress={() => { router.push({
+                    pathname: "/(main)/poiresult",
+                    params: { amenity: "fuel", title: t("items.gas") }
+                  }); }}
               >
                 <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
                   <GasIcon />
@@ -84,9 +86,10 @@ export default function MainScreen() {
 
               <TouchableOpacity
                 className="items-center w-[22%]"
-                onPress={() => {
-                  showCommingSoonToast();
-                }}
+                  onPress={() => { router.push({
+                    pathname: "/(main)/poiresult",
+                    params: { amenity: "restaurant|fast_food|cafe", title: t("items.food") }
+                  }); }}
               >
                 <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
                   <FoodIcon />
@@ -99,9 +102,10 @@ export default function MainScreen() {
 
               <TouchableOpacity
                 className="items-center w-[22%]"
-                onPress={() => {
-                  showCommingSoonToast();
-                }}
+                  onPress={() => { router.push({
+                    pathname: "/(main)/poiresult",
+                    params: { amenity: "cafe", title: t("items.coffee") }
+                  }); }}
               >
                 <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
                   <CoffeeIcon />
@@ -114,9 +118,10 @@ export default function MainScreen() {
 
               <TouchableOpacity
                 className="items-center w-[22%]"
-                onPress={() => {
-                  showCommingSoonToast();
-                }}
+                  onPress={() => { router.push({
+                    pathname: "/(main)/poiresult",
+                    params: { amenity: "parking", title: t("items.parking") }
+                  }); }}
               >
                 <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
                   <ParkingIcon />

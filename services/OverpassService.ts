@@ -17,7 +17,7 @@ export default class OverpassService {
       throw new Error(`Coordonnées invalides : lat=${lat}, lon=${lon}`);
     }
 
-    const query = `[out:json];(node["amenity"="${amenityType}"](around:${radius},${lat},${lon});way["amenity"="${amenityType}"](around:${radius},${lat},${lon});relation["amenity"="${amenityType}"](around:${radius},${lat},${lon}););out center;`;
+    const query = `[out:json];(node["amenity"~"^(${amenityType})$"](around:${radius},${lat},${lon});way["amenity"~"^(${amenityType})$"](around:${radius},${lat},${lon});relation["amenity"~"^(${amenityType})$"](around:${radius},${lat},${lon}););out center;`;
     const url = "https://overpass.osm.ch/api/interpreter";
     console.log(url, ":", query);
 

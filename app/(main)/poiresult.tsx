@@ -12,7 +12,7 @@ import { createTranslator } from "@/i18n";
 import OverpassService, {
     NeerAmenityResponse,
 } from "@/services/OverpassService";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import {
     ActivityIndicator,
@@ -24,6 +24,10 @@ import {
 
 export default function POISearchScreen() {
   const { t } = createTranslator("poi_search");
+  const { amenity = "restaurant", title = "Nearby" } = useLocalSearchParams<{
+    amenity: string;
+    title: string;
+  }>();
   const [results, setResults] = React.useState<NeerAmenityResponse | null>(
     null,
   );
@@ -41,7 +45,7 @@ export default function POISearchScreen() {
         position.latitude,
         position.longitude,
         1000,
-        "restaurant",
+        amenity,
       )
         .then((res) => {
           console.log("Overpass results:", res);
@@ -57,7 +61,7 @@ export default function POISearchScreen() {
   if (results === null) {
     return (
       <View className="flex-1 pt-6 bg-[#101922]">
-        <Header title={t("title")} />
+        <Header title={title || t("title")} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#e3e3e3" />
           <Text className="mt-4 text-center text-[#e3e3e3]">
@@ -70,12 +74,12 @@ export default function POISearchScreen() {
 
   return (
     <View className="flex-1 pt-6 bg-[#101922]">
-      <Header title={t("title")} />
+      <Header title={title || t("title")} />
 
       <ScrollView contentContainerClassName="p-4 pb-10">
         <View className="flex-row justify-between items-center">
           <Text className="text-[#e3e3e3] text-lg font-bold">
-            Nearby Classic
+            {title || "Nearby"}
           </Text>
           {loading && <ActivityIndicator size="small" color="#e3e3e3" />}
         </View>
