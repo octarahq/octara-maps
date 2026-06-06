@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLocationSharing } from "@/contexts/LocationSharingContext";
 import { createTranslator } from "@/i18n";
 import { OctaraService, OctaraUser } from "@/services/OctaraService";
-import { telemetryNavigationStart } from "@/services/TelemetryService";
 import { cn } from "@/utils/cn";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -36,7 +35,7 @@ export default function ShareLocationViewScreen() {
   const [sharingInProgress, setSharingInProgress] = useState(false);
 
   useEffect(() => {
-    telemetryNavigationStart("share_location_view_screen");
+    /* telemetry removed */;
   }, []);
 
   useEffect(() => {

@@ -2,7 +2,6 @@ import MapSnapshot from "@/components/MapSnapshot";
 import { Colors } from "@/constants/theme";
 import { usePosition } from "@/contexts/PositionContext";
 import { createTranslator } from "@/i18n";
-import { telemetryNavigationStart } from "@/services/TelemetryService";
 import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -76,11 +75,7 @@ export default function ArrivedScreen() {
   }, [hasDestination, destLat, destLng]);
 
   React.useEffect(() => {
-    telemetryNavigationStart("arrival_screen", {
-      total_distance_m: totalDistance,
-      total_duration_min: Math.round(totalDuration / 60),
-      mode: params.mode || "car",
-    });
+    /* telemetry removed */;
   }, [params.mode, totalDistance, totalDuration]);
 
   const routeCoords: { latitude: number; longitude: number }[] = [];

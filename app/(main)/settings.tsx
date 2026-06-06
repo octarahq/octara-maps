@@ -2,7 +2,6 @@ import BottomSelect, { BottomSelectHandle } from "@/components/ui/BottomSelect";
 import { UserProfile, useUser } from "@/contexts/UserContext";
 import { useAuth } from "@/hooks/useAuth";
 import { createTranslator } from "@/i18n";
-import { telemetryNavigationStart } from "@/services/TelemetryService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import Constants from "expo-constants";
@@ -95,7 +94,7 @@ export default function SettingsScreen() {
   const [activeSelect, setActiveSelect] = useState<any>(null);
 
   useEffect(() => {
-    telemetryNavigationStart("settings_screen");
+    /* telemetry removed */;
   }, []);
 
   if (isLoading) {

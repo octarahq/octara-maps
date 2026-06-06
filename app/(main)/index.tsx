@@ -3,10 +3,6 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import MapProvider from "@/components/map";
 import { usePosition } from "@/contexts/PositionContext";
 import { createTranslator } from "@/i18n";
-import {
-  telemetryFeatureUsed,
-  telemetryNavigationStart,
-} from "@/services/TelemetryService";
 import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { snapPointsPercent } from "@/utils/snapPoints";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
@@ -33,7 +29,7 @@ export default function MainScreen() {
   const pos = usePosition();
 
   React.useEffect(() => {
-    telemetryNavigationStart("home_screen");
+    /* telemetry removed */;
   }, []);
 
   return (
@@ -76,7 +72,7 @@ export default function MainScreen() {
               <TouchableOpacity
                 className="items-center w-[22%]"
                 onPress={() => {
-                  telemetryFeatureUsed("home_explore_gas");
+                  /* telemetry removed */;
                   showCommingSoonToast();
                 }}
               >
@@ -92,7 +88,7 @@ export default function MainScreen() {
               <TouchableOpacity
                 className="items-center w-[22%]"
                 onPress={() => {
-                  telemetryFeatureUsed("home_explore_food");
+                  /* telemetry removed */;
                   showCommingSoonToast();
                 }}
               >
@@ -108,7 +104,7 @@ export default function MainScreen() {
               <TouchableOpacity
                 className="items-center w-[22%]"
                 onPress={() => {
-                  telemetryFeatureUsed("home_explore_coffee");
+                  /* telemetry removed */;
                   showCommingSoonToast();
                 }}
               >
@@ -124,7 +120,7 @@ export default function MainScreen() {
               <TouchableOpacity
                 className="items-center w-[22%]"
                 onPress={() => {
-                  telemetryFeatureUsed("home_explore_parking");
+                  /* telemetry removed */;
                   showCommingSoonToast();
                 }}
               >

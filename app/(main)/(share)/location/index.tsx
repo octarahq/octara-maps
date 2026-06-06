@@ -4,7 +4,6 @@ import Header from "@/components/layout/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { createTranslator } from "@/i18n";
 import { OctaraService, OctaraUser } from "@/services/OctaraService";
-import { telemetryNavigationStart } from "@/services/TelemetryService";
 import { router } from "expo-router";
 import React, { useEffect } from "react";
 import {
@@ -31,7 +30,7 @@ export default function ShareLocationScreen() {
       : never
   >([]);
   useEffect(() => {
-    telemetryNavigationStart("share_location_screen");
+    /* telemetry removed */;
   }, []);
 
   useEffect(() => {

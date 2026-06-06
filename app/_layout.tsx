@@ -29,8 +29,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import UpdateDialog from "@/components/UpdateDialog";
 import { UpdateProvider } from "@/contexts/UpdateContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { initTelemetry } from "@/services/TelemetryInit";
-import { telemetryAppStart } from "@/services/TelemetryService";
+
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -97,11 +96,8 @@ function InnerLayout() {
   useEffect(() => {
     if (!isLoading && hasFinishedOnboarding) {
       try {
-        initTelemetry(privacy);
-        telemetryAppStart({
-          timestamp: Date.now(),
-          user_anonymous: !hasFinishedOnboarding,
-        });
+
+        /* telemetry removed */;
       } catch {}
     }
   }, [isLoading, hasFinishedOnboarding, privacy]);

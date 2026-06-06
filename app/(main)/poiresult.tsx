@@ -12,7 +12,6 @@ import { createTranslator } from "@/i18n";
 import OverpassService, {
   NeerAmenityResponse,
 } from "@/services/OverpassService";
-import { telemetryNavigationStart } from "@/services/TelemetryService";
 import { router } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import {
@@ -32,7 +31,7 @@ export default function POISearchScreen() {
   const hasFetchedRef = useRef(false);
 
   useEffect(() => {
-    telemetryNavigationStart("poi_search_screen");
+    /* telemetry removed */;
   }, []);
 
   useEffect(() => {

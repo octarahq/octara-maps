@@ -14,12 +14,6 @@ import { Colors } from "@/constants/theme";
 import { usePosition } from "@/contexts/PositionContext";
 import { useUser } from "@/contexts/UserContext";
 import { createTranslator } from "@/i18n";
-import {
-  telemetryCrash,
-  telemetryFeatureUsed,
-  telemetryNavigationStart,
-  telemetryNavigationStop,
-} from "@/services/TelemetryService";
 import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -789,13 +783,7 @@ export default function RoutePlanningScreen() {
       .filter((c): c is Coordinate => c !== null);
 
     try {
-      telemetryFeatureUsed("navigation_started", {
-        mode: navigationModeForIntent,
-        waypoint_count: coords.length,
-        has_alternative_routes: Object.values(routeAlternatives).some(
-          (arr) => arr && arr.length > 1,
-        ),
-      });
+      /* telemetry removed */;
 
       if (coords.length > 2) {
         await routeService.getMultiStepRoute(coords, navigationModeForIntent);
@@ -820,10 +808,7 @@ export default function RoutePlanningScreen() {
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      telemetryCrash(errorMsg, "", {
-        mode: navigationModeForIntent,
-        waypoint_count: coords.length,
-      });
+      /* telemetry removed */;
     }
 
     router.push({
@@ -927,9 +912,7 @@ export default function RoutePlanningScreen() {
     const modes: ("car" | "walk" | "bike")[] = ["car", "walk", "bike"];
     setModesCalculating({ car: true, walk: true, bike: true });
 
-    telemetryNavigationStart("route_calculation", {
-      waypoint_count: resolvedCoords.length,
-    });
+    /* telemetry removed */;
 
     let completed = 0;
     let successCount = 0;
@@ -970,9 +953,7 @@ export default function RoutePlanningScreen() {
               },
             }));
           } else {
-            telemetryFeatureUsed("route_calculation_no_alternatives", {
-              mode,
-            });
+            /* telemetry removed */;
             setRouteErrors((prev) => ({
               ...prev,
               [mode as TransportMode]: t("errorNoRoute"),
@@ -981,10 +962,7 @@ export default function RoutePlanningScreen() {
         } catch (error) {
           const errorMsg =
             error instanceof Error ? error.message : String(error);
-          telemetryCrash(errorMsg, "", {
-            mode,
-            waypoint_count: resolvedCoords.length,
-          });
+          /* telemetry removed */;
           setRouteErrors((prev) => ({
             ...prev,
             [mode as TransportMode]: errorMsg,
@@ -992,13 +970,7 @@ export default function RoutePlanningScreen() {
         } finally {
           completed++;
           if (completed === modes.length) {
-            telemetryNavigationStop({
-              success: successCount > 0,
-              modes_tried: modes.length,
-              success_count: successCount,
-              max_distance_m: distances.length ? Math.max(...distances) : 0,
-              max_duration_min: durations.length ? Math.max(...durations) : 0,
-            });
+            /* telemetry removed */;
           }
         }
 

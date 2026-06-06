@@ -1,4 +1,4 @@
-import { telemetryCrash, TelemetryService } from "@/services/TelemetryService";
+
 import React from "react";
 import { Button, ScrollView, Text, View } from "react-native";
 
@@ -24,22 +24,6 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     this.setState({ errorInfo });
-
-    telemetryCrash(error.message, error.stack || "", {
-      component_stack: errorInfo.componentStack,
-      error_name: error.name,
-      timestamp: Date.now(),
-    });
-
-    const payload = TelemetryService.getTelemetryInfo({
-      event: "crash",
-      message: error.message,
-      stacktrace: error.stack,
-    });
-
-    if (payload) {
-      TelemetryService.sendTelemetry(payload).catch(() => {});
-    }
   }
 
   handleReload = () => {

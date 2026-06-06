@@ -7,11 +7,6 @@ import { useUser } from "@/contexts/UserContext";
 import { createTranslator } from "@/i18n";
 import type { Coordinate } from "@/services/RouteService";
 import { useRouteService } from "@/services/RouteService";
-import {
-  telemetryFeatureUsed,
-  telemetryNavigationStart,
-  telemetryNavigationStop,
-} from "@/services/TelemetryService";
 import { cn } from "@/utils/cn";
 import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { addRecentTrip } from "@/utils/recentTrips";
@@ -170,9 +165,7 @@ export default function StandardNavigationScreen() {
   React.useEffect(() => {
     if (!navigationStartTrackedRef.current && mapReady && position) {
       navigationStartTrackedRef.current = true;
-      telemetryNavigationStart("live_navigation", {
-        mode: mode || "car",
-      });
+      /* telemetry removed */;
     }
   }, [mapReady, position, mode]);
 
@@ -431,9 +424,7 @@ export default function StandardNavigationScreen() {
           waitingForRouteRef.current = true;
           lastLeftPositionRef.current = currentPos;
           lastOffRouteRecalcAtRef.current = now;
-          telemetryFeatureUsed("navigation_off_route", {
-            distance_to_route_m: Math.round(distanceToRoute),
-          });
+          /* telemetry removed */;
 
           offRouteRecalcInFlightRef.current = true;
           lastOffRouteRecalcAtRef.current = now;
@@ -732,13 +723,7 @@ export default function StandardNavigationScreen() {
         ? (reliableDistanceForSummary / reliableDurationForSummary) * 3.6
         : Math.max(0, (position.speed ?? 0) * 3.6);
 
-    telemetryNavigationStop({
-      distance_m: Math.round(reliableDistanceForSummary),
-      duration_min: Math.round(reliableDurationForSummary / 60),
-      avg_speed_kmh: Math.round(averageSpeedKmh),
-      mode: requestedMode,
-      success: true,
-    });
+    /* telemetry removed */;
 
     const startLatParam =
       startCoordinate?.latitude ??

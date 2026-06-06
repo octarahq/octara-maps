@@ -1,10 +1,6 @@
 import { HistoryIcon } from "@/assets/icons";
 import Header from "@/components/layout/Header";
 import { createTranslator } from "@/i18n";
-import {
-  telemetryFeatureUsed,
-  telemetryNavigationStart,
-} from "@/services/TelemetryService";
 import { getRecentTrips } from "@/utils/recentTrips";
 import { router } from "expo-router";
 import React, { useEffect } from "react";
@@ -28,7 +24,7 @@ export default function TripHistoryScreen() {
   }, []);
 
   useEffect(() => {
-    telemetryNavigationStart("trip_history_screen");
+    /* telemetry removed */;
   }, []);
 
   return (
@@ -47,9 +43,7 @@ export default function TripHistoryScreen() {
             title={r.name || r.address || ""}
             subtitle={r.address || ""}
             onPress={() => {
-              telemetryFeatureUsed("recent_trip_selected", {
-                trip_index: recentTrips.indexOf(r),
-              });
+              /* telemetry removed */;
               router.push({
                 pathname: "/(main)/place",
                 params: {
