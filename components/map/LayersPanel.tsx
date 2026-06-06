@@ -7,7 +7,6 @@ import * as Haptics from "expo-haptics";
 import React from "react";
 import {
   ScrollView,
-  StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
@@ -59,37 +58,31 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
 
   return (
     <ScrollView
-      style={styles.container}
+      className="flex-1"
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.content}
+      contentContainerClassName="pb-5"
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>{t("layers.title")}</Text>
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+      <View className="flex-row justify-between items-center mb-6 pt-2">
+        <Text className="text-2xl font-bold text-white">{t("layers.title")}</Text>
+        <TouchableOpacity className="w-10 h-10 rounded-full bg-white/10 items-center justify-center" onPress={onClose}>
           <CloseIcon />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>{t("layers.mapType")}</Text>
-        <View style={styles.mapTypesGrid}>
+      <View className="mb-8">
+        <Text className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3px] mb-4">{t("layers.mapType")}</Text>
+        <View className="flex-row justify-between gap-2">
           {MAP_TYPES.map((mapType) => (
             <TouchableOpacity
               key={mapType.id}
-              style={[
-                styles.mapTypeButton,
-                layers.mapType === mapType.id && styles.mapTypeButtonActive,
-              ]}
+              className="flex-1 items-center gap-3"
               onPress={() => {
                 triggerHaptic();
                 layers.setMapType(mapType.id);
               }}
             >
               <View
-                style={[
-                  styles.mapTypeIcon,
-                  layers.mapType === mapType.id && styles.mapTypeIconActive,
-                ]}
+                className={`w-16 h-16 rounded-full border-2 items-center justify-center ${layers.mapType === mapType.id ? "border-white bg-white" : "border-white/20 bg-white/5"}`}
               >
                 <SvgPathIcon
                   d={mapType.path}
@@ -97,10 +90,7 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
                 />
               </View>
               <Text
-                style={[
-                  styles.mapTypeLabel,
-                  layers.mapType === mapType.id && styles.mapTypeLabelActive,
-                ]}
+                className={`text-xs text-center ${layers.mapType === mapType.id ? "font-bold text-white" : "font-medium text-white/60"}`}
               >
                 {t(`layers.mapTypes.${mapType.id}`)}
               </Text>
@@ -109,16 +99,16 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
         </View>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>{t("layers.details")}</Text>
+      <View className="mb-8">
+        <Text className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3px] mb-4">{t("layers.details")}</Text>
 
         {["standard", "terrain"].includes(layers.mapType) && (
-          <View style={styles.detailRow}>
-            <View style={styles.detailLeft}>
-              <View style={styles.detailIcon}>
+          <View className="flex-row justify-between items-center py-3 border-b border-white/5">
+            <View className="flex-row items-center gap-3">
+              <View className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 items-center justify-center">
                 <MoonStarsIcon />
               </View>
-              <Text style={styles.detailLabel}>{t("layers.darkMap")}</Text>
+              <Text className="text-base font-medium text-white">{t("layers.darkMap")}</Text>
             </View>
             <Switch
               value={layers.darkTheme}
@@ -131,16 +121,16 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
                 true: "rgba(255,255,255,0.25)",
               }}
               thumbColor={layers.darkTheme ? "#fff" : "#fff"}
-              style={styles.toggle}
+              style={{ transform: [{ scaleX: 1 }, { scaleY: 1 }] }}
             />
           </View>
         )}
-        <View style={styles.detailRow}>
-          <View style={styles.detailLeft}>
-            <View style={styles.detailIcon}>
+        <View className="flex-row justify-between items-center py-3 border-b border-white/5">
+          <View className="flex-row items-center gap-3">
+            <View className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 items-center justify-center">
               <CarIcon />
             </View>
-            <Text style={styles.detailLabel}>{t("layers.traffic")}</Text>
+            <Text className="text-base font-medium text-white">{t("layers.traffic")}</Text>
           </View>
           <Switch
             value={layers.traffic}
@@ -154,16 +144,16 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
               true: "rgba(255,255,255,0.25)",
             }}
             thumbColor={layers.traffic ? "#fff" : "#fff"}
-            style={styles.toggle}
+            style={{ transform: [{ scaleX: 1 }, { scaleY: 1 }] }}
           />
         </View>
 
-        <View style={styles.detailRow}>
-          <View style={styles.detailLeft}>
-            <View style={styles.detailIcon}>
+        <View className="flex-row justify-between items-center py-3 border-b border-white/5">
+          <View className="flex-row items-center gap-3">
+            <View className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 items-center justify-center">
               <TrainIcon />
             </View>
-            <Text style={styles.detailLabel}>
+            <Text className="text-base font-medium text-white">
               {t("layers.publicTransport")}
             </Text>
           </View>
@@ -179,7 +169,7 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
               true: "rgba(255,255,255,0.25)",
             }}
             thumbColor={layers.publicTransport ? "#fff" : "#fff"}
-            style={styles.toggle}
+            style={{ transform: [{ scaleX: 1 }, { scaleY: 1 }] }}
           />
         </View>
       </View>
@@ -187,138 +177,3 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    paddingBottom: 20,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-    paddingTop: 8,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  section: {
-    marginBottom: 32,
-  },
-  sectionLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: "rgba(255,255,255,0.4)",
-    textTransform: "uppercase",
-    letterSpacing: 0.3,
-    marginBottom: 16,
-  },
-  mapTypesGrid: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  mapTypeButton: {
-    flex: 1,
-    alignItems: "center",
-    gap: 12,
-  },
-  mapTypeButtonActive: {},
-  mapTypeIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.2)",
-    backgroundColor: "rgba(255,255,255,0.05)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  mapTypeIconActive: {
-    borderColor: "#fff",
-    backgroundColor: "#fff",
-  },
-  iconSymbol: {
-    fontSize: 28,
-  },
-  mapTypeLabel: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "rgba(255,255,255,0.6)",
-    textAlign: "center",
-  },
-  mapTypeLabelActive: {
-    fontWeight: "700",
-    color: "#fff",
-  },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.05)",
-  },
-  detailLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  detailIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  detailIconSymbol: {
-    fontSize: 20,
-  },
-  detailLabel: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#fff",
-  },
-  toggle: {
-    transform: [{ scaleX: 1 }, { scaleY: 1 }],
-  },
-  themeToggleRow: {
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
-  },
-  themeButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: "rgba(255,255,255,0.03)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-  },
-  themeButtonActive: {
-    backgroundColor: "#0d7ff2",
-    borderColor: "#0d7ff2",
-  },
-  themeButtonText: {
-    color: "rgba(255,255,255,0.7)",
-    fontWeight: "600",
-  },
-  themeButtonTextActive: {
-    color: "#fff",
-  },
-});
