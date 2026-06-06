@@ -5,7 +5,6 @@ import BottomSheet, {
 import React from "react";
 import {
   FlatList,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -110,21 +109,21 @@ function BottomSelectInner<T = string>(
 
     return (
       <TouchableOpacity
-        style={styles.item}
+        className="flex-row items-center justify-between py-3"
         onPress={() => {
           if (mode === "multiple") toggleMultiple(item.value);
           else selectSingle(item.value);
         }}
       >
-        <View style={styles.labelWrap}>
-          <Text style={styles.itemLabel}>{item.label}</Text>
+        <View className="flex-1">
+          <Text className="text-white/90 text-[15px]">{item.label}</Text>
         </View>
 
-        <View style={styles.control}>
+        <View className="w-9 items-center justify-center">
           {mode === "multiple" ? (
-            <View style={[styles.checkbox, isSelected && styles.checkboxOn]} />
+            <View className={`w-[18px] h-[18px] rounded border ${isSelected ? "bg-[#1EA7FF] border-[#1EA7FF]" : "bg-transparent border-white/30"}`} />
           ) : (
-            <View style={[styles.radio, isSelected && styles.radioOn]} />
+            <View className={`w-[18px] h-[18px] rounded-full border items-center justify-center ${isSelected ? "border-[#1EA7FF]" : "border-white/30"}`} />
           )}
         </View>
       </TouchableOpacity>
@@ -141,14 +140,14 @@ function BottomSelectInner<T = string>(
       backgroundStyle={{ backgroundColor }}
       handleIndicatorStyle={{ backgroundColor: "rgba(255,255,255,0.3)" }}
     >
-      <BottomSheetView style={styles.sheetContent}>
-        {title ? <Text style={styles.title}>{title}</Text> : null}
+      <BottomSheetView className="p-4">
+        {title ? <Text className="text-white text-base font-bold mb-3">{title}</Text> : null}
 
         <FlatList
           data={items}
           keyExtractor={(i) => i.key}
           renderItem={renderItem}
-          ItemSeparatorComponent={() => <View style={styles.sep} />}
+          ItemSeparatorComponent={() => <View className="h-[1px] bg-white/[0.03]" />}
           contentContainerStyle={{ paddingBottom: 24 }}
         />
       </BottomSheetView>
@@ -159,40 +158,5 @@ function BottomSelectInner<T = string>(
 const BottomSelect = React.forwardRef(BottomSelectInner);
 BottomSelect.displayName = "BottomSelect";
 
-const styles = StyleSheet.create({
-  sheetContent: { padding: 16 },
-  title: { color: "#fff", fontSize: 16, fontWeight: "700", marginBottom: 12 },
-  item: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-  },
-  itemLabel: { color: "rgba(255,255,255,0.9)", fontSize: 15 },
-  labelWrap: { flex: 1 },
-  control: { width: 36, alignItems: "center", justifyContent: "center" },
-  checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
-    backgroundColor: "transparent",
-  },
-  checkboxOn: { backgroundColor: "#1EA7FF", borderColor: "#1EA7FF" },
-  radio: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  radioOn: {
-    borderColor: "#1EA7FF",
-  },
-  sep: { height: 1, backgroundColor: "rgba(255,255,255,0.03)" },
-});
 
 export default BottomSelect;
