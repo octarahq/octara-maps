@@ -90,14 +90,13 @@ function InnerLayout() {
   const [showSplash, setShowSplash] = useState(true);
   const [navigationDone, setNavigationDone] = useState(false);
   const isMainRoute = pathname.startsWith("/(main)");
-  const { privacy } = useUser();
 
   useEffect(() => {
     if (!isLoading && hasFinishedOnboarding) {
       try {
       } catch {}
     }
-  }, [isLoading, hasFinishedOnboarding, privacy]);
+  }, [isLoading, hasFinishedOnboarding]);
 
   useEffect(() => {
     if (Platform.OS === "web" && "serviceWorker" in navigator) {
@@ -141,7 +140,6 @@ function InnerLayout() {
       "/step2",
       "/step3",
       "/step4",
-      "/step5",
       "/redirect",
     ].some((step) => pathname.includes(step));
 

@@ -3,11 +3,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Localization from "expo-localization";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-export type PrivacyLevel = "total" | "necessary" | "limited" | "none";
-
 export type UserProfile = {
   name: string;
-  privacy: PrivacyLevel;
   language: string;
   hasFinishedOnboarding: boolean;
   settings: {
@@ -39,7 +36,6 @@ export type SavedPlaces = {
 
 type ContextType = UserProfile & {
   setName: (name: string) => void;
-  setPrivacy: (lvl: PrivacyLevel) => void;
   setLanguage: (lang: string) => void;
   setHasFinishedOnboarding: (val: boolean) => void;
   isLoading: boolean;
@@ -63,7 +59,6 @@ function loadProfile(): Promise<UserProfile & { saved?: SavedPlaces }> {
     }
     return {
       name: "",
-      privacy: "total",
       language: "fr",
       hasFinishedOnboarding: false,
       settings: {
@@ -82,7 +77,6 @@ function saveProfile(profile: UserProfile & { saved?: SavedPlaces }) {
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile>({
     name: "",
-    privacy: "total",
     language: Localization.getLocales()[0]?.languageCode || "en",
     hasFinishedOnboarding: false,
     settings: {
@@ -106,7 +100,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       await setI18nLanguage(p.language);
       setProfile({
         name: p.name || "",
-        privacy: p.privacy || "total",
         language:
           p.language || Localization.getLocales()[0]?.languageCode || "en",
         hasFinishedOnboarding: !!p.hasFinishedOnboarding,
@@ -140,14 +133,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const setName = React.useCallback((name: string) => {
     setProfile((p) => {
       const updated = { ...p, name };
-      saveProfile(updated);
-      return updated;
-    });
-  }, []);
-
-  const setPrivacy = React.useCallback((lvl: PrivacyLevel) => {
-    setProfile((p) => {
-      const updated = { ...p, privacy: lvl };
       saveProfile(updated);
       return updated;
     });
@@ -225,7 +210,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         addOtherPlace,
         removeOtherPlace,
         setName,
-        setPrivacy,
         setLanguage,
         setHasFinishedOnboarding,
         setSettings,

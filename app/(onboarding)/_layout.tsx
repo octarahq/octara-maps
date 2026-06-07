@@ -10,7 +10,7 @@ import { usePermissions } from "../../contexts/PermissionsContext";
 import OnboardingButton from "./_components/button";
 import PageIndicators from "./_components/page-indicators";
 
-const ROUTES = ["step1", "step2", "step3", "step4", "step5"] as const;
+const ROUTES = ["step1", "step2", "step3", "step4"] as const;
 const STORAGE_KEY = "hasOnboarded";
 
 function InnerLayout() {
