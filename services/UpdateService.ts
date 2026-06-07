@@ -1,12 +1,17 @@
 import { createTranslator } from "@/i18n";
 import * as Application from "expo-application";
 import Constants from "expo-constants";
-import { cacheDirectory, documentDirectory, createDownloadResumable, getContentUriAsync } from "expo-file-system/legacy";
+import {
+  cacheDirectory,
+  createDownloadResumable,
+  documentDirectory,
+  getContentUriAsync,
+} from "expo-file-system/legacy";
 import * as IntentLauncher from "expo-intent-launcher";
 import { Platform, ToastAndroid } from "react-native";
 
 const GITHUB_API_URL =
-  "https://api.github.com/repos/octarahq/lmc-maps/releases/latest";
+  "https://api.github.com/repos/octarahq/octara-maps/releases/latest";
 
 const FLAG_ACTIVITY_NEW_TASK = 0x10000000;
 const FLAG_GRANT_READ_URI_PERMISSION = 0x00000001;
@@ -136,8 +141,7 @@ export const downloadAndInstallAPK = async (
       ? filenameWithoutQuery
       : `${filenameWithoutQuery}.apk`;
 
-    let cacheDir =
-      cacheDirectory || documentDirectory || "";
+    let cacheDir = cacheDirectory || documentDirectory || "";
 
     if (!cacheDir || cacheDir === "undefined" || cacheDir === "null") {
       cacheDir = documentDirectory || "";
