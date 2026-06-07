@@ -188,15 +188,15 @@ function MapSnapshotInner({
   }, []);
 
   return (
-    <View
-      className={cn("overflow-hidden rounded-2xl", className)}
-      pointerEvents={interactive ? "auto" : "none"}
-    >
+    <View className={cn("overflow-hidden rounded-2xl relative", className)} style={[style, { opacity: 0.99 }]}>
       <ShadcnMap
         ref={ref}
         initialZoom={pins && pins.length > 0 ? 2 : zoom}
         onMapMessage={handleMapMsg}
       />
+      {!interactive && (
+        <View className="absolute inset-0 z-50 bg-transparent" />
+      )}
     </View>
   );
 }
