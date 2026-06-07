@@ -5,6 +5,8 @@ type PlaceDetails = {
   phone?: string | null;
   website?: string | null;
   opening_hours?: string | null;
+  cuisine?: string | null;
+  email?: string | null;
   photos?: { url: string }[];
 };
 
@@ -43,6 +45,8 @@ export default class FreePlaceDetailsService {
         phone: place.extratags?.phone || null,
         website: place.extratags?.website || null,
         opening_hours: place.extratags?.opening_hours || null,
+        cuisine: place.extratags?.cuisine || null,
+        email: place.extratags?.email || null,
         photos: [],
       };
 
@@ -75,7 +79,12 @@ export default class FreePlaceDetailsService {
         `;
         const overpassRes = await fetch(OVERPASS_BASE, {
           method: "POST",
-          body: overpassQuery,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "application/json",
+            "User-Agent": "OctaraMaps/v3",
+          },
+          body: "data=" + encodeURIComponent(overpassQuery),
         });
         const overpassData = await overpassRes.json();
         const node = overpassData.elements?.[0];
@@ -84,6 +93,8 @@ export default class FreePlaceDetailsService {
           details.website = details.website || node.tags.website || null;
           details.opening_hours =
             details.opening_hours || node.tags.opening_hours || null;
+          details.cuisine = details.cuisine || node.tags.cuisine || null;
+          details.email = details.email || node.tags.email || null;
         }
       } catch {}
 
@@ -98,7 +109,7 @@ export default class FreePlaceDetailsService {
     osmId: number,
   ): Promise<PlaceDetails | null> {
     try {
-      const typeMap = { N: "node", W: "way", R: "relation" };
+      const typeMap: Record<string, string> = { N: "node", W: "way", R: "relation", node: "node", way: "way", relation: "relation" };
       const overpassQuery = `
       [out:json][timeout:25];
       ${typeMap[osmType] || osmType.toLowerCase()}(${osmId});
@@ -106,7 +117,12 @@ export default class FreePlaceDetailsService {
     `;
       const overpassRes = await fetch(OVERPASS_BASE, {
         method: "POST",
-        body: overpassQuery,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept": "application/json",
+          "User-Agent": "OctaraMaps/v3",
+        },
+        body: "data=" + encodeURIComponent(overpassQuery),
       });
 
       if (!overpassRes.ok) {
@@ -125,6 +141,8 @@ export default class FreePlaceDetailsService {
         phone: element.tags?.phone || null,
         website: element.tags?.website || null,
         opening_hours: element.tags?.opening_hours || null,
+        cuisine: element.tags?.cuisine || null,
+        email: element.tags?.email || null,
         photos: [],
       };
 

@@ -18,7 +18,7 @@ export default class OverpassService {
     }
 
     const query = `[out:json];(node["amenity"~"^(${amenityType})$"](around:${radius},${lat},${lon});way["amenity"~"^(${amenityType})$"](around:${radius},${lat},${lon});relation["amenity"~"^(${amenityType})$"](around:${radius},${lat},${lon}););out center;`;
-    const url = "https://overpass.osm.ch/api/interpreter";
+    const url = "https://overpass-api.de/api/interpreter";
     console.log(url, ":", query);
 
     const response = await fetch(url, {
