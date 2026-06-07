@@ -2,7 +2,7 @@ import { HapticTouchable as TouchableOpacity } from "@/components/HapticTouchabl
 import { Colors } from "@/constants/theme";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
-import { Animated, Easing, Text, View } from "react-native";
+import { Animated, Easing, Text, View, ScrollView } from "react-native";
 
 export type WarningButton = {
   label: string;
@@ -83,8 +83,10 @@ export function WarningMessage({
               />
             </View>
             <Text className="text-[24px] font-bold text-center mb-2" style={{ color: Colors.dark.text }}>{title}</Text>
-            <View className="items-center gap-1 py-3">
-              <Text className="text-white/70 text-base text-center">{description}</Text>
+            <View className="items-center py-3 w-full" style={{ maxHeight: 250 }}>
+              <ScrollView showsVerticalScrollIndicator={true} className="w-full">
+                <Text className="text-white/70 text-base text-center">{description}</Text>
+              </ScrollView>
             </View>
             {buttons.length > 0 && (
               <View className="w-full flex-col gap-3 py-4">

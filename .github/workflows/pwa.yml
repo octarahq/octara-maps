@@ -2,8 +2,7 @@ name: Deploy PWA
 
 on:
   release:
-    branches:
-      - main
+    types: [published]
 
 jobs:
   deploy-pwa:

@@ -1,3 +1,4 @@
+import "react-native-reanimated";
 import { AppLogoIcon } from "@/assets/icons";
 import { Colors } from "@/constants/theme";
 import {
@@ -16,7 +17,6 @@ import * as SystemUI from "expo-system-ui";
 import { useEffect, useState } from "react";
 import { StatusBar as NativeStatusBar, Platform, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import "react-native-reanimated";
 import "../global.css";
 
 import { AuthProvider } from "../contexts/AuthContext";

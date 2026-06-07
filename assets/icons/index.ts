@@ -1,3 +1,4 @@
+import "./svgInterop";
 export { default as AddPlaceIcon } from "./AddPlaceIcon";
 export { default as AddressIcon } from "./AddressIcon";
 export { default as AmenityIcon } from "./AmenityIcon";
