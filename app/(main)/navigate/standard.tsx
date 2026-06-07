@@ -19,6 +19,7 @@ import BottomSheet, {
 import * as Localization from "expo-localization";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Speech from "expo-speech";
+import Constants from "expo-constants";
 import React from "react";
 import {
     Animated,
@@ -35,7 +36,7 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 
 type NavigationMode = "car" | "walk" | "bike";
 
-const OFF_ROUTE_RECALC_DISTANCE_M = 10;
+const OFF_ROUTE_RECALC_DISTANCE_M = 30;
 const FIRST_ON_ROUTE_TOLERANCE_M = 20;
 const OFF_ROUTE_RECALC_COOLDOWN_MS = 2000;
 const OFF_ROUTE_CHECK_INTERVAL_MS = 700;
@@ -377,6 +378,15 @@ export default function StandardNavigationScreen() {
         return;
       }
 
+      if (
+        currentPos.speed !== undefined &&
+        currentPos.speed !== null &&
+        currentPos.speed < 1.0 &&
+        distanceToRoute < 50
+      ) {
+        return;
+      }
+
       if (!hasBeenOnRouteRef.current) {
         if (distanceToRoute <= FIRST_ON_ROUTE_TOLERANCE_M) {
           hasBeenOnRouteRef.current = true;
@@ -680,8 +690,26 @@ export default function StandardNavigationScreen() {
     return approachingStep.duration * ratio;
   }, [approachingStep, distanceToNextManeuver]);
 
-  const totalDuration = navigationData?.totalDuration ?? 0;
-  const totalDistance = navigationData?.totalDistance ?? 0;
+  const remainingDistance = React.useMemo(() => {
+    if (!navigationData?.steps) return navigationData?.totalDistance ?? 0;
+    let dist = Math.max(0, distanceToNextManeuver);
+    for (let i = approachingStepIndex + 1; i < navigationData.steps.length; i++) {
+      dist += navigationData.steps[i].distance || 0;
+    }
+    return dist;
+  }, [navigationData?.steps, approachingStepIndex, distanceToNextManeuver]);
+
+  const remainingDuration = React.useMemo(() => {
+    if (!navigationData?.steps) return navigationData?.totalDuration ?? 0;
+    let dur = Math.max(0, timeToNextManeuver);
+    for (let i = approachingStepIndex + 1; i < navigationData.steps.length; i++) {
+      dur += navigationData.steps[i].duration || 0;
+    }
+    return dur;
+  }, [navigationData?.steps, approachingStepIndex, timeToNextManeuver]);
+
+  const totalDuration = remainingDuration;
+  const totalDistance = remainingDistance;
   const reliableDurationForSummary = React.useMemo(() => {
     const navDuration = Math.max(0, Math.round(totalDuration));
     const tripDuration = Math.max(0, Math.round(tripDurationSeconds));
@@ -1292,8 +1320,12 @@ export default function StandardNavigationScreen() {
             </Defs>
             <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
           </Svg>
-          <View className="absolute top-0 left-0 right-0">
-            <View className="mx-4 mt-12 rounded-xl bg-[#12202a]/80 p-4 flex-row items-center">
+          <View
+            className="absolute top-0 left-0 right-0 w-full"
+            pointerEvents="box-none"
+            style={{ paddingTop: Math.max(insets.top, Constants.statusBarHeight) + 16 }}
+          >
+            <View className="mx-4 rounded-xl bg-[#12202a]/80 p-4 flex-row items-center">
               <View className="w-12 h-12 mr-4 items-center justify-center">
                 {approachingStep &&
                 (approachingStep.maneuver?.type === "roundabout" ||
@@ -1335,9 +1367,14 @@ export default function StandardNavigationScreen() {
       </View>
 
       {isCarMode && speedLimit && (
-        <Animated.View className="absolute left-4 items-center justify-center rounded-full bg-[#12202a]/80">
-          <View className="w-16 h-16 items-center justify-center rounded-full bg-[#0d7ff2]">
-            <Text className="text-white font-bold">{speedLimit}</Text>
+        <Animated.View
+          className="absolute right-4 z-[100]"
+          style={{ bottom: speedPanelBottom }}
+        >
+          <View className="w-[60px] h-[60px] rounded-full bg-white border-[6px] border-[#e01e1e] items-center justify-center shadow-md shadow-black/30 elevation-4">
+            <Text className="text-black text-[24px] font-bold">
+              {speedLimit}
+            </Text>
           </View>
         </Animated.View>
       )}
@@ -1366,21 +1403,21 @@ export default function StandardNavigationScreen() {
         style={{ borderRadius: 30, overflow: "hidden" }}
         handleIndicatorStyle={{ backgroundColor: "rgba(255,255,255,0.3)" }}
       >
-        <BottomSheetView className="flex-1 px-4">
-          <View className="flex-row items-center justify-between">
+          <BottomSheetView className="flex-1 z-20 px-5 pt-6 pb-[env(safe-area-inset-bottom)+16px]">
+          <View className="flex-row justify-between items-end mb-4">
             <View>
-              <Text className="text-white text-lg font-medium">
+              <Text className="text-white text-[30px] font-bold">
                 {routeService.isCalculating
                   ? "…"
                   : formatDuration(totalDuration)}
               </Text>
-              <Text className="text-gray-400" numberOfLines={1}>
+              <Text className="text-[#90adcb] text-[13px] mt-0.5" numberOfLines={1}>
                 {formatDistance(totalDistance)}
                 {etaLabel ? ` • ${t("eta", { time: etaLabel })}` : ""}
               </Text>
             </View>
             <TouchableOpacity
-              className="flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2"
+              className="flex-row items-center justify-center gap-2 rounded-xl py-2.5 px-4 bg-[#0d7ff2]/10 border border-[#0d7ff2]/20"
               onPress={() => {
                 showCommingSoonToast();
               }}
@@ -1391,62 +1428,63 @@ export default function StandardNavigationScreen() {
                 size={18}
                 color={Colors.dark.primary}
               />
-              <Text className="text-white"> {t("addStop")}</Text>
+              <Text className="text-[#0d7ff2] font-bold text-[14px]">{t("addStop")}</Text>
             </TouchableOpacity>
           </View>
-          <View className="flex-row items-center justify-content">
+          
+          <View className="flex-row gap-3 mt-1.5">
             {!following ? (
               <TouchableOpacity
-                className="flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2"
+                className="flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl py-3.5 bg-[#0d7ff2]"
                 onPress={() => setFollowing(true)}
                 activeOpacity={0.8}
               >
                 <MaterialIcons name="my-location" size={18} color="#fff" />
-                <Text className="text-white">{t("recenter")}</Text>
+                <Text className="text-white font-bold text-[14px]">{t("recenter")}</Text>
               </TouchableOpacity>
             ) : (
               <>
                 <TouchableOpacity
-                  className="flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2"
+                  className="flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl py-3.5 border border-white/20 bg-white/5"
                   onPress={handleRoutes}
                   activeOpacity={0.8}
                 >
                   <MaterialIcons name="alt-route" size={18} color="#fff" />
-                  <Text className="text-white">{t("route")}</Text>
+                  <Text className="text-white font-bold text-[14px]">{t("route")}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2"
+                  className="flex-[1.5] flex-row items-center justify-center gap-1.5 rounded-2xl py-3.5 bg-[#0d7ff2]"
                   onPress={handleStopTrip}
                   activeOpacity={0.8}
                 >
                   <MaterialIcons name="stop" size={18} color="#fff" />
-                  <Text className="text-white">{t("stopTrip")}</Text>
+                  <Text className="text-white font-bold text-[14px]">{t("stopTrip")}</Text>
                 </TouchableOpacity>
               </>
             )}
           </View>
 
-          <View className="h-px bg-gray-600" />
+          <View className="h-[1px] bg-white/5 my-3 rounded-sm" />
 
-          <View className="flex-1 py-4">
+          <View className="flex-1">
             <View className="flex-row items-center justify-between mb-3">
-              <Text className="text-white font-medium">{t("mapStyle")}</Text>
+              <Text className="text-white text-[15px] font-bold">{t("mapStyle")}</Text>
               <MaterialIcons name="layers" size={20} color="#8a8a8a" />
             </View>
 
-            <View className="flex-row items-center justify-start mb-4">
+            <View className="flex-row justify-between bg-[#12202a] p-1.5 rounded-xl border border-white/5">
               <TouchableOpacity
                 className={cn(
-                  "flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2",
-                  baseLayer === "standard" && "bg-[#0d7ff2]",
+                  "flex-1 mx-1 py-2.5 rounded-lg items-center bg-transparent",
+                  baseLayer === "standard" && "bg-white/5"
                 )}
                 onPress={() => layers.setMapType("standard")}
               >
                 <Text
                   className={cn(
-                    "text-white",
-                    baseLayer === "standard" && "text-white",
+                    "text-[#9aa4b2] font-bold text-[13px]",
+                    baseLayer === "standard" && "text-white"
                   )}
                 >
                   {t("layerStandard")}
@@ -1455,15 +1493,15 @@ export default function StandardNavigationScreen() {
 
               <TouchableOpacity
                 className={cn(
-                  "flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2 ml-3",
-                  baseLayer === "satellite" && "bg-[#0d7ff2]",
+                  "flex-1 mx-1 py-2.5 rounded-lg items-center bg-transparent",
+                  baseLayer === "satellite" && "bg-white/5"
                 )}
                 onPress={() => layers.setMapType("satellite")}
               >
                 <Text
                   className={cn(
-                    "text-white",
-                    baseLayer === "satellite" && "text-white",
+                    "text-[#9aa4b2] font-bold text-[13px]",
+                    baseLayer === "satellite" && "text-white"
                   )}
                 >
                   {t("layerSatellite")}
@@ -1472,15 +1510,15 @@ export default function StandardNavigationScreen() {
 
               <TouchableOpacity
                 className={cn(
-                  "flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2 ml-3",
-                  baseLayer === "terrain" && "bg-[#0d7ff2]",
+                  "flex-1 mx-1 py-2.5 rounded-lg items-center bg-transparent",
+                  baseLayer === "terrain" && "bg-white/5"
                 )}
                 onPress={() => layers.setMapType("terrain")}
               >
                 <Text
                   className={cn(
-                    "text-white",
-                    baseLayer === "terrain" && "text-white",
+                    "text-[#9aa4b2] font-bold text-[13px]",
+                    baseLayer === "terrain" && "text-white"
                   )}
                 >
                   {t("layerTerrain")}
@@ -1489,8 +1527,8 @@ export default function StandardNavigationScreen() {
             </View>
 
             {baseLayer !== "satellite" && (
-              <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-white">{t("darkMode")}</Text>
+              <View className="flex-row items-center justify-between mt-2.5">
+                <Text className="text-[#c1c8cf] text-[13px] font-semibold">{t("darkMode")}</Text>
                 <Switch
                   value={themeMode === "dark"}
                   onValueChange={() => layers.setDarkTheme(!layers.darkTheme)}
@@ -1500,9 +1538,9 @@ export default function StandardNavigationScreen() {
               </View>
             )}
 
-            <View className="flex-1">
+            <View className="mt-4">
               <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-white">{t("guideVolume")}</Text>
+                <Text className="text-white text-[15px] font-bold">{t("guideVolume")}</Text>
                 <TouchableOpacity
                   onPress={async () => {
                     await Speech.speak(t("guideVolumeSample"), {
@@ -1514,18 +1552,18 @@ export default function StandardNavigationScreen() {
                 </TouchableOpacity>
               </View>
 
-              <View className="flex-row items-center justify-between">
+              <View className="flex-row justify-between bg-[#12202a] p-1.5 rounded-xl border border-white/5">
                 <TouchableOpacity
                   className={cn(
-                    "flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2",
-                    guideMode === "off" && "bg-[#0d7ff2]",
+                    "flex-1 mx-1 py-2.5 rounded-lg items-center bg-transparent",
+                    guideMode === "off" && "bg-white/5"
                   )}
                   onPress={() => setGuideMode("off")}
                 >
                   <Text
                     className={cn(
-                      "text-white",
-                      guideMode === "off" && "text-white",
+                      "text-[#9aa4b2] font-bold text-[13px]",
+                      guideMode === "off" && "text-white"
                     )}
                   >
                     {t("volumeMute")}
@@ -1534,8 +1572,8 @@ export default function StandardNavigationScreen() {
 
                 <TouchableOpacity
                   className={cn(
-                    "flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2 ml-3",
-                    guideMode === "alert" && "bg-[#0d7ff2]",
+                    "flex-1 mx-1 py-2.5 rounded-lg items-center bg-transparent",
+                    guideMode === "alert" && "bg-white/5"
                   )}
                   onPress={() => {
                     setGuideMode("alert");
@@ -1543,8 +1581,8 @@ export default function StandardNavigationScreen() {
                 >
                   <Text
                     className={cn(
-                      "text-white",
-                      guideMode === "alert" && "text-white",
+                      "text-[#9aa4b2] font-bold text-[13px]",
+                      guideMode === "alert" && "text-white"
                     )}
                   >
                     {t("volumeAlerts")}
@@ -1553,8 +1591,8 @@ export default function StandardNavigationScreen() {
 
                 <TouchableOpacity
                   className={cn(
-                    "flex-row items-center rounded-lg bg-[#0d7ff2] px-3 py-2 ml-3",
-                    guideMode === "all" && "bg-[#0d7ff2]",
+                    "flex-1 mx-1 py-2.5 rounded-lg items-center bg-transparent",
+                    guideMode === "all" && "bg-[#0d7ff2]"
                   )}
                   onPress={() => {
                     setGuideMode("all");
@@ -1562,8 +1600,8 @@ export default function StandardNavigationScreen() {
                 >
                   <Text
                     className={cn(
-                      "text-white",
-                      guideMode === "all" && "text-white",
+                      "text-[#9aa4b2] font-bold text-[13px]",
+                      guideMode === "all" && "text-white"
                     )}
                   >
                     {t("volumeFull")}
