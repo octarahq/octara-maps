@@ -21,7 +21,11 @@
         "backgroundColor": "#101922",
         "display": "standalone",
         "startUrl": "/",
-        "icon": "./assets/images/icon.png"
+        "icon": "./assets/images/icon.png",
+        "meta": {
+          "appleMobileWebAppCapable": "yes",
+          "appleMobileWebAppStatusBarStyle": "default"
+        }
       }
     },
     "android": {
