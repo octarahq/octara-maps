@@ -40,6 +40,8 @@ const WebWebView = React.forwardRef<any, WebViewProps>(
   },
 );
 
+WebWebView.displayName = "WebWebView";
+
 type Props = {
   initialZoom?: number;
   onMapMessage?: (msg: any) => void;

@@ -23,7 +23,7 @@ jobs:
 
       - name: Build Expo Web PWA
         run: |
-          npx expo export:web
+          npx expo export --platform web
           cp vercel.json dist/
 
       - name: Deploy to Vercel
