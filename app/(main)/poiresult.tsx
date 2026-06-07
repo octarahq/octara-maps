@@ -1,25 +1,25 @@
 import {
-    AddressIcon,
-    CommercialIcon,
-    FoodIcon,
-    GasIcon,
-    HealthIcon,
-    ParkingIcon,
+  AddressIcon,
+  CommercialIcon,
+  FoodIcon,
+  GasIcon,
+  HealthIcon,
+  ParkingIcon,
 } from "@/assets/icons";
 import Header from "@/components/layout/Header";
 import { usePosition } from "@/contexts/PositionContext";
 import { createTranslator } from "@/i18n";
 import OverpassService, {
-    NeerAmenityResponse,
+  NeerAmenityResponse,
 } from "@/services/OverpassService";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import {
-    ActivityIndicator,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function POISearchScreen() {
@@ -44,7 +44,7 @@ export default function POISearchScreen() {
       OverpassService.fetchNeerAmenity(
         position.latitude,
         position.longitude,
-        1000,
+        2000,
         amenity,
       )
         .then((res) => {
@@ -60,7 +60,7 @@ export default function POISearchScreen() {
 
   if (results === null) {
     return (
-      <View className="flex-1 pt-6 bg-[#101922]">
+      <View className="flex-1 bg-[#101922]">
         <Header title={title || t("title")} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#e3e3e3" />
@@ -73,7 +73,7 @@ export default function POISearchScreen() {
   }
 
   return (
-    <View className="flex-1 pt-6 bg-[#101922]">
+    <View className="flex-1 bg-[#101922]">
       <Header title={title || t("title")} />
 
       <ScrollView contentContainerClassName="p-4 pb-10">
@@ -150,7 +150,6 @@ export default function POISearchScreen() {
                 <View className="w-12 h-12 rounded-full bg-[#2e3a4c] justify-center items-center mr-4">
                   {PlaceIcon}
                 </View>
-                {/* On limite le texte à sa colonne pour éviter qu'il pousse l'écran */}
                 <View className="flex-1">
                   <Text
                     className="text-[#e3e3e3] text-base font-bold"

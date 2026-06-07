@@ -17,6 +17,7 @@ import { snapPointsPercent } from "@/utils/snapPoints";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
+import Constants from "expo-constants";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     ActivityIndicator,
@@ -48,7 +49,7 @@ export default function PlaceDetailScreen() {
     useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const topInset = Math.max(insets.top - 10, 4);
+  const topInset = Math.max(insets.top, Constants.statusBarHeight) + 16;
   const { t } = createTranslator("place");
   const [loading, setLoading] = useState(true);
   const [details, setDetails] = useState<PlaceDetails | null>(null);
@@ -105,20 +106,7 @@ export default function PlaceDetailScreen() {
 
   const [ohUtils, setOhUtils] = useState<any>(null);
   const [ohStatus, setOhStatus] = useState<any>(null);
-  const sheetRef = useRef<BottomSheet>(null);
-  const { height: screenHeight } = useWindowDimensions();
-  const snapPoints = useMemo(() => {
-    return snapPointsPercent([400], screenHeight);
-  }, [screenHeight]);
 
-  useEffect(() => {
-    if (!sheetRef.current) return;
-    if (hoursModalVisible) {
-      sheetRef.current.snapToIndex(0);
-    } else {
-      sheetRef.current.close();
-    }
-  }, [hoursModalVisible]);
 
   useEffect(() => {
     let mounted = true;
@@ -169,7 +157,6 @@ export default function PlaceDetailScreen() {
   return (
     <View className="flex-1 bg-[#101922]">
       <StatusBar
-        hidden
         translucent
         backgroundColor="transparent"
         barStyle="light-content"
@@ -216,6 +203,7 @@ export default function PlaceDetailScreen() {
           </Text>
           <Text className="text-[#90adcb] text-[16px] mt-1">
             {categoryLabel}
+            {details?.cuisine ? ` • ${details.cuisine.charAt(0).toUpperCase() + details.cuisine.slice(1).replace(/_/g, " ")}` : ""}
           </Text>
 
           <View className="flex-row mt-6 gap-3">
@@ -285,23 +273,16 @@ export default function PlaceDetailScreen() {
                   </View>
                 </View>
 
-                {lat && lng ? (
-                  <View className="mt-3 mx-4 h-[120px] rounded-[12px] overflow-hidden">
-                    <MapSnapshot
-                      lat={parseFloat(lat as string)}
-                      lng={parseFloat(lng as string)}
-                    />
-                  </View>
-                ) : null}
+
               </View>
             )}
 
             {details?.opening_hours && (
-              <>
+              <View>
                 <TouchableOpacity
                   className="flex-row gap-4"
                   onPress={() => {
-                    setHoursModalVisible(true);
+                    setHoursModalVisible(!hoursModalVisible);
                   }}
                 >
                   <View className="w-10 h-10 rounded-[8px] bg-primary/10 items-center justify-center">
@@ -371,8 +352,76 @@ export default function PlaceDetailScreen() {
                     </View>
                   </View>
                 </TouchableOpacity>
-              </>
+
+                {hoursModalVisible && ohStatus && (
+                  <View className="mt-3 ml-14 bg-[#223649] p-3 rounded-[8px]">
+                    {ohUtils?.formatDayLines(ohStatus.rules).map((l: string) => (
+                      <Text key={l} className="text-white text-[14px] mb-1">
+                        {l}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+              </View>
             )}
+
+            {details?.phone && (
+              <TouchableOpacity className="flex-row gap-4" onPress={() => Linking.openURL(`tel:${details.phone}`)}>
+                <View className="w-10 h-10 rounded-[8px] bg-primary/10 items-center justify-center">
+                  <CallIcon />
+                </View>
+                <View className="flex-1 justify-center">
+                  <Text className="text-[#90adcb] text-[12px] font-semibold uppercase tracking-widest">
+                    {t("phone") || "Téléphone"}
+                  </Text>
+                  <Text className="text-white text-[16px] font-medium mt-[2px]">
+                    {details.phone}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
+
+            {details?.website && (
+              <TouchableOpacity className="flex-row gap-4" onPress={() => WebBrowser.openBrowserAsync(details.website!)}>
+                <View className="w-10 h-10 rounded-[8px] bg-primary/10 items-center justify-center">
+                  <WebIcon />
+                </View>
+                <View className="flex-1 justify-center">
+                  <Text className="text-[#90adcb] text-[12px] font-semibold uppercase tracking-widest">
+                    {t("website") || "Site Web"}
+                  </Text>
+                  <Text className="text-white text-[16px] font-medium mt-[2px]" numberOfLines={1}>
+                    {details.website}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
+
+            {details?.email && (
+              <View className="flex-row gap-4">
+                <View className="w-10 h-10 rounded-[8px] bg-primary/10 items-center justify-center">
+                  <Text className="text-[#0d7ff2] font-bold text-[18px]">@</Text>
+                </View>
+                <View className="flex-1 justify-center">
+                  <Text className="text-[#90adcb] text-[12px] font-semibold uppercase tracking-widest">
+                    {t("email") || "Email"}
+                  </Text>
+                  <Text className="text-white text-[16px] font-medium mt-[2px]" numberOfLines={1}>
+                    {details.email}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            <View className="mt-6 mb-4 bg-[#17232f] rounded-[14px] overflow-hidden border border-[#263445]">
+              <MapSnapshot
+                lat={parseFloat(lat as string)}
+                lng={parseFloat(lng as string)}
+                pins={[{ lat: parseFloat(lat as string), lng: parseFloat(lng as string), type: "destination" }]}
+                className="w-full h-[220px]"
+                interactive={true}
+              />
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -387,51 +436,7 @@ export default function PlaceDetailScreen() {
         initialLng={(lng as string) || ""}
       />
 
-      <BottomSheet
-        ref={sheetRef}
-        index={-1}
-        snapPoints={snapPoints}
-        style={{ zIndex: 9999, elevation: 9999 }}
-        containerStyle={{ zIndex: 9999 }}
-        enablePanDownToClose
-        backgroundStyle={{
-          backgroundColor: "rgba(16,35,52,1)",
-          borderTopWidth: 1,
-          borderTopColor: "rgba(255,255,255,0.1)",
-        }}
-        handleIndicatorStyle={{
-          backgroundColor: "rgba(255,255,255,0.3)",
-        }}
-        onChange={(idx) => {
-          if (idx === -1) {
-            setHoursModalVisible(false);
-          }
-        }}
-      >
-        <BottomSheetView className="flex-1 w-full rounded-[16px] p-4">
-          <Text className="text-white text-[32px] font-extrabold tracking-[-0.5px]">
-            {t("hours")}
-          </Text>
-          <ScrollView className="mt-3">
-            {(ohStatus &&
-              ohUtils?.formatDayLines(ohStatus.rules).map((l: string) => (
-                <Text key={l} className="text-white text-[16px] mb-2">
-                  {l}
-                </Text>
-              ))) || <Text className="text-white text-[16px] mb-2">Aucun</Text>}
 
-            <View className="h-6" />
-            <TouchableOpacity
-              onPress={() => setHoursModalVisible(false)}
-              className="bg-primary h-[56px] rounded-[16px] flex-row items-center justify-center gap-2"
-            >
-              <Text className="text-white text-[18px] font-extrabold">
-                {t("ok")}
-              </Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </BottomSheetView>
-      </BottomSheet>
     </View>
   );
 }

@@ -1,13 +1,13 @@
 import {
-    AddressIcon,
-    BusStopIcon,
-    CityIcon,
-    CommercialIcon,
-    FoodIcon,
-    GasIcon,
-    HealthIcon,
-    ParkingIcon,
-    TrainStationIcon,
+  AddressIcon,
+  BusStopIcon,
+  CityIcon,
+  CommercialIcon,
+  FoodIcon,
+  GasIcon,
+  HealthIcon,
+  ParkingIcon,
+  TrainStationIcon,
 } from "@/assets/icons";
 import MapSnapshot, { WaypointPin } from "@/components/MapSnapshot";
 import { Colors } from "@/constants/theme";
@@ -19,37 +19,37 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
-    Keyboard,
-    KeyboardEvent,
-    LayoutAnimation,
-    Modal,
-    ScrollView,
-    StatusBar,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Keyboard,
+  KeyboardEvent,
+  LayoutAnimation,
+  Modal,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import {
-    Gesture,
-    GestureDetector,
-    GestureHandlerRootView,
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import Animated, {
-    Easing,
-    interpolate,
-    runOnJS,
-    SharedValue,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
+  Easing,
+  interpolate,
+  runOnJS,
+  SharedValue,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Coordinate } from "../../services/RouteService";
 import { useRouteService } from "../../services/RouteService";
 import {
-    PhotonFeature,
-    SearchEngineService,
+  PhotonFeature,
+  SearchEngineService,
 } from "../../services/SearchEngineService";
 
 const { t } = createTranslator("routePlanning");
@@ -1206,7 +1206,7 @@ export default function RoutePlanningScreen() {
                 onPress={toggleMapExpand}
                 activeOpacity={0.85}
               >
-                <View className="rounded-[12px] border border-white/10 overflow-hidden">
+                <View className="flex-1 rounded-[12px] border border-white/10 overflow-hidden">
                   <MapSnapshot
                     pins={mapPins}
                     routeCoords={
@@ -1214,6 +1214,7 @@ export default function RoutePlanningScreen() {
                         ? routeService.routeCoords
                         : undefined
                     }
+                    className="w-full h-full"
                   />
                 </View>
               </TouchableOpacity>
@@ -1582,7 +1583,7 @@ export default function RoutePlanningScreen() {
               >
                 <View className="relative">
                   <View className="rounded-[12px] border border-white/10 overflow-hidden">
-                    <MapSnapshot pins={mapPins} />
+                    <MapSnapshot pins={mapPins} className="w-full h-32" />
                   </View>
                 </View>
 
@@ -1623,4 +1624,3 @@ export default function RoutePlanningScreen() {
     </View>
   );
 }
-// NativeWind migration complete
