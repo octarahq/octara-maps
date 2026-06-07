@@ -41,6 +41,8 @@ type PlaceDetails = {
   phone?: string | null;
   website?: string | null;
   opening_hours?: string | null;
+  cuisine?: string | null;
+  email?: string | null;
   photos?: { url: string }[];
 };
 

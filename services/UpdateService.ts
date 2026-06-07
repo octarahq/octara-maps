@@ -1,7 +1,7 @@
 import { createTranslator } from "@/i18n";
 import * as Application from "expo-application";
 import Constants from "expo-constants";
-import * as FileSystem from "expo-file-system";
+import { cacheDirectory, documentDirectory, createDownloadResumable, getContentUriAsync } from "expo-file-system/legacy";
 import * as IntentLauncher from "expo-intent-launcher";
 import { Platform, ToastAndroid } from "react-native";
 
@@ -137,16 +137,16 @@ export const downloadAndInstallAPK = async (
       : `${filenameWithoutQuery}.apk`;
 
     let cacheDir =
-      FileSystem.cacheDirectory || FileSystem.documentDirectory || "";
+      cacheDirectory || documentDirectory || "";
 
     if (!cacheDir || cacheDir === "undefined" || cacheDir === "null") {
-      cacheDir = FileSystem.documentDirectory || "";
+      cacheDir = documentDirectory || "";
     }
 
     const basePath = cacheDir.endsWith("/") ? cacheDir : cacheDir + "/";
     const downloadPath = `${basePath}${filename}`;
 
-    const downloadResumable = FileSystem.createDownloadResumable(
+    const downloadResumable = createDownloadResumable(
       downloadUrl,
       downloadPath,
       {},
@@ -173,7 +173,7 @@ export const downloadAndInstallAPK = async (
     const fileUri = downloadResult.uri || downloadPath;
     onProgress?.(1);
 
-    const contentUri = await FileSystem.getContentUriAsync(fileUri);
+    const contentUri = await getContentUriAsync(fileUri);
 
     const installFlags =
       FLAG_ACTIVITY_NEW_TASK | FLAG_GRANT_READ_URI_PERMISSION;

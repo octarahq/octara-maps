@@ -173,12 +173,9 @@ function InnerLayout() {
 
     if (Platform.OS === "android") {
       const edgeToEdgeEnabled = Boolean(
-        (Constants.expoConfig &&
+        Constants.expoConfig &&
           Constants.expoConfig.android &&
-          Constants.expoConfig.android.edgeToEdgeEnabled) ||
-        (Constants.manifest &&
-          Constants.manifest.android &&
-          Constants.manifest.android.edgeToEdgeEnabled),
+          Constants.expoConfig.android.edgeToEdgeEnabled
       );
 
       NativeStatusBar.setTranslucent(true);
