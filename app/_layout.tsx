@@ -1,3 +1,4 @@
+import "react-native-gesture-handler";
 import "react-native-reanimated";
 import { AppLogoIcon } from "@/assets/icons";
 import { Colors } from "@/constants/theme";
