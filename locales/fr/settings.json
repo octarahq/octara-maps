@@ -32,6 +32,10 @@
           {
             "title": "Style de carte",
             "description": "Choisissez votre style de carte préféré"
+          },
+          {
+            "title": "Langue",
+            "description": "Changer la langue de l'application"
           }
       ]
     }, {

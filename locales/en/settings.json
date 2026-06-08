@@ -32,6 +32,10 @@
         {
           "title": "Map style",
           "description": "Choose your preferred map style"
+        },
+        {
+          "title": "Language",
+          "description": "Change the application language"
         }
       ]
     }, {
