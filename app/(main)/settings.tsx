@@ -87,7 +87,7 @@ function SettingsSection({
 export default function SettingsScreen() {
   const { t } = createTranslator("settings");
   const { isLoading } = useAuth();
-  const { settings, setSettings } = useUser();
+  const { settings, setSettings, language, setLanguage } = useUser();
   const insets = useSafeAreaInsets();
 
   const [activeSelect, setActiveSelect] = useState<any>(null);
@@ -140,6 +140,11 @@ export default function SettingsScreen() {
     { label: t("map_styles.satelite"), value: "satelite" },
     { label: t("map_styles.terrain"), value: "terrain" },
     { label: t("map_styles.terrain_dark"), value: "terrain_dark" },
+  ];
+
+  const languageOptions = [
+    { label: "Français", value: "fr" },
+    { label: "English", value: "en" },
   ];
 
   return (
@@ -212,6 +217,18 @@ export default function SettingsScreen() {
                     ...settings,
                     mapStyle: val,
                   }),
+              }),
+          },
+          {
+            title: t("sections.0.settings.3.title", { defaultValue: "Langue" }),
+            description: t("sections.0.settings.3.description", { defaultValue: "Changer la langue de l'application" }),
+            icon: "language",
+            onClick: () =>
+              handleSelectPress({
+                selectTitle: "Choisir la langue",
+                selectOptions: languageOptions,
+                selectedValue: language,
+                onSelectChange: (val: any) => setLanguage(val),
               }),
           },
         ]}

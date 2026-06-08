@@ -34,5 +34,29 @@
   "viewPreview": "View preview",
   "startNavigation": "Start navigation",
   "planner": "Planner",
-  "errorNoRoute": "no route found"
+  "errorNoRoute": "No route found",
+  "transitRouting": "Routes",
+  "transitOptions": "Transport options",
+  "transitSchedule": "Travel schedule",
+  "departAt": "Depart at",
+  "arriveAt": "Arrive by",
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "resetNow": "Reset (Now)",
+  "transportModes": "Transport modes",
+  "search": "Search",
+  "searching": "Searching...",
+  "buyTicket": "Buy ticket",
+  "departurePoint": "Departure",
+  "direction": "Direction",
+  "stops": "stops",
+  "walk": "Walk",
+  "arrivalPoint": "Arrival",
+  "transitModes": {
+    "bus": "Bus",
+    "tramway": "Tram",
+    "metro": "Subway",
+    "rer": "Train",
+    "train": "Train"
+  }
 }

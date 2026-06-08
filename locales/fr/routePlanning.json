@@ -34,5 +34,29 @@
   "viewPreview": "Voir l’aperçu",
   "startNavigation": "Démarrer la navigation",
   "planner": "Planificateur",
-  "errorNoRoute": "aucun itinéraire trouvé"
+  "errorNoRoute": "Aucun itinéraire trouvé",
+  "transitRouting": "Itinéraires",
+  "transitOptions": "Options de transport",
+  "transitSchedule": "Horaires de trajet",
+  "departAt": "Partir à",
+  "arriveAt": "Arriver à",
+  "today": "Aujourd'hui",
+  "tomorrow": "Demain",
+  "resetNow": "Réinitialiser (Maintenant)",
+  "transportModes": "Modes de transport",
+  "search": "Rechercher",
+  "searching": "Recherche en cours...",
+  "buyTicket": "Acheter le billet",
+  "departurePoint": "Départ",
+  "direction": "Direction",
+  "stops": "arrêts",
+  "walk": "Marche",
+  "arrivalPoint": "Arrivée",
+  "transitModes": {
+    "bus": "Bus",
+    "tramway": "Tramway",
+    "metro": "Métro",
+    "rer": "RER",
+    "train": "Train"
+  }
 }
