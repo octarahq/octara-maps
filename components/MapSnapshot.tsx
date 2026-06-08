@@ -20,6 +20,7 @@ export type WaypointPin = {
 interface Props {
   pins?: WaypointPin[];
   routeCoords?: { latitude: number; longitude: number }[];
+  routeSections?: { coords: { latitude: number; longitude: number }[]; color?: string }[];
   lat?: number;
   lng?: number;
   zoom?: number;
@@ -31,6 +32,7 @@ interface Props {
 function MapSnapshotInner({
   pins,
   routeCoords,
+  routeSections,
   lat,
   lng,
   zoom = 11,
@@ -92,11 +94,22 @@ function MapSnapshotInner({
 
       post({ type: "clearMarkers" });
       post({ type: "clearPolyline" });
+      post({ type: "clearOverlayPolylines" });
 
       const valid = pins.filter((p) => p.lat && p.lng);
       if (valid.length === 0) return;
 
-      if (routeCoords && routeCoords.length >= 2) {
+      if (routeSections && routeSections.length > 0) {
+        routeSections.forEach(sec => {
+          post({
+            type: "addOverlayPolyline",
+            latlngs: sec.coords.map((c) => [c.latitude, c.longitude]),
+            color: sec.color || "#0d7ff2",
+            weight: 3,
+            opacity: 0.9,
+          });
+        });
+      } else if (routeCoords && routeCoords.length >= 2) {
         post({
           type: "setPolyline",
           latlngs: routeCoords.map((c) => [c.latitude, c.longitude]),
@@ -181,7 +194,7 @@ function MapSnapshotInner({
       post({ type: "zoomTo", lat, lng, zoom, animate: false });
       post({ type: "setUserMarker", lat, lng, icon: "address" });
     }
-  }, [mapReady, pins, routeCoords, lat, lng, zoom, layers]);
+  }, [mapReady, pins, routeCoords, routeSections, lat, lng, zoom, layers]);
 
   const handleMapMsg = React.useCallback((msg: any) => {
     if (msg?.type === "mapReady") setMapReady(true);

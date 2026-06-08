@@ -53,8 +53,20 @@ export interface RouteService {
       alternatives?: number;
       avoidTolls?: boolean;
       avoidHighways?: boolean;
+      transitOptions?: {
+        datetime?: string;
+        datetimeRepresents?: "departure" | "arrival";
+        forbiddenModes?: string[];
+      };
     },
-  ) => Promise<{ coords: Coordinate[]; duration: number; distance: number }[]>;
+  ) => Promise<{ 
+    coords: Coordinate[]; 
+    duration: number; 
+    distance: number; 
+    transitLines?: any[];
+    sections?: { coords: Coordinate[]; color?: string; type: string }[];
+    rawJourney?: any;
+  }[]>;
   getMultiStepRoute: (
     waypoints: Coordinate[],
     mode?: string,
@@ -88,6 +100,7 @@ export interface RouteService {
     coords: Coordinate[];
     duration: number;
     distance: number;
+    transitLines?: any[];
   }[];
   selectAlternative?: (index: number) => boolean;
   getNavigationData: () => NavigationData | null;
@@ -98,12 +111,13 @@ export interface RouteService {
   getSpeedLimit: (points: Coordinate[]) => Promise<string | null>;
 }
 
-export type TransportMode = "driving" | "walking" | "bicycling";
+export type TransportMode = "driving" | "walking" | "bicycling" | "transit";
 
 const getRoutingOSMHost = (mode: string = "driving"): string => {
   if (mode === "walking") return "https://routing.openstreetmap.de/routed-foot";
   if (mode === "bicycling")
     return "https://routing.openstreetmap.de/routed-bike";
+  if (mode === "transit") return "https://4021.fr1.orionhost.xyz";
   return "https://router.project-osrm.org";
 };
 
@@ -126,7 +140,14 @@ export function useRouteService(): RouteService {
   >([]);
   const [lastRawRouteData, setLastRawRouteData] = useState<any | null>(null);
   const [lastAlternatives, setLastAlternatives] = useState<
-    { coords: Coordinate[]; duration: number; distance: number }[]
+    { 
+      coords: Coordinate[]; 
+      duration: number; 
+      distance: number; 
+      transitLines?: any[];
+      sections?: { coords: Coordinate[]; color?: string; type: string }[];
+      rawJourney?: any;
+    }[]
   >([]);
   const [isFromCache, setIsFromCache] = useState(false);
 
@@ -376,6 +397,13 @@ export function useRouteService(): RouteService {
     start: Coordinate,
     end: Coordinate,
     mode = "driving",
+    options?: {
+      transitOptions?: {
+        datetime?: string;
+        datetimeRepresents?: "departure" | "arrival";
+        forbiddenModes?: string[];
+      };
+    }
   ): Promise<{
     success: boolean;
     data?: any;
@@ -398,7 +426,20 @@ export function useRouteService(): RouteService {
 
     const startTs = Date.now();
     try {
-      const url = `${host}/route/v1/${osrmMode}/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson&steps=true`;
+      let url = `${host}/route/v1/${osrmMode}/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson&steps=true`;
+      
+      if (mode === "transit") {
+        url = `${host}/navigation/transit?from_lon=${start.longitude}&from_lat=${start.latitude}&to_lon=${end.longitude}&to_lat=${end.latitude}`;
+        if (options?.transitOptions) {
+          const { datetime, datetimeRepresents, forbiddenModes } = options.transitOptions;
+          if (datetime) url += `&datetime=${datetime}`;
+          if (datetimeRepresents) url += `&datetime_represents=${datetimeRepresents}`;
+          if (forbiddenModes && forbiddenModes.length > 0) {
+            forbiddenModes.forEach(m => url += `&forbidden_uris[]=${m}`);
+          }
+        }
+      }
+      
       const res = await fetchWithTimeout(url);
       const duration = Date.now() - startTs;
       const timing = {
@@ -419,6 +460,13 @@ export function useRouteService(): RouteService {
 
       const data = await res.json();
       if (data?.routes?.length) {
+        return {
+          success: true,
+          data,
+          host,
+          timings,
+        };
+      } else if (data?.journeys?.length) {
         return {
           success: true,
           data,
@@ -446,6 +494,11 @@ export function useRouteService(): RouteService {
       alternatives?: number;
       avoidTolls?: boolean;
       avoidHighways?: boolean;
+      transitOptions?: {
+        datetime?: string;
+        datetimeRepresents?: "departure" | "arrival";
+        forbiddenModes?: string[];
+      };
     } = {},
   ): Promise<{
     success: boolean;
@@ -481,7 +534,19 @@ export function useRouteService(): RouteService {
       const excludeParam = excludes.length
         ? `&exclude=${excludes.join(",")}`
         : "";
-      const url = `${host}/route/v1/${osrmMode}/${coordsQuery}?overview=full&geometries=geojson&steps=true&alternatives=true${excludeParam}`;
+      let url = `${host}/route/v1/${osrmMode}/${coordsQuery}?overview=full&geometries=geojson&steps=true&alternatives=true${excludeParam}`;
+      if (mode === "transit") {
+        url = `${host}/navigation/transit?from_lon=${waypoints[0].longitude}&from_lat=${waypoints[0].latitude}&to_lon=${waypoints[waypoints.length-1].longitude}&to_lat=${waypoints[waypoints.length-1].latitude}`;
+        if (options?.transitOptions) {
+          const { datetime, datetimeRepresents, forbiddenModes } = options.transitOptions;
+          if (datetime) url += `&datetime=${datetime}`;
+          if (datetimeRepresents) url += `&datetime_represents=${datetimeRepresents}`;
+          if (forbiddenModes && forbiddenModes.length > 0) {
+            forbiddenModes.forEach(m => url += `&forbidden_uris[]=${m}`);
+          }
+        }
+      }
+      
       const res = await fetchWithTimeout(url);
       const duration = Date.now() - startTs;
       const timing = {
@@ -512,6 +577,48 @@ export function useRouteService(): RouteService {
             distance: Math.round(route.distance),
           }));
         return { success: true, routes, host, rawData: data, timings };
+      } else if (data?.journeys?.length) {
+        const routes = (data.journeys as any[]).slice(0, altCount).map((journey) => {
+          const coords: Coordinate[] = [];
+          const sections: { coords: Coordinate[]; color?: string; type: string }[] = [];
+          let distance = 0;
+          const transitLines: any[] = [];
+          if (journey.sections) {
+            journey.sections.forEach((section: any) => {
+              const secCoords: Coordinate[] = [];
+              if (section.geojson && section.geojson.coordinates) {
+                section.geojson.coordinates.forEach((coord: [number, number]) => {
+                  const c = { latitude: coord[1], longitude: coord[0] };
+                  coords.push(c);
+                  secCoords.push(c);
+                });
+              }
+              const info = section.display_informations;
+              if (info && info.code) {
+                transitLines.push(info);
+              }
+              if (secCoords.length > 0) {
+                sections.push({
+                  coords: secCoords,
+                  color: info?.color ? `#${info.color}` : undefined,
+                  type: section.type
+                });
+              }
+            });
+          }
+          if (journey.distances && journey.distances.walking) {
+            distance += journey.distances.walking;
+          }
+          return {
+            coords,
+            duration: Math.round(journey.duration / 60),
+            distance,
+            transitLines,
+            sections,
+            rawJourney: journey,
+          };
+        });
+        return { success: true, routes, host, rawData: data, timings };
       }
 
       return { success: false, timings };
@@ -529,6 +636,13 @@ export function useRouteService(): RouteService {
     start: Coordinate,
     end: Coordinate,
     mode = "driving",
+    options?: {
+      transitOptions?: {
+        datetime?: string;
+        datetimeRepresents?: "departure" | "arrival";
+        forbiddenModes?: string[];
+      };
+    }
   ) => {
     setRouteInfo(null);
     setLastRawRouteData(null);
@@ -553,24 +667,50 @@ export function useRouteService(): RouteService {
         setIsOsrmAvailable(true);
         setLastRawRouteData(cachedRoute.routeData);
 
-        const route = cachedRoute.routeData.routes[0];
-        const coords = (route.geometry.coordinates as [number, number][]).map(
-          ([lon, lat]) => ({ latitude: lat, longitude: lon }),
-        );
-        setRouteCoords(coords);
-        setDestination(end);
-        setRouteInfo({
-          duration: Math.round(route.duration / 60),
-          distance: Math.round(route.distance),
-          instruction: "Suivre l'itinéraire",
-          label: computeLabel(cachedRoute.routeData),
-        });
+        if (cachedRoute.routeData.routes && cachedRoute.routeData.routes.length > 0) {
+          const route = cachedRoute.routeData.routes[0];
+          const coords = (route.geometry.coordinates as [number, number][]).map(
+            ([lon, lat]) => ({ latitude: lat, longitude: lon }),
+          );
+          setRouteCoords(coords);
+          setDestination(end);
+          setRouteInfo({
+            duration: Math.round(route.duration / 60),
+            distance: Math.round(route.distance),
+            instruction: "Suivre l'itinéraire",
+            label: computeLabel(cachedRoute.routeData),
+          });
+        } else if (cachedRoute.routeData.journeys && cachedRoute.routeData.journeys.length > 0) {
+          const journey = cachedRoute.routeData.journeys[0];
+          const coords: Coordinate[] = [];
+          let distance = 0;
+          if (journey.sections) {
+            journey.sections.forEach((section: any) => {
+              if (section.geojson && section.geojson.coordinates) {
+                section.geojson.coordinates.forEach((coord: [number, number]) => {
+                  coords.push({ latitude: coord[1], longitude: coord[0] });
+                });
+              }
+            });
+          }
+          if (journey.distances && journey.distances.walking) {
+            distance += journey.distances.walking;
+          }
+          setRouteCoords(coords);
+          setDestination(end);
+          setRouteInfo({
+            duration: Math.round(journey.duration / 60),
+            distance,
+            instruction: "Suivre l'itinéraire",
+            label: computeLabel(cachedRoute.routeData),
+          });
+        }
 
         setIsCalculating(false);
         return true;
       }
 
-      const result = await fetchParallelRoutes(start, end, mode);
+      const result = await fetchParallelRoutes(start, end, mode, options);
       setLastRequestTimings(result.timings);
       setIsFromCache(false);
 
@@ -589,20 +729,48 @@ export function useRouteService(): RouteService {
         await RouteCacheService.setCachedRoute(cacheKey, result.data);
       }
 
-      const route = result.data.routes[0];
-      const coords = (route.geometry.coordinates as [number, number][]).map(
-        ([lon, lat]) => ({ latitude: lat, longitude: lon }),
-      );
-      setRouteCoords(coords);
-      setDestination(end);
-      const duration = Math.round(route.duration / 60);
-      const distance = Math.round(route.distance);
-      setRouteInfo({
-        duration,
-        distance,
-        instruction: "Suivre l'itinéraire",
-        label: computeLabel(result.data),
-      });
+      if (result.data.routes && result.data.routes.length > 0) {
+        const route = result.data.routes[0];
+        const coords = (route.geometry.coordinates as [number, number][]).map(
+          ([lon, lat]) => ({ latitude: lat, longitude: lon }),
+        );
+        setRouteCoords(coords);
+        setDestination(end);
+        const duration = Math.round(route.duration / 60);
+        const distance = Math.round(route.distance);
+        setRouteInfo({
+          duration,
+          distance,
+          instruction: "Suivre l'itinéraire",
+          label: computeLabel(result.data),
+        });
+      } else if (result.data.journeys && result.data.journeys.length > 0) {
+        const journey = result.data.journeys[0];
+        const coords: Coordinate[] = [];
+        let distance = 0;
+        if (journey.sections) {
+          journey.sections.forEach((section: any) => {
+            if (section.geojson && section.geojson.coordinates) {
+              section.geojson.coordinates.forEach((coord: [number, number]) => {
+                coords.push({ latitude: coord[1], longitude: coord[0] });
+              });
+            }
+          });
+        }
+        if (journey.distances && journey.distances.walking) {
+          distance += journey.distances.walking;
+        }
+        
+        setRouteCoords(coords);
+        setDestination(end);
+        const duration = Math.round(journey.duration / 60);
+        setRouteInfo({
+          duration,
+          distance,
+          instruction: "Suivre l'itinéraire",
+          label: computeLabel(result.data),
+        });
+      }
 
       return true;
     } catch {
@@ -691,7 +859,7 @@ export function useRouteService(): RouteService {
       avoidHighways?: boolean;
     } = {},
   ): Promise<
-    { coords: Coordinate[]; duration: number; distance: number }[]
+    { coords: Coordinate[]; duration: number; distance: number; transitLines?: any[] }[]
   > => {
     if (!waypoints || waypoints.length < 2) return [];
 
@@ -1208,6 +1376,8 @@ export async function fetchParallelRouting(
       return "https://routing.openstreetmap.de/routed-foot";
     if (mode === "bicycling")
       return "https://routing.openstreetmap.de/routed-bike";
+    if (mode === "transit")
+      return "https://4021.fr1.orionhost.xyz";
     return "https://router.project-osrm.org";
   };
 
@@ -1226,13 +1396,19 @@ export async function fetchParallelRouting(
     }
 
     const alternativesParam = options.alternatives ? "&alternatives=true" : "";
-    const url = `${host}/route/v1/${osrmMode}/${coordinates}?overview=full&geometries=geojson&steps=true${alternativesParam}`;
+    let url = `${host}/route/v1/${osrmMode}/${coordinates}?overview=full&geometries=geojson&steps=true${alternativesParam}`;
+    if (mode === "transit") {
+      url = `${host}/navigation/transit?from_lon=${start.longitude}&from_lat=${start.latitude}&to_lon=${end.longitude}&to_lat=${end.latitude}`;
+      // In fetchParallelRouting we don't pass options for transitOptions right now, but could be added later.
+    }
 
     const res = await fetchWithTimeout(url);
     if (!res.ok) return { success: false };
 
     const data = await res.json();
     if (data?.routes?.length) {
+      return { success: true, data, host };
+    } else if (data?.journeys?.length) {
       return { success: true, data, host };
     }
     return { success: false };
