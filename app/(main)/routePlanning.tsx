@@ -466,7 +466,7 @@ export default function RoutePlanningScreen() {
     Partial<
       Record<
         TransportMode,
-        { duration: number; distance: number; coords: Coordinate[] }
+        { duration: number; distance: number; coords: Coordinate[]; transitLines?: any[] }
       >
     >
   >({});
@@ -478,7 +478,7 @@ export default function RoutePlanningScreen() {
     Partial<
       Record<
         TransportMode,
-        { duration: number; distance: number; coords: Coordinate[] }[]
+        { duration: number; distance: number; coords: Coordinate[]; transitLines?: any[] }[]
       >
     >
   >({});
@@ -494,13 +494,18 @@ export default function RoutePlanningScreen() {
     car: false,
     walk: false,
     bike: false,
+    transit: false,
   });
 
+  const [transitDate, setTransitDate] = React.useState(new Date());
+  const [transitTimeType, setTransitTimeType] = React.useState<"departure" | "arrival">("departure");
+  const [transitForbiddenModes, setTransitForbiddenModes] = React.useState<string[]>([]);
+
   const modeToService = (m: TransportMode): string =>
-    m === "car" ? "driving" : m === "walk" ? "walking" : "bicycling";
+    m === "car" ? "driving" : m === "walk" ? "walking" : m === "transit" ? "transit" : "bicycling";
 
   const getFastestMode = (): TransportMode | null => {
-    const modes: TransportMode[] = ["car", "walk", "bike"];
+    const modes: TransportMode[] = ["car", "walk", "bike", "transit"];
     const durations = modes
       .filter((mode) => routeResults[mode])
       .map((mode) => ({
@@ -529,6 +534,7 @@ export default function RoutePlanningScreen() {
         duration: alternatives[index].duration,
         distance: alternatives[index].distance,
         coords: alternatives[index].coords,
+        transitLines: alternatives[index].transitLines,
       },
     }));
   };
@@ -907,7 +913,7 @@ export default function RoutePlanningScreen() {
     setRouteErrors({});
 
     const modes: ("car" | "walk" | "bike")[] = ["car", "walk", "bike"];
-    setModesCalculating({ car: true, walk: true, bike: true });
+    setModesCalculating({ car: true, walk: true, bike: true, transit: false });
 
     let completed = 0;
     let successCount = 0;
@@ -945,6 +951,7 @@ export default function RoutePlanningScreen() {
                 duration: alternatives[0].duration,
                 distance: alternatives[0].distance,
                 coords: alternatives[0].coords,
+                transitLines: alternatives[0].transitLines,
               },
             }));
           } else {
@@ -977,9 +984,11 @@ export default function RoutePlanningScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolvedCoords]);
 
+
+
   const prevSelectedRouteKey = React.useRef("");
   React.useEffect(() => {
-    if (selected === "transit") return;
+    // We allow transit update now
     const selectedRoute = routeResults[selected];
     if (!selectedRoute) return;
 
@@ -1074,7 +1083,7 @@ export default function RoutePlanningScreen() {
                 <Text className="text-[#90adcb] text-[10px] font-semibold tracking-widest uppercase">
                   {t("summaryLabel")}
                 </Text>
-                {selected !== "transit" && (
+                {selected && (
                   <View className="flex-row items-center gap-[6px] mt-1">
                     {modesCalculating[selected] ? (
                       <Text className="text-[#90adcb] text-[13px] italic">
@@ -1093,6 +1102,16 @@ export default function RoutePlanningScreen() {
                         </Text>
                       </>
                     ) : null}
+                    
+                    {selected === "transit" && routeResults["transit"]?.transitLines && (
+                      <View className="flex-row items-center flex-wrap gap-1 ml-2">
+                        {routeResults["transit"].transitLines.map((line: any, idx: number) => (
+                          <View key={idx} className="px-1.5 py-0.5 rounded-[4px]" style={{ backgroundColor: `#${line.color}` }}>
+                            <Text style={{ color: `#${line.text_color}` }} className="text-[10px] font-bold">{line.code}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
                   </View>
                 )}
               </View>
@@ -1177,7 +1196,7 @@ export default function RoutePlanningScreen() {
                   );
                 })}
 
-                {selected !== "transit" && (
+                {selected && (
                   <View className="flex-row items-center gap-[6px] mt-1">
                     {modesCalculating[selected] ? (
                       <Text className="text-[#90adcb] text-[13px] italic">
@@ -1196,6 +1215,16 @@ export default function RoutePlanningScreen() {
                         </Text>
                       </>
                     ) : null}
+
+                    {selected === "transit" && routeResults["transit"]?.transitLines && (
+                      <View className="flex-row items-center flex-wrap gap-1 ml-2">
+                        {routeResults["transit"].transitLines.map((line: any, idx: number) => (
+                          <View key={idx} className="px-1.5 py-0.5 rounded-[4px]" style={{ backgroundColor: `#${line.color}` }}>
+                            <Text style={{ color: `#${line.text_color}` }} className="text-[10px] font-bold">{line.code}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
                   </View>
                 )}
               </View>
@@ -1236,6 +1265,8 @@ export default function RoutePlanningScreen() {
           </>
         )}
 
+
+
         <View className="flex-row items-center justify-between mb-3">
           <Text className="text-white text-[17px] font-bold">
             {t("modesTitle")}
@@ -1246,7 +1277,7 @@ export default function RoutePlanningScreen() {
           {MODES.map((mode) => {
             const isSelected = selected === mode.id;
             const altsCount = routeAlternatives[mode.id]?.length ?? 0;
-            const hasMultipleAlts = mode.id !== "transit" && altsCount > 1;
+            const hasMultipleAlts = altsCount > 1;
 
             if (isSelected && hasMultipleAlts) {
               const alternatives = routeAlternatives[mode.id] ?? [];
@@ -1337,6 +1368,15 @@ export default function RoutePlanningScreen() {
                                 >
                                   {formatDistance(alt.distance)}
                                 </Text>
+                                {mode.id === "transit" && alt.transitLines && (
+                                  <View className="flex-row items-center flex-wrap gap-1 mt-1">
+                                    {alt.transitLines.map((line: any, lidx: number) => (
+                                      <View key={lidx} className="px-1 py-[1px] rounded-[3px]" style={{ backgroundColor: `#${line.color}` }}>
+                                        <Text style={{ color: `#${line.text_color}` }} className="text-[9px] font-bold">{line.code}</Text>
+                                      </View>
+                                    ))}
+                                  </View>
+                                )}
                               </View>
                             </View>
                             <Text
@@ -1369,10 +1409,7 @@ export default function RoutePlanningScreen() {
                     shadowOffset: { width: 0, height: 4 },
                   },
                 ]}
-                onPress={() => {
-                  if (mode.id !== "transit") setSelected(mode.id);
-                  else showCommingSoonToast();
-                }}
+                onPress={() => setSelected(mode.id)}
                 activeOpacity={0.85}
               >
                 <View className="flex-row items-center gap-[14px] flex-1">
@@ -1411,22 +1448,29 @@ export default function RoutePlanningScreen() {
                     >
                       {t(`modes.${mode.id}.subtitle`)}
                     </Text>
+                    {mode.id === "transit" && routeResults["transit"]?.transitLines && (
+                      <View className="flex-row items-center flex-wrap gap-1 mt-[4px]">
+                        {routeResults["transit"].transitLines.map((line: any, idx: number) => (
+                          <View key={idx} className="px-1.5 py-[2px] rounded-[4px]" style={{ backgroundColor: `#${line.color}` }}>
+                            <Text style={{ color: `#${line.text_color}` }} className="text-[10px] font-bold">{line.code}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
                   </View>
                 </View>
                 <View className="items-end gap-[2px]">
                   <Text className="text-white text-[15px] font-bold">
-                    {mode.id === "transit"
-                      ? "—"
-                      : modesCalculating[mode.id]
-                        ? "…"
-                        : routeErrors[mode.id]
-                          ? `status: ${routeErrors[mode.id]}`
-                          : routeResults[mode.id]
-                            ? formatDuration(routeResults[mode.id]!.duration)
-                            : "—"}
+                    {modesCalculating[mode.id]
+                      ? "…"
+                      : routeErrors[mode.id]
+                        ? `status: ${routeErrors[mode.id]}`
+                        : routeResults[mode.id]
+                          ? formatDuration(routeResults[mode.id]!.duration)
+                          : "—"}
                   </Text>
                   <Text className="text-[#90adcb] text-[12px]">
-                    {mode.id !== "transit" && routeResults[mode.id]
+                    {routeResults[mode.id]
                       ? formatDistance(routeResults[mode.id]!.distance)
                       : ""}
                   </Text>
@@ -1441,7 +1485,22 @@ export default function RoutePlanningScreen() {
         className="absolute bottom-0 left-0 right-0 px-4 pt-4 bg-transparent"
         style={[{ paddingBottom: insets.bottom + 16 }]}
       >
-        {departure ? (
+        {selected === "transit" ? (
+          <TouchableOpacity
+            className="bg-primary rounded-[16px] h-[56px] flex-row items-center justify-center gap-[10px] elevation-10 shadow-primary shadow-opacity-40 shadow-radius-[16px] shadow-offset-[0,6]"
+            style={{ backgroundColor: Colors.dark.primary }}
+            onPress={() => router.push({
+              pathname: "/transitPlanning",
+              params: { name, address, lat, lng }
+            })}
+            activeOpacity={0.9}
+          >
+            <Text className="text-white text-[17px] font-extrabold">
+              {t("searchTransit", { defaultValue: "Rechercher un trajet" })}
+            </Text>
+            <MaterialIcons name="search" size={22} color="#fff" />
+          </TouchableOpacity>
+        ) : departure ? (
           <>
             <View className="flex-row items-center gap-[6px] mb-[10px] px-1">
               <MaterialIcons name="info-outline" size={18} color="#90adcb" />

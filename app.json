@@ -2,7 +2,7 @@
   "expo": {
     "name": "Octara Maps",
     "slug": "octara-maps",
-    "version": "3.0.6",
+    "version": "3.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "octaramaps",
@@ -81,7 +81,8 @@
       "expo-font",
       "expo-localization",
       "expo-web-browser",
-      "expo-location"
+      "expo-location",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
