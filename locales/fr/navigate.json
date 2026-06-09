@@ -79,5 +79,57 @@
   "units": {
     "meters": "mètres",
     "kilometers": "kilomètres"
+  },
+  "transit": {
+    "route": "Itinéraire",
+    "nextStep": "ÉTAPE SUIVANTE",
+    "min": "min",
+    "timeRemaining": "TEMPS RESTANT",
+    "km": "km",
+    "distanceRemaining": "RESTE À PARCOURIR",
+    "tripSteps": "ÉTAPES DU TRAJET",
+    "livePreview": "Aperçu en direct",
+    "tapToExpand": "Appuyer pour agrandir",
+    "bus": "Bus",
+    "transport": "Transport",
+    "wait": "Attente",
+    "walk": "Marche",
+    "yourDestination": "votre destination",
+    "action": {
+      "waitMin": "Attendez {{time}} min ",
+      "waitForMode": "Attendez {{time}} min pour le {{mode}} ",
+      "takeMode": "Prenez le {{mode}} ",
+      "onMode": "Vous êtes dans le {{mode}} {{code}}. ",
+      "prepareOff": "Préparez-vous à descendre dans ",
+      "getOffNext": "Descendez au prochain arrêt : ",
+      "walkTo": "Marchez vers ",
+      "waiting": "ATTENTE",
+      "takeTransit": "PRENEZ LE TRANSPORT",
+      "inTransitStops": "EN TRANSIT - {{count}} ARRÊTS",
+      "inTransitMin": "EN TRANSIT - {{time}} MIN",
+      "getReady": "PRÉPAREZ-VOUS",
+      "arrivingSoon": "ARRIVÉE IMMINENTE",
+      "inMeters": "DANS {{distance}} MÈTRES"
+    },
+    "highlight": {
+      "forTransit": "pour la correspondance",
+      "direction": "{{code}} - Direction {{direction}}",
+      "relaxStops_one": "Détendez-vous pendant {{count}} arrêt",
+      "relaxStops_other": "Détendez-vous pendant {{count}} arrêts",
+      "stops_one": "{{count}} arrêt",
+      "stops_other": "{{count}} arrêts",
+      "relaxMin": "Détendez-vous pendant {{time}} min",
+      "min": "{{time}} min"
+    },
+    "next": {
+      "waitMode": "Puis attendez {{time}} min pour prendre le {{mode}} {{code}}",
+      "wait": "Puis attendez {{time}} min",
+      "takeMode": "Puis prenez le {{mode}} {{code}} direction {{direction}}",
+      "walk": "Puis marchez pendant {{time}} min",
+      "arrive": "Vous arriverez à destination"
+    },
+    "step": {
+      "dir": "Dir. {{direction}}"
+    }
   }
 }
