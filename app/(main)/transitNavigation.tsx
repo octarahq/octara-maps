@@ -5,6 +5,7 @@ import MapSnapshot, {
 import Controls from "@/components/map/Controls";
 import { MapContext } from "@/components/map/MapContext";
 import { usePosition } from "@/contexts/PositionContext";
+import { createTranslator } from "@/i18n";
 import { MaterialIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -37,6 +38,8 @@ function getDistanceMetres(
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
+
+const { t } = createTranslator("navigate");
 
 export default function TransitNavigationScreen() {
   const mapRef = React.useRef<MapSnapshotRef>(null);
@@ -102,13 +105,13 @@ export default function TransitNavigationScreen() {
   let currentPercentage = 100;
   let stepPercentage = 15;
   let currentInstruction = {
-    distanceText: "In 400 meters",
-    actionText: "Turn slight right onto ",
-    highlightText: "Avenue de l'Observatoire",
+    distanceText: "",
+    actionText: "",
+    highlightText: "",
     icon: "turn-right" as any,
   };
   let nextInstruction = {
-    text: "Continue straight for 2.4 km",
+    text: "",
     icon: "straight" as any,
   };
   let activeSectionIndex = 0;
@@ -194,9 +197,9 @@ export default function TransitNavigationScreen() {
       const firstSection = activeSections[0];
       if (firstSection.type === "waiting") {
         currentInstruction = {
-          distanceText: "WAITING",
-          actionText: `Wait ${Math.ceil((firstSection.duration || 0) / 60)} min `,
-          highlightText: "for transit",
+          distanceText: t("transit.action.waiting"),
+          actionText: t("transit.action.waitMin", { time: Math.ceil((firstSection.duration || 0) / 60) }),
+          highlightText: t("transit.highlight.forTransit"),
           icon: "schedule",
         };
         currentZoomLevel = 15;
@@ -205,8 +208,8 @@ export default function TransitNavigationScreen() {
           activeSections[1].type === "public_transport"
         ) {
           const pt = activeSections[1];
-          currentInstruction.actionText = `Wait ${Math.ceil((firstSection.duration || 0) / 60)} min for the ${pt.display_informations?.physical_mode || "Bus"} `;
-          currentInstruction.highlightText = `${pt.display_informations?.code || ""} - Direction ${pt.display_informations?.direction || ""}`;
+          currentInstruction.actionText = t("transit.action.waitForMode", { time: Math.ceil((firstSection.duration || 0) / 60), mode: pt.display_informations?.physical_mode || t("transit.bus") });
+          currentInstruction.highlightText = t("transit.highlight.direction", { code: pt.display_informations?.code || "", direction: pt.display_informations?.direction || "" });
         }
       } else if (firstSection.type === "public_transport") {
         let remainingStops = 0;
@@ -237,14 +240,14 @@ export default function TransitNavigationScreen() {
         }
 
         const modeName =
-          firstSection.display_informations?.physical_mode || "Bus";
+          firstSection.display_informations?.physical_mode || t("transit.bus");
         const codeName = firstSection.display_informations?.code || "";
 
         if (activeSectionCoordIndex === 0) {
           currentInstruction = {
-            distanceText: "TAKE TRANSIT",
-            actionText: `Take the ${modeName} `,
-            highlightText: `${codeName} - Direction ${firstSection.display_informations?.direction || ""}`,
+            distanceText: t("transit.action.takeTransit"),
+            actionText: t("transit.action.takeMode", { mode: modeName }),
+            highlightText: t("transit.highlight.direction", { code: codeName, direction: firstSection.display_informations?.direction || "" }),
             icon: "directions-bus",
           };
         } else {
@@ -254,22 +257,22 @@ export default function TransitNavigationScreen() {
           ) {
             if (remainingStops >= 4) {
               currentInstruction = {
-                distanceText: `IN TRANSIT - ${remainingStops} STOPS`,
-                actionText: `You are on the ${modeName} ${codeName}. `,
-                highlightText: `Relax for ${remainingStops} stops`,
+                distanceText: t("transit.action.inTransitStops", { count: remainingStops }),
+                actionText: t("transit.action.onMode", { mode: modeName, code: codeName }),
+                highlightText: t("transit.highlight.relaxStops", { count: remainingStops }),
                 icon: "directions-bus",
               };
             } else if (remainingStops > 0 && remainingStops <= 3) {
               currentInstruction = {
-                distanceText: "GET READY",
-                actionText: "Prepare to get off in ",
-                highlightText: `${remainingStops} stop${remainingStops > 1 ? "s" : ""}`,
+                distanceText: t("transit.action.getReady"),
+                actionText: t("transit.action.prepareOff"),
+                highlightText: t("transit.highlight.stops", { count: remainingStops }),
                 icon: "transfer-within-a-station",
               };
             } else {
               currentInstruction = {
-                distanceText: "ARRIVING SOON",
-                actionText: "Get off at next stop: ",
+                distanceText: t("transit.action.arrivingSoon"),
+                actionText: t("transit.action.getOffNext"),
                 highlightText: firstSection.to?.name || "",
                 icon: "directions-bus",
               };
@@ -292,22 +295,22 @@ export default function TransitNavigationScreen() {
 
             if (remainingMin > 5) {
               currentInstruction = {
-                distanceText: `IN TRANSIT - ${remainingMin} MIN`,
-                actionText: `You are on the ${modeName} ${codeName}. `,
-                highlightText: `Relax for ${remainingMin} min`,
+                distanceText: t("transit.action.inTransitMin", { time: remainingMin }),
+                actionText: t("transit.action.onMode", { mode: modeName, code: codeName }),
+                highlightText: t("transit.highlight.relaxMin", { time: remainingMin }),
                 icon: "directions-bus",
               };
             } else if (remainingMin > 0 && remainingMin <= 5) {
               currentInstruction = {
-                distanceText: "GET READY",
-                actionText: "Prepare to get off in ",
-                highlightText: `${remainingMin} min`,
+                distanceText: t("transit.action.getReady"),
+                actionText: t("transit.action.prepareOff"),
+                highlightText: t("transit.highlight.min", { time: remainingMin }),
                 icon: "transfer-within-a-station",
               };
             } else {
               currentInstruction = {
-                distanceText: "ARRIVING SOON",
-                actionText: "Get off at next stop: ",
+                distanceText: t("transit.action.arrivingSoon"),
+                actionText: t("transit.action.getOffNext"),
                 highlightText: firstSection.to?.name || "",
                 icon: "directions-bus",
               };
@@ -328,9 +331,9 @@ export default function TransitNavigationScreen() {
           );
         }
         currentInstruction = {
-          distanceText: `IN ${dist} METERS`,
-          actionText: "Walk to ",
-          highlightText: firstSection.to?.name || "your destination",
+          distanceText: t("transit.action.inMeters", { distance: dist }),
+          actionText: t("transit.action.walkTo"),
+          highlightText: firstSection.to?.name || t("transit.yourDestination"),
           icon: "directions-walk",
         };
         currentZoomLevel = 18;
@@ -345,29 +348,29 @@ export default function TransitNavigationScreen() {
           ) {
             const pt = activeSections[2];
             nextInstruction = {
-              text: `Then wait ${Math.ceil((nextSec.duration || 0) / 60)} min to take the ${pt.display_informations?.physical_mode || "bus"} ${pt.display_informations?.code || ""}`,
+              text: t("transit.next.waitMode", { time: Math.ceil((nextSec.duration || 0) / 60), mode: pt.display_informations?.physical_mode || t("transit.bus"), code: pt.display_informations?.code || "" }),
               icon: "schedule",
             };
           } else {
             nextInstruction = {
-              text: `Then wait ${Math.ceil((nextSec.duration || 0) / 60)} min`,
+              text: t("transit.next.wait", { time: Math.ceil((nextSec.duration || 0) / 60) }),
               icon: "schedule",
             };
           }
         } else if (nextSec.type === "public_transport") {
           nextInstruction = {
-            text: `Then take the ${nextSec.display_informations?.physical_mode || "bus"} ${nextSec.display_informations?.code || ""} direction ${nextSec.display_informations?.direction || ""}`,
+            text: t("transit.next.takeMode", { mode: nextSec.display_informations?.physical_mode || t("transit.bus"), code: nextSec.display_informations?.code || "", direction: nextSec.display_informations?.direction || "" }),
             icon: "directions-transit",
           };
         } else {
           nextInstruction = {
-            text: `Then walk for ${Math.ceil((nextSec.duration || 0) / 60)} min`,
+            text: t("transit.next.walk", { time: Math.ceil((nextSec.duration || 0) / 60) }),
             icon: "directions-walk",
           };
         }
       } else {
         nextInstruction = {
-          text: "You will arrive at destination",
+          text: t("transit.next.arrive"),
           icon: "place",
         };
       }
@@ -518,7 +521,7 @@ export default function TransitNavigationScreen() {
           <MaterialIcons name="arrow-back" size={24} color="#0d7ff2" />
         </TouchableOpacity>
         <Text className="font-bold tracking-tight text-xl text-white mt-auto mb-4">
-          Itinéraire
+          {t("transit.route")}
         </Text>
         <TouchableOpacity className="p-2 rounded-full mt-auto mb-3 -mr-2"></TouchableOpacity>
       </BlurView>
@@ -556,7 +559,7 @@ export default function TransitNavigationScreen() {
 
           <View className="p-4 rounded-3xl bg-[#16202a] border border-white/5 space-y-2 mt-2">
             <Text className="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">
-              ÉTAPE SUIVANTE
+              {t("transit.nextStep")}
             </Text>
             <View className="flex-row items-center justify-between">
               <Text className="text-lg font-semibold text-white flex-1 mr-4">
@@ -581,10 +584,10 @@ export default function TransitNavigationScreen() {
             <View>
               <Text className="text-3xl font-bold text-white">
                 {durationMin}
-                <Text className="text-base font-medium text-white/40">min</Text>
+                <Text className="text-base font-medium text-white/40">{t("transit.min")}</Text>
               </Text>
               <Text className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">
-                TEMPS RESTANT
+                {t("transit.timeRemaining")}
               </Text>
             </View>
           </View>
@@ -594,21 +597,21 @@ export default function TransitNavigationScreen() {
               <View className="flex-row items-end justify-between">
                 <Text className="text-3xl font-bold text-white">
                   {distanceKm}
-                  <Text className="text-base font-medium text-white/40">km</Text>
+                  <Text className="text-base font-medium text-white/40">{t("transit.km")}</Text>
                 </Text>
                 <Text className="text-[#0d7ff2] font-bold text-base mb-1">
                   {currentPercentage}%
                 </Text>
               </View>
               <Text className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">
-                RESTE À PARCOURIR
+                {t("transit.distanceRemaining")}
               </Text>
             </View>
           </View>
         </View>
 
         <Text className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-4">
-          ÉTAPES DU TRAJET
+          {t("transit.tripSteps")}
         </Text>
 
         <ScrollView
@@ -630,18 +633,18 @@ export default function TransitNavigationScreen() {
 
               if (sec.type === "waiting") {
                 icon = "schedule";
-                title = "Wait";
-                subtitle = `${Math.ceil((sec.duration || 0) / 60)} min`;
+                title = t("transit.wait");
+                subtitle = `${Math.ceil((sec.duration || 0) / 60)} ${t("transit.min")}`;
                 color = "#8a8a8a";
               } else if (sec.type === "public_transport") {
                 icon = sec.display_informations?.physical_mode === "Bus" ? "directions-bus" : "directions-transit";
-                title = `${sec.display_informations?.physical_mode || "Transport"} ${sec.display_informations?.code || ""}`;
-                subtitle = `Dir. ${sec.display_informations?.direction || ""}`;
+                title = `${sec.display_informations?.physical_mode || t("transit.transport")} ${sec.display_informations?.code || ""}`;
+                subtitle = t("transit.step.dir", { direction: sec.display_informations?.direction || "" });
                 color = sec.display_informations?.color ? `#${sec.display_informations.color}` : "#0d7ff2";
               } else if (sec.type === "street_network" || sec.type === "transfer") {
                 icon = "directions-walk";
-                title = "Walk";
-                subtitle = `${Math.ceil((sec.duration || 0) / 60)} min`;
+                title = t("transit.walk");
+                subtitle = `${Math.ceil((sec.duration || 0) / 60)} ${t("transit.min")}`;
                 color = "#0d7ff2";
               } else {
                 return null;
@@ -708,10 +711,10 @@ export default function TransitNavigationScreen() {
                 </View>
                 <View>
                   <Text className="text-sm font-bold text-white tracking-wide">
-                    Aperçu en direct
+                    {t("transit.livePreview")}
                   </Text>
                   <Text className="text-[10px] font-bold text-white/50 uppercase tracking-widest">
-                    Appuyer pour agrandir
+                    {t("transit.tapToExpand")}
                   </Text>
                 </View>
               </View>

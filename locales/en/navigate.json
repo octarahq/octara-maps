@@ -78,5 +78,57 @@
   "units": {
     "meters": "meters",
     "kilometers": "kilometers"
+  },
+  "transit": {
+    "route": "Route",
+    "nextStep": "NEXT STEP",
+    "min": "min",
+    "timeRemaining": "TIME REMAINING",
+    "km": "km",
+    "distanceRemaining": "REMAINING DISTANCE",
+    "tripSteps": "TRIP STEPS",
+    "livePreview": "Live preview",
+    "tapToExpand": "Tap to expand",
+    "bus": "Bus",
+    "transport": "Transport",
+    "wait": "Wait",
+    "walk": "Walk",
+    "yourDestination": "your destination",
+    "action": {
+      "waitMin": "Wait {{time}} min ",
+      "waitForMode": "Wait {{time}} min for the {{mode}} ",
+      "takeMode": "Take the {{mode}} ",
+      "onMode": "You are on the {{mode}} {{code}}. ",
+      "prepareOff": "Prepare to get off in ",
+      "getOffNext": "Get off at next stop: ",
+      "walkTo": "Walk to ",
+      "waiting": "WAITING",
+      "takeTransit": "TAKE TRANSIT",
+      "inTransitStops": "IN TRANSIT - {{count}} STOPS",
+      "inTransitMin": "IN TRANSIT - {{time}} MIN",
+      "getReady": "GET READY",
+      "arrivingSoon": "ARRIVING SOON",
+      "inMeters": "IN {{distance}} METERS"
+    },
+    "highlight": {
+      "forTransit": "for transit",
+      "direction": "{{code}} - Direction {{direction}}",
+      "relaxStops_one": "Relax for {{count}} stop",
+      "relaxStops_other": "Relax for {{count}} stops",
+      "stops_one": "{{count}} stop",
+      "stops_other": "{{count}} stops",
+      "relaxMin": "Relax for {{time}} min",
+      "min": "{{time}} min"
+    },
+    "next": {
+      "waitMode": "Then wait {{time}} min to take the {{mode}} {{code}}",
+      "wait": "Then wait {{time}} min",
+      "takeMode": "Then take the {{mode}} {{code}} direction {{direction}}",
+      "walk": "Then walk for {{time}} min",
+      "arrive": "You will arrive at destination"
+    },
+    "step": {
+      "dir": "Dir. {{direction}}"
+    }
   }
 }
