@@ -580,34 +580,41 @@ export function useRouteService(): RouteService {
       } else if (data?.journeys?.length) {
         const routes = (data.journeys as any[]).slice(0, altCount).map((journey) => {
           const coords: Coordinate[] = [];
-          const sections: { coords: Coordinate[]; color?: string; type: string }[] = [];
+          const sections: { coords: Coordinate[]; color?: string; type: string; distance?: number }[] = [];
           let distance = 0;
           const transitLines: any[] = [];
           if (journey.sections) {
             journey.sections.forEach((section: any) => {
               const secCoords: Coordinate[] = [];
+              let secDistance = 0;
               if (section.geojson && section.geojson.coordinates) {
-                section.geojson.coordinates.forEach((coord: [number, number]) => {
+                section.geojson.coordinates.forEach((coord: [number, number], index: number) => {
                   const c = { latitude: coord[1], longitude: coord[0] };
                   coords.push(c);
                   secCoords.push(c);
+                  if (index > 0) {
+                    const prev = section.geojson.coordinates[index - 1];
+                    secDistance += calculateDistance(
+                      { latitude: prev[1], longitude: prev[0] },
+                      c
+                    );
+                  }
                 });
               }
               const info = section.display_informations;
               if (info && info.code) {
                 transitLines.push(info);
               }
+              distance += secDistance;
               if (secCoords.length > 0) {
                 sections.push({
                   coords: secCoords,
-                  color: info?.color ? `#${info.color}` : undefined,
-                  type: section.type
+                  color: (section.type === "public_transport" && info?.color) ? `#${info.color}` : "#0d7ff2",
+                  type: section.type,
+                  distance: secDistance,
                 });
               }
             });
-          }
-          if (journey.distances && journey.distances.walking) {
-            distance += journey.distances.walking;
           }
           return {
             coords,
@@ -687,14 +694,19 @@ export function useRouteService(): RouteService {
           if (journey.sections) {
             journey.sections.forEach((section: any) => {
               if (section.geojson && section.geojson.coordinates) {
-                section.geojson.coordinates.forEach((coord: [number, number]) => {
-                  coords.push({ latitude: coord[1], longitude: coord[0] });
+                section.geojson.coordinates.forEach((coord: [number, number], index: number) => {
+                  const c = { latitude: coord[1], longitude: coord[0] };
+                  coords.push(c);
+                  if (index > 0) {
+                    const prev = section.geojson.coordinates[index - 1];
+                    distance += calculateDistance(
+                      { latitude: prev[1], longitude: prev[0] },
+                      c
+                    );
+                  }
                 });
               }
             });
-          }
-          if (journey.distances && journey.distances.walking) {
-            distance += journey.distances.walking;
           }
           setRouteCoords(coords);
           setDestination(end);
@@ -751,14 +763,19 @@ export function useRouteService(): RouteService {
         if (journey.sections) {
           journey.sections.forEach((section: any) => {
             if (section.geojson && section.geojson.coordinates) {
-              section.geojson.coordinates.forEach((coord: [number, number]) => {
-                coords.push({ latitude: coord[1], longitude: coord[0] });
+              section.geojson.coordinates.forEach((coord: [number, number], index: number) => {
+                const c = { latitude: coord[1], longitude: coord[0] };
+                coords.push(c);
+                if (index > 0) {
+                  const prev = section.geojson.coordinates[index - 1];
+                  distance += calculateDistance(
+                    { latitude: prev[1], longitude: prev[0] },
+                    c
+                  );
+                }
               });
             }
           });
-        }
-        if (journey.distances && journey.distances.walking) {
-          distance += journey.distances.walking;
         }
         
         setRouteCoords(coords);

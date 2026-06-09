@@ -2,7 +2,6 @@ import MapSnapshot, { WaypointPin } from "@/components/MapSnapshot";
 import { Colors } from "@/constants/theme";
 import { usePosition } from "@/contexts/PositionContext";
 import { createTranslator } from "@/i18n";
-import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { MaterialIcons } from "@expo/vector-icons";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import Constants from "expo-constants";
@@ -111,7 +110,15 @@ export default function TransitPlanningScreen() {
   }, [resolvedCoords, fetchTrigger]);
 
   const handleStartNavigation = () => {
-    showCommingSoonToast();
+    const selectedRoute = routeAlternatives[selectedAlternativeIndex];
+    const routeId = `transit_nav_${Date.now()}`;
+    import("../../services/RouteCacheService").then(({ RouteCacheService }) => {
+      RouteCacheService.setCachedRoute(routeId, selectedRoute);
+      router.push({
+        pathname: "/(main)/transitNavigation",
+        params: { routeId },
+      });
+    });
   };
 
   const selectedRoute = routeAlternatives[selectedAlternativeIndex];
@@ -355,13 +362,15 @@ export default function TransitPlanningScreen() {
                   },
                   {
                     id: "physical_mode:Tramway",
-                    label: t("transitModes.tramway", { defaultValue: "Tramway" }),
+                    label: t("transitModes.tramway", {
+                      defaultValue: "Tramway",
+                    }),
                     icon: "tram",
                   },
-                  { 
-                    id: "physical_mode:Metro", 
-                    label: t("transitModes.metro", { defaultValue: "Métro" }), 
-                    icon: "subway" 
+                  {
+                    id: "physical_mode:Metro",
+                    label: t("transitModes.metro", { defaultValue: "Métro" }),
+                    icon: "subway",
                   },
                   {
                     id: "physical_mode:RapidTransit",
