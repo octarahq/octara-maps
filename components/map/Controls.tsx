@@ -30,11 +30,11 @@ export default function Controls() {
     !layers.darkTheme;
   const iconColor = isLightMap ? "#000" : "#fff";
   const containerBg = isLightMap
-    ? "rgba(0,0,0,0.12)"
-    : "rgba(255,255,255,0.05)";
+    ? "rgba(255,255,255,0.8)"
+    : "rgba(22,32,42,0.8)";
   const containerBorder = isLightMap
-    ? "rgba(0,0,0,0.18)"
-    : "rgba(255,255,255,0.2)";
+    ? "rgba(0,0,0,0.1)"
+    : "rgba(255,255,255,0.1)";
 
   const snapPoints = React.useMemo(
     () => snapPointsPercent([240, 500], screenHeight),
@@ -70,7 +70,7 @@ export default function Controls() {
       <View className="absolute right-3 top-[40%] z-[80]" pointerEvents="box-none">
         <View className="flex-col gap-3 items-center">
           <BlurView
-            intensity={50}
+            intensity={80}
             className="flex-col rounded-2xl overflow-hidden border shadow-lg"
             style={{ backgroundColor: containerBg, borderColor: containerBorder }}
           >
@@ -105,7 +105,7 @@ export default function Controls() {
           </BlurView>
 
           <BlurView
-            intensity={50}
+            intensity={80}
             className="rounded-2xl overflow-hidden border shadow-lg"
             style={{ backgroundColor: containerBg, borderColor: containerBorder }}
           >
@@ -121,7 +121,7 @@ export default function Controls() {
           </BlurView>
 
           <BlurView
-            intensity={50}
+            intensity={80}
             className="rounded-2xl overflow-hidden border shadow-lg"
             style={{ backgroundColor: containerBg, borderColor: containerBorder }}
           >
