@@ -480,6 +480,9 @@ export default function TransitNavigationScreen() {
     durationMin = Math.max(1, Math.ceil(remainingSeconds / 60));
   }
 
+  const arrivalTime = new Date(Date.now() + durationMin * 60000);
+  const arrivalTimeString = arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
   const mapPins: WaypointPin[] = [];
   if (routeData && routeData.coords && routeData.coords.length > 0) {
     mapPins.push({
@@ -569,7 +572,12 @@ export default function TransitNavigationScreen() {
         </View>
         <View className="flex-row gap-4 mb-6">
           <View className="bg-[#16202a] p-4 rounded-3xl border border-white/5 flex-1 aspect-video justify-between">
-            <MaterialIcons name="schedule" size={24} color="#0d7ff2" />
+            <View className="flex-row items-start justify-between">
+              <MaterialIcons name="schedule" size={24} color="#0d7ff2" />
+              <View className="bg-white/5 px-2 py-0.5 rounded-md">
+                <Text className="text-xs font-bold text-white/70">{arrivalTimeString}</Text>
+              </View>
+            </View>
             <View>
               <Text className="text-3xl font-bold text-white">
                 {durationMin}
