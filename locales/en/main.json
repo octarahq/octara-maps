@@ -15,6 +15,7 @@
   "items": {
     "gas": "Gas",
     "food": "Food",
+    "coffee": "Coffee",
     "more": "More",
     "parking": "Parking"
   },
