@@ -46,6 +46,14 @@
           "description": "Partagez votre position avec vos proches"
         }
       ]
+    }, {
+      "title": "Mises à jour",
+      "settings": [
+        {
+          "title": "Rejoindre le programme bêta",
+          "description": "Recevez un accès anticipé aux nouvelles fonctionnalités (peut être instable)"
+        }
+      ]
     }
   ]
 }

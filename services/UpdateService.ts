@@ -82,11 +82,15 @@ export const compareVersions = (
   return "same";
 };
 
-export const checkForUpdates = async (): Promise<UpdateInfo> => {
+export const checkForUpdates = async (joinBetaProgram?: boolean): Promise<UpdateInfo> => {
   const currentVersion = getCurrentVersion();
 
   try {
-    const response = await fetch(GITHUB_API_URL, {
+    const url = joinBetaProgram
+      ? "https://api.github.com/repos/octarahq/octara-maps/releases"
+      : GITHUB_API_URL;
+
+    const response = await fetch(url, {
       method: "GET",
       headers: {
         Accept: "application/vnd.github.v3+json",
@@ -101,8 +105,18 @@ export const checkForUpdates = async (): Promise<UpdateInfo> => {
       };
     }
 
-    const releaseInfo: ReleaseInfo = await response.json();
-    const latestVersion = releaseInfo.tag_name.replace(/^Beta-|^v/, "");
+    const data = await response.json();
+    const releaseInfo: ReleaseInfo = joinBetaProgram ? data[0] : data;
+
+    if (!releaseInfo) {
+      return {
+        isUpdateAvailable: false,
+        currentVersion,
+        latestVersion: currentVersion,
+      };
+    }
+
+    const latestVersion = releaseInfo.tag_name.replace(/^beta-|^v/i, "");
 
     const comparison = compareVersions(currentVersion, latestVersion);
     const isUpdateAvailable = comparison === "update";

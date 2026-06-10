@@ -29,6 +29,7 @@ function SettingsSection({
     icon: React.ComponentProps<typeof MaterialIcons>["name"];
     description: string;
     onValueChange?: (value: boolean) => void;
+    switchValue?: boolean;
     onClick?: () => void;
     selectOptions?: { label: string; value: string }[];
     selectedValue?: string;
@@ -49,11 +50,11 @@ function SettingsSection({
               onPress={item.onClick}
               className="flex-row items-center justify-between p-4"
             >
-              <View className="flex-row items-center gap-3">
-                <View className="w-10 h-10 rounded-[20px] bg-white/5 items-center justify-center">
+              <View className="flex-row items-center gap-3 flex-1">
+                <View className="w-10 h-10 rounded-[20px] bg-white/5 items-center justify-center shrink-0">
                   <MaterialIcons name={item.icon} size={20} color="#0d7ff2" />
                 </View>
-                <View>
+                <View className="flex-1 pr-2">
                   <Text className="text-white text-[14px] font-medium">
                     {item.title}
                   </Text>
@@ -64,7 +65,7 @@ function SettingsSection({
               </View>
               {item.onValueChange ? (
                 <Switch
-                  value={false}
+                  value={item.switchValue || false}
                   onValueChange={item.onValueChange}
                   trackColor={{ false: "#334155", true: "#0d7ff2" }}
                   thumbColor="#fff"
@@ -244,6 +245,19 @@ export default function SettingsScreen() {
             onClick: () => {
               router.push("/(main)/(share)/location");
             },
+          },
+        ]}
+      />
+
+      <SettingsSection
+        title={t("sections.2.title", { defaultValue: "Mises à jour" })}
+        items={[
+          {
+            title: t("sections.2.settings.0.title", { defaultValue: "Rejoindre le programme bêta" }),
+            description: t("sections.2.settings.0.description", { defaultValue: "Recevez un accès anticipé aux nouvelles fonctionnalités" }),
+            icon: "new-releases",
+            onValueChange: (val) => setSettings({ ...settings, joinBetaProgram: val }),
+            switchValue: !!settings.joinBetaProgram,
           },
         ]}
       />
