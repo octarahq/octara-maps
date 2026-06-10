@@ -76,16 +76,18 @@ export default function ArrivedScreen() {
 
   return (
     <View
-      className={`flex bg-${Colors.dark.backgroundDark.replace("#", "")} pt-${topInset}`}
+      className="flex-1"
+      style={{ backgroundColor: Colors.dark.backgroundDark, paddingTop: topInset }}
     >
       <ScrollView
-        className={`flex bg-${Colors.dark.backgroundDark.replace("#", "")}`}
+        className="flex-1"
+        style={{ backgroundColor: Colors.dark.backgroundDark }}
         contentContainerClassName="pb-4 px-4"
         showsVerticalScrollIndicator={false}
       >
         <View className="h-14 flex-row items-center justify-between">
           <TouchableOpacity
-            className="w-11 h-11 items-center justify-center"
+            className="w-11 h-11 items-center justify-center absolute left-0 z-10"
             onPress={() => router.replace("/")}
             activeOpacity={0.75}
           >
@@ -94,7 +96,6 @@ export default function ArrivedScreen() {
           <Text className="w-full text-center text-white text-[18px] font-bold">
             {t("arrived.tripSummary")}
           </Text>
-          <View className="w-11 h-11" />
         </View>
 
         <View className="items-center mt-2 mb-4">
@@ -103,7 +104,7 @@ export default function ArrivedScreen() {
           </Text>
         </View>
 
-        <View className="bg-[#17232f] rounded-14 overflow-hidden border border-[#263445]">
+        <View className="bg-[#17232f] overflow-hidden border border-[#263445]" style={{ borderRadius: 14 }}>
           {hasDestination ? (
             <MapSnapshot
               pins={pins}
@@ -128,51 +129,51 @@ export default function ArrivedScreen() {
           )}
         </View>
 
-        <View className="flex-row items-center gap-2 mt-3">
-          <View className="bg-[#17232f] rounded-14 overflow-hidden border border-[#263445]">
-            <View className="flex-row items-center gap-2 p-3">
+        <View className="flex-row items-center justify-between gap-2 mt-3">
+          <View className="flex-1 bg-[#17232f] overflow-hidden border border-[#263445]" style={{ borderRadius: 14 }}>
+            <View className="flex-row items-center gap-2 p-3 pb-1">
               <MaterialIcons
                 name="schedule"
                 size={18}
                 color={Colors.dark.primary}
               />
-              <Text className="text-white text-[15px] font-bold">
+              <Text className="text-white text-[14px] font-bold" numberOfLines={1} adjustsFontSizeToFit>
                 {t("arrived.time")}
               </Text>
             </View>
-            <Text className="text-white text-[24px] font-bold px-4 pb-4">
+            <Text className="text-white text-[20px] font-bold px-3 pb-3" numberOfLines={1} adjustsFontSizeToFit>
               {formatDuration(totalDuration)}
             </Text>
           </View>
 
-          <View className="bg-[#17232f] rounded-14 overflow-hidden border border-[#263445]">
-            <View className="flex-row items-center gap-2 p-3">
+          <View className="flex-1 bg-[#17232f] overflow-hidden border border-[#263445]" style={{ borderRadius: 14 }}>
+            <View className="flex-row items-center gap-2 p-3 pb-1">
               <MaterialIcons
                 name="route"
                 size={18}
                 color={Colors.dark.primary}
               />
-              <Text className="text-white text-[15px] font-bold">
+              <Text className="text-white text-[14px] font-bold" numberOfLines={1} adjustsFontSizeToFit>
                 {t("arrived.distance")}
               </Text>
             </View>
-            <Text className="text-white text-[24px] font-bold px-4 pb-4">
+            <Text className="text-white text-[20px] font-bold px-3 pb-3" numberOfLines={1} adjustsFontSizeToFit>
               {formatDistance(totalDistance)}
             </Text>
           </View>
 
-          <View className="bg-[#17232f] rounded-14 overflow-hidden border border-[#263445]">
-            <View className="flex-row items-center gap-2 p-3">
+          <View className="flex-1 bg-[#17232f] overflow-hidden border border-[#263445]" style={{ borderRadius: 14 }}>
+            <View className="flex-row items-center gap-2 p-3 pb-1">
               <MaterialIcons
                 name="speed"
                 size={18}
                 color={Colors.dark.primary}
               />
-              <Text className="text-white text-[15px] font-bold">
+              <Text className="text-white text-[14px] font-bold" numberOfLines={1} adjustsFontSizeToFit>
                 {t("arrived.avgSpeed")}
               </Text>
             </View>
-            <Text className="text-white text-[24px] font-bold px-4 pb-4">
+            <Text className="text-white text-[20px] font-bold px-3 pb-3" numberOfLines={1} adjustsFontSizeToFit>
               {Math.round(Math.max(0, avgSpeed))} km/h
             </Text>
           </View>
