@@ -234,8 +234,8 @@ const ShadcnMap = React.forwardRef<any, Props>(
               } else {
                 map.flyTo([m.lat || 0, m.lng || 0], m.zoom, { duration: m.duration || 0.6 });
               }
+              setTimeout(()=>map.invalidateSize(),100);
             }
-            setTimeout(()=>map.invalidateSize(),100);
             if (m.type === 'setZoom') { map.setZoom(m.zoom, { animate: m.animate !== false }); }
             if (m.type === 'zoomBy') { map.setZoom(map.getZoom() + (m.delta || 0), { animate: m.animate !== false }); }
             if (m.type === 'panTo') {
@@ -297,13 +297,20 @@ const ShadcnMap = React.forwardRef<any, Props>(
                 });
                 userMarker = L.marker([lat, lng], { icon: myIcon, zIndexOffset: 1000 }).addTo(map);
               }
-              userMarker.bringToFront();
-
               if (m.center) {
-                const point = map.project([lat, lng]);
+                const targetZoom = m.zoom || map.getZoom();
+                const point = map.project([lat, lng], targetZoom);
                 point.y += (m.offsetY || 0);
-                const target = map.unproject(point);
-                map.setView(target, m.zoom || map.getZoom(), { animate: m.animate !== false });
+                const target = map.unproject(point, targetZoom);
+                if (m.animate !== false) {
+                  if (m.zoom) {
+                    map.flyTo(target, targetZoom, { duration: 0.8 });
+                  } else {
+                    map.panTo(target, { animate: true, duration: 0.5 });
+                  }
+                } else {
+                  map.setView(target, targetZoom, { animate: false });
+                }
               }
             }
             if (m.type === 'setUserPositionShareMarker') {
@@ -445,7 +452,11 @@ const ShadcnMap = React.forwardRef<any, Props>(
                 }
               }
             }
-          } catch{ }
+          } catch(err) {
+            try {
+              postToApp({ type: 'error', message: err.message, stack: err.stack });
+            } catch(e) {}
+          }
         }
         window.addEventListener('message', function(e){ handleMessage(e.data); });
         document.addEventListener('message', function(e){ handleMessage(e.data); });
