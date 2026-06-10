@@ -147,11 +147,16 @@ export default function SearchScreen() {
   const filteredAmenities = React.useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
-    return OverPassAmenityList.filter(
-      (a) =>
-        a.label.toLowerCase().includes(q) || a.value.toLowerCase().includes(q),
-    );
-  }, [query]);
+    return OverPassAmenityList.filter((a) => {
+      const key = `amenity_${a.value}`;
+      const translated = t(key);
+      const localizedLabel = translated === `search:${key}` ? a.label : translated;
+      return (
+        localizedLabel.toLowerCase().includes(q) ||
+        a.value.toLowerCase().includes(q)
+      );
+    });
+  }, [query, t]);
 
   const [addressResults, setAddressResults] = React.useState<PhotonFeature[]>(
     [],
@@ -272,18 +277,23 @@ export default function SearchScreen() {
             <View className="mt-2 px-3">
               <ScrollView keyboardShouldPersistTaps="handled">
                 {filteredAmenities.length > 0 &&
-                  filteredAmenities.slice(0, 10).map((a) => (
-                    <SearchResult
-                      key={a.value}
-                      icon={<AmenityIcon />}
-                      title={a.label}
-                      subtitle={t(`type_${a.type.toLowerCase()}`)}
-                      onPress={() => {
-                        setQuery(a.label);
-                        showCommingSoonToast();
-                      }}
-                    />
-                  ))}
+                  filteredAmenities.slice(0, 10).map((a) => {
+                    const key = `amenity_${a.value}`;
+                    const translated = t(key);
+                    const label = translated === `search:${key}` ? a.label : translated;
+                    return (
+                      <SearchResult
+                        key={a.value}
+                        icon={<AmenityIcon />}
+                        title={label}
+                        subtitle={t(`type_${a.type.toLowerCase()}`)}
+                        onPress={() => {
+                          setQuery(label);
+                          showCommingSoonToast();
+                        }}
+                      />
+                    );
+                  })}
 
                 {addressResults.length > 0 &&
                   addressResults.slice(0, 10).map((r) => {
