@@ -281,7 +281,21 @@ const ShadcnMap = React.forwardRef<any, Props>(
                 });
                 userMarker = L.marker([lat, lng], { icon: myIcon }).addTo(map);
               } else {
-                userMarker = L.circleMarker([lat, lng], { radius: 8, color: '#fff', fillColor: '#0d7ff2', fillOpacity: 1, weight: 2 }).addTo(map);
+                var htmlContent = '<div style="width:20px;height:20px;position:relative;">' +
+                  '<div style="box-sizing:content-box;width:16px;height:16px;background:#0d7ff2;border:2px solid #fff;border-radius:50%;box-shadow:0 0 4px rgba(0,0,0,0.3);position:absolute;top:0;left:0;z-index:2;"></div>';
+                if (m.heading != null) {
+                  htmlContent += '<div style="width:20px;height:20px;position:absolute;top:0;left:0;transform:rotate(' + m.heading + 'deg);z-index:1;">' +
+                    '<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #0d7ff2;position:absolute;top:-5px;left:5px;filter:drop-shadow(0 -2px 2px rgba(0,0,0,0.3));"></div>' +
+                  '</div>';
+                }
+                htmlContent += '</div>';
+                var myIcon = L.divIcon({
+                  className: '',
+                  html: htmlContent,
+                  iconSize: [20,20],
+                  iconAnchor: [10,10]
+                });
+                userMarker = L.marker([lat, lng], { icon: myIcon, zIndexOffset: 1000 }).addTo(map);
               }
               userMarker.bringToFront();
 

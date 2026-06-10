@@ -23,6 +23,7 @@ interface Props {
   routeSections?: { coords: { latitude: number; longitude: number }[]; color?: string }[];
   lat?: number;
   lng?: number;
+  heading?: number;
   zoom?: number;
   interactive?: boolean;
   style?: any;
@@ -43,6 +44,7 @@ function MapSnapshotInnerFunc({
   routeSections,
   lat,
   lng,
+  heading,
   zoom = 11,
   interactive = false,
   style,
@@ -99,12 +101,18 @@ function MapSnapshotInnerFunc({
       });
     }
 
-    if (pins && pins.length > 0) {
-      const routeFingerprint =
-        routeCoords && routeCoords.length >= 2
+    const hasPins = pins && pins.length > 0;
+    const hasCoords = routeCoords && routeCoords.length >= 2;
+    const hasSections = routeSections && routeSections.length > 0;
+
+    if (hasPins || hasCoords || hasSections) {
+      const routeFingerprint = hasCoords
           ? `${routeCoords[0].latitude},${routeCoords[0].longitude}:${routeCoords[routeCoords.length - 1].latitude},${routeCoords[routeCoords.length - 1].longitude}:${routeCoords.length}`
           : "0";
-      const key = JSON.stringify(pins) + routeFingerprint;
+      const sectionsFingerprint = hasSections 
+        ? routeSections.map(s => `${s.color || 'none'}:${s.coords.length}`).join('|') 
+        : "0";
+      const key = JSON.stringify(pins || []) + routeFingerprint + sectionsFingerprint;
       
       if (key !== lastKey.current) {
         lastKey.current = key;
@@ -113,27 +121,29 @@ function MapSnapshotInnerFunc({
         post({ type: "clearPolyline" });
         post({ type: "clearOverlayPolylines" });
 
-        const valid = pins.filter((p) => p.lat && p.lng);
-        if (valid.length > 0) {
-          if (routeSections && routeSections.length > 0) {
-            routeSections.forEach(sec => {
-              post({
-                type: "addOverlayPolyline",
-                latlngs: sec.coords.map((c) => [c.latitude, c.longitude]),
-                color: sec.color ? `#${sec.color.replace(/^#/, '')}` : "#0d7ff2",
-                weight: 3,
-                opacity: 0.9,
-              });
-            });
-          } else if (routeCoords && routeCoords.length >= 2) {
+        if (hasSections) {
+          routeSections.forEach(sec => {
             post({
-              type: "setPolyline",
-              latlngs: routeCoords.map((c) => [c.latitude, c.longitude]),
-              color: "#0d7ff2",
-              weight: 2,
-              opacity: 0.85,
+              type: "addOverlayPolyline",
+              latlngs: sec.coords.map((c) => [c.latitude, c.longitude]),
+              color: sec.color ? `#${sec.color.replace(/^#/, '')}` : "#0d7ff2",
+              weight: 3,
+              opacity: 0.9,
             });
-          } else if (valid.length >= 2) {
+          });
+        } else if (hasCoords) {
+          post({
+            type: "setPolyline",
+            latlngs: routeCoords.map((c) => [c.latitude, c.longitude]),
+            color: "#0d7ff2",
+            weight: 2,
+            opacity: 0.85,
+          });
+        }
+
+        const valid = (pins || []).filter((p) => p.lat && p.lng);
+        if (valid.length > 0) {
+          if (!hasSections && !hasCoords && valid.length >= 2) {
             post({
               type: "setPolyline",
               latlngs: valid.map((p) => [p.lat, p.lng]),
@@ -175,31 +185,38 @@ function MapSnapshotInnerFunc({
               });
             }
           });
+        }
 
-          if (valid.length >= 2) {
-            const fitPoints =
-              routeCoords && routeCoords.length >= 2
-                ? routeCoords.map((c) => ({ lat: c.latitude, lng: c.longitude }))
-                : valid;
-            const lats = fitPoints.map((p) => p.lat);
-            const lngs = fitPoints.map((p) => p.lng);
-            post({
-              type: "fitBounds",
-              bounds: [
-                [Math.min(...lats), Math.min(...lngs)],
-                [Math.max(...lats), Math.max(...lngs)],
-              ],
-              padding: interactive ? [32, 32] : [8, 8],
-            });
-          } else {
-            post({
-              type: "zoomTo",
-              lat: valid[0].lat,
-              lng: valid[0].lng,
-              zoom: 13,
-              animate: false,
-            });
-          }
+        const fitPoints: { lat: number; lng: number }[] = [];
+        if (hasCoords) {
+          fitPoints.push(...routeCoords.map((c) => ({ lat: c.latitude, lng: c.longitude })));
+        } else if (hasSections) {
+          routeSections.forEach((sec) =>
+            fitPoints.push(...sec.coords.map((c) => ({ lat: c.latitude, lng: c.longitude })))
+          );
+        } else {
+          fitPoints.push(...valid);
+        }
+
+        if (fitPoints.length >= 2) {
+          const lats = fitPoints.map((p) => p.lat);
+          const lngs = fitPoints.map((p) => p.lng);
+          post({
+            type: "fitBounds",
+            bounds: [
+              [Math.min(...lats), Math.min(...lngs)],
+              [Math.max(...lats), Math.max(...lngs)],
+            ],
+            padding: interactive ? [32, 32] : [8, 8],
+          });
+        } else if (fitPoints.length === 1) {
+          post({
+            type: "zoomTo",
+            lat: fitPoints[0].lat,
+            lng: fitPoints[0].lng,
+            zoom: 13,
+            animate: false,
+          });
         }
       }
     } else {
@@ -209,9 +226,9 @@ function MapSnapshotInnerFunc({
     }
 
     if (lat != null && lng != null) {
-      post({ type: "setUserMarker", lat, lng, icon: "address" });
+      post({ type: "setUserMarker", lat, lng, heading, icon: "circle" });
     }
-  }, [mapReady, pins, routeCoords, routeSections, lat, lng, zoom, layers]);
+  }, [mapReady, pins, routeCoords, routeSections, lat, lng, heading, zoom, layers]);
 
   const handleMapMsg = React.useCallback((msg: any) => {
     if (msg?.type === "mapReady") {

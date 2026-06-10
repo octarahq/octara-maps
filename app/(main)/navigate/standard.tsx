@@ -1138,6 +1138,7 @@ export default function StandardNavigationScreen() {
       type: "setUserMarker",
       lat: position.latitude,
       lng: position.longitude,
+      heading: position?.heading || undefined,
       icon: "circle",
       animate: false,
     });
