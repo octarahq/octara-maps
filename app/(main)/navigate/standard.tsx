@@ -723,7 +723,6 @@ export default function StandardNavigationScreen() {
   const etaLabel = getEtaLabel(totalDuration);
 
   React.useEffect(() => {
-    if (requestedMode !== "car") return;
     if (hasArrivedRedirectRef.current) return;
     if (
       !position ||
@@ -735,12 +734,21 @@ export default function StandardNavigationScreen() {
       return;
     }
 
+    const isLastStep =
+      currentStepIndex === Math.max(0, (navigationData?.steps?.length || 1) - 1);
+    if (!isLastStep) return;
+
     const distanceToDestination = calculateDistance(
       { latitude: position.latitude, longitude: position.longitude },
       { latitude: destLat, longitude: destLng },
     );
 
-    if (distanceToDestination > 200) return;
+    let distanceThreshold = 50;
+    if (requestedMode === "walk" || requestedMode === "bike") {
+      distanceThreshold = 10;
+    }
+
+    if (distanceToDestination > distanceThreshold) return;
 
     hasArrivedRedirectRef.current = true;
 
@@ -784,6 +792,8 @@ export default function StandardNavigationScreen() {
     routeService,
     router,
     t,
+    currentStepIndex,
+    navigationData?.steps?.length,
   ]);
 
   const targetZoom = React.useMemo(() => {
