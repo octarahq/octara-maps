@@ -11,6 +11,8 @@ export type UserProfile = {
     favTransportMode: "car" | "transit" | "bike" | "walk";
     voice: "alert" | "all" | "off";
     mapStyle?:
+      | "standard"
+      | "standard_dark"
       | "satelite"
       | "terrain"
       | "terrain_dark";
@@ -127,26 +129,26 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const setSettings = React.useCallback((settings: UserProfile["settings"]) => {
     setProfile((p) => {
       const updated = { ...p, settings };
-      saveProfile(updated);
+      saveProfile({ ...updated, saved });
       return updated;
     });
-  }, []);
+  }, [saved]);
 
   const setName = React.useCallback((name: string) => {
     setProfile((p) => {
       const updated = { ...p, name };
-      saveProfile(updated);
+      saveProfile({ ...updated, saved });
       return updated;
     });
-  }, []);
+  }, [saved]);
 
   const setLanguage = React.useCallback((lang: string) => {
     setProfile((p) => {
       const updated = { ...p, language: lang };
-      saveProfile(updated);
+      saveProfile({ ...updated, saved });
       return updated;
     });
-  }, []);
+  }, [saved]);
 
   const setHasFinishedOnboarding = React.useCallback(
     (val: boolean) => {
