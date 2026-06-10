@@ -55,7 +55,8 @@ const getCurrentVersion = (): string => {
 };
 
 const parseVersion = (version: string): number[] => {
-  return version
+  const clean = version.replace(/^beta-|^v/i, "");
+  return clean
     .split(".")
     .map((v) => {
       const match = v.match(/^\d+/);
