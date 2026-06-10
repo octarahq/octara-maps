@@ -43,6 +43,7 @@ const { t } = createTranslator("navigate");
 
 export default function TransitNavigationScreen() {
   const mapRef = React.useRef<MapSnapshotRef>(null);
+  const hasArrivedRedirectRef = React.useRef(false);
   const [followUser, setFollowUser] = React.useState(true);
   const { route, routeId } = useLocalSearchParams();
   const router = useRouter();
@@ -511,6 +512,48 @@ export default function TransitNavigationScreen() {
     }
   }, [isWalking, setInterpolationEnabled]);
 
+  React.useEffect(() => {
+    if (hasArrivedRedirectRef.current) return;
+    if (!position || !routeData?.rawJourney?.sections) return;
+
+    const sections = routeData.rawJourney.sections;
+    if (sections.length === 0) return;
+
+    const isLastStep = activeSectionIndex === sections.length - 1;
+    if (!isLastStep) return;
+
+    const lastSection = sections[sections.length - 1];
+    if (!lastSection?.to?.coord) return;
+
+    const destLat = lastSection.to.coord.lat;
+    const destLng = lastSection.to.coord.lon;
+
+    const distToDest = getDistanceMetres(
+      position.latitude,
+      position.longitude,
+      destLat,
+      destLng
+    );
+
+    if (distToDest <= 20) {
+      hasArrivedRedirectRef.current = true;
+      router.replace({
+        pathname: "/(main)/arrived" as any,
+        params: {
+          name: lastSection.to.name || t("destinationFallback"),
+          mode: "transit",
+          totalDuration: String(routeData.duration || 0),
+          totalDistance: String(routeData.distance || 0),
+          avgSpeed: "0",
+          startLat: String(routeData.coords?.[0]?.latitude ?? position.latitude),
+          startLng: String(routeData.coords?.[0]?.longitude ?? position.longitude),
+          destLat: String(destLat),
+          destLng: String(destLng),
+        },
+      });
+    }
+  }, [position, routeData, activeSectionIndex, router]);
+
   return (
     <View className="flex-1 bg-[#0a0f14]">
       <Stack.Screen options={{ headerShown: false }} />
@@ -752,6 +795,7 @@ export default function TransitNavigationScreen() {
             zoom={currentZoomLevel}
             interactive={true}
             onMapReady={handleMapReady}
+            onMapMoved={() => setFollowUser(false)}
             className="rounded-none"
             style={{ width: "100%", height: "100%", position: "absolute" }}
           />
