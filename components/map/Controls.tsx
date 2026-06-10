@@ -42,11 +42,7 @@ export default function Controls() {
   );
 
   const centerOnUser = () => {
-    if (followUser) {
-      m.toggleFollow?.();
-    } else {
-      centerAndFollow?.();
-    }
+    centerAndFollow?.();
   };
 
   const { vibration } = useHapticSettings();
