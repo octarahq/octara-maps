@@ -24,6 +24,7 @@ import {
 
 export default function POISearchScreen() {
   const { t } = createTranslator("poi_search");
+  const { t: tSearch } = createTranslator("search");
   const { amenity = "restaurant", title = "Nearby" } = useLocalSearchParams<{
     amenity: string;
     title: string;
@@ -79,7 +80,7 @@ export default function POISearchScreen() {
       <ScrollView contentContainerClassName="p-4 pb-10">
         <View className="flex-row justify-between items-center">
           <Text className="text-[#e3e3e3] text-lg font-bold">
-            {title || "Nearby"}
+            {title || t("title")}
           </Text>
           {loading && <ActivityIndicator size="small" color="#e3e3e3" />}
         </View>
@@ -155,13 +156,22 @@ export default function POISearchScreen() {
                     className="text-[#e3e3e3] text-base font-bold"
                     numberOfLines={1}
                   >
-                    {result.tags.name || "Unknown Restaurant"}
+                    {(() => {
+                      const key = `amenity_${result.tags.amenity}`;
+                      const translated = tSearch(key);
+                      const fallbackName = translated === `search:${key}` ? (result.tags.amenity || "Lieu") : translated;
+                      return result.tags.name || fallbackName;
+                    })()}
                   </Text>
                   <Text
                     className="text-[#e3e3e3] text-sm mt-1"
                     numberOfLines={1}
                   >
-                    {result.tags.cuisine || result.tags.amenity}
+                    {result.tags.cuisine || (result.tags.name ? (() => {
+                      const key = `amenity_${result.tags.amenity}`;
+                      const translated = tSearch(key);
+                      return translated === `search:${key}` ? (result.tags.amenity || "") : translated;
+                    })() : "")}
                   </Text>
                 </View>
               </View>
