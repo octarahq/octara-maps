@@ -79,6 +79,8 @@ function MapProviderContent({
   const [followUser, setFollowUser] = useState(true);
   const ignoreMapMove = useRef(false);
   const followRef = useRef(followUser);
+  const shouldZoomToDefaultRef = useRef(false);
+  const isFlyingRef = useRef(false);
 
   const [mapReady, setMapReady] = useState(false);
   const pendingPositionRef = useRef<typeof position | null>(null);
@@ -121,23 +123,28 @@ function MapProviderContent({
         setFollowUser((f) => !f);
       },
       centerAndFollow: () => {
-        setFollowUser(true);
-
-        if (position) {
-          ignoreMapMove.current = true;
-          setTimeout(() => {
-            ignoreMapMove.current = false;
-          }, 1000);
-          post({
-            type: "setUserMarker",
-            lat: position.latitude,
-            lng: position.longitude,
-            center: true,
-            offsetY: -40,
-            zoom: defaultCenterZoom,
-            animate: false,
-          });
-        }
+        shouldZoomToDefaultRef.current = true;
+        setFollowUser((f) => {
+          if (f && position) {
+            ignoreMapMove.current = true;
+            isFlyingRef.current = true;
+            setTimeout(() => {
+              ignoreMapMove.current = false;
+              isFlyingRef.current = false;
+            }, 1000);
+            shouldZoomToDefaultRef.current = false;
+            post({
+              type: "setUserMarker",
+              lat: position.latitude,
+              lng: position.longitude,
+              center: true,
+              offsetY: -40,
+              zoom: defaultCenterZoom,
+              animate: true,
+            });
+          }
+          return true;
+        });
       },
     };
   }, [followUser, position, layers.mapType, currentZoom]);
@@ -153,8 +160,13 @@ function MapProviderContent({
       return;
     }
 
+    if (msg.type === "error") {
+      console.error("WebView Map Error:", msg.message, msg.stack);
+      return;
+    }
+
     if (msg.type === "mapMoved") {
-      if (followRef.current) {
+      if (!ignoreMapMove.current && followRef.current) {
         setFollowUser(false);
       }
     }
@@ -183,15 +195,30 @@ function MapProviderContent({
       const pos = position || pendingPositionRef.current;
       if (pos) {
         pendingPositionRef.current = null;
-        post({
+        
+        const shouldZoom = shouldZoomToDefaultRef.current;
+        shouldZoomToDefaultRef.current = false;
+        
+        if (shouldZoom) {
+          ignoreMapMove.current = true;
+          isFlyingRef.current = true;
+          setTimeout(() => {
+            ignoreMapMove.current = false;
+            isFlyingRef.current = false;
+          }, 1000);
+        }
+
+        const payload = {
           type: "setUserMarker",
           lat: pos.latitude,
           lng: pos.longitude,
-          center: followUser,
+          center: shouldZoom ? true : (followUser && !isFlyingRef.current),
           offsetY: followUser ? -40 : 0,
-          zoom: followUser ? defaultCenterZoom : undefined,
-          animate: false,
-        });
+          zoom: shouldZoom ? defaultCenterZoom : undefined,
+          animate: true,
+        };
+        
+        post(payload);
       }
     }
 

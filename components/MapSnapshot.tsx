@@ -29,6 +29,7 @@ interface Props {
   style?: any;
   className?: string;
   onMapReady?: () => void;
+  onMapMoved?: () => void;
 }
 
 export interface MapSnapshotRef {
@@ -50,6 +51,7 @@ function MapSnapshotInnerFunc({
   style,
   className,
   onMapReady,
+  onMapMoved,
 }: Props, fRef: React.Ref<MapSnapshotRef>) {
   const ref = useRef<any>(null);
   const [mapReady, setMapReady] = React.useState(false);
@@ -228,14 +230,18 @@ function MapSnapshotInnerFunc({
     if (lat != null && lng != null) {
       post({ type: "setUserMarker", lat, lng, heading, icon: "circle" });
     }
-  }, [mapReady, pins, routeCoords, routeSections, lat, lng, heading, zoom, layers]);
+  }, [mapReady, pins, routeCoords, routeSections, lat, lng, heading, zoom, layers, interactive]);
 
   const handleMapMsg = React.useCallback((msg: any) => {
     if (msg?.type === "mapReady") {
       setMapReady(true);
       if (onMapReady) onMapReady();
+    } else if (msg?.type === "mapMoved") {
+      if (onMapMoved) onMapMoved();
+    } else if (msg?.type === "error") {
+      console.error("WebView MapSnapshot Error:", msg.message, msg.stack);
     }
-  }, [onMapReady]);
+  }, [onMapReady, onMapMoved]);
 
   return (
     <View className={cn("overflow-hidden rounded-2xl relative", className)} style={[style, { opacity: 0.99 }]}>
