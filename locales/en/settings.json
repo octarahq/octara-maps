@@ -46,6 +46,14 @@
           "description": "Share your location with nearby"
         }
       ]
+    }, {
+      "title": "Updates",
+      "settings": [
+        {
+          "title": "Join beta program",
+          "description": "Receive early access to new features (may be unstable)"
+        }
+      ]
     }
   ]
 }

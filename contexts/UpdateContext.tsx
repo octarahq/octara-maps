@@ -1,5 +1,6 @@
 import { checkForUpdates, ReleaseInfo } from "@/services/UpdateService";
 import React from "react";
+import { useUser } from "./UserContext";
 
 type UpdateContextValue = {
   hasUpdate: boolean;
@@ -18,6 +19,7 @@ export function useUpdate() {
 }
 
 export function UpdateProvider({ children }: { children: React.ReactNode }) {
+  const { settings, isLoading: userIsLoading } = useUser();
   const [hasUpdate, setHasUpdate] = React.useState(false);
   const [releaseInfo, setReleaseInfo] = React.useState<ReleaseInfo | undefined>(
     undefined,
@@ -31,9 +33,10 @@ export function UpdateProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const checkUpdates = React.useCallback(async () => {
+    if (userIsLoading) return;
     setIsChecking(true);
     try {
-      const result = await checkForUpdates();
+      const result = await checkForUpdates(settings?.joinBetaProgram);
       if (result.isUpdateAvailable && result.releaseInfo) {
         setHasUpdate(true);
         setReleaseInfo(result.releaseInfo);
@@ -42,14 +45,14 @@ export function UpdateProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsChecking(false);
     }
-  }, []);
+  }, [settings?.joinBetaProgram, userIsLoading]);
 
   React.useEffect(() => {
-    if (!checkedRef.current) {
+    if (!userIsLoading && !checkedRef.current) {
       checkedRef.current = true;
       checkUpdates();
     }
-  }, [checkUpdates]);
+  }, [checkUpdates, userIsLoading]);
 
   const value = React.useMemo(
     () => ({
