@@ -74,7 +74,10 @@ export default function TransitNavigationScreen() {
 
   const [mapExpanded, setMapExpanded] = useState(false);
 
-  const { position } = usePosition();
+  const { position, setInterpolationEnabled } = usePosition();
+  
+  let isWalking = false;
+
   let currentZoomLevel = 16;
 
   React.useEffect(() => {
@@ -195,6 +198,7 @@ export default function TransitNavigationScreen() {
 
     if (activeSections.length > 0) {
       const firstSection = activeSections[0];
+      isWalking = firstSection.type !== "public_transport" && firstSection.type !== "waiting";
       if (firstSection.type === "waiting") {
         currentInstruction = {
           distanceText: t("transit.action.waiting"),
@@ -500,6 +504,13 @@ export default function TransitNavigationScreen() {
     });
   }
 
+  React.useEffect(() => {
+    if (setInterpolationEnabled) {
+      setInterpolationEnabled(isWalking);
+      return () => setInterpolationEnabled(true);
+    }
+  }, [isWalking, setInterpolationEnabled]);
+
   return (
     <View className="flex-1 bg-[#0a0f14]">
       <Stack.Screen options={{ headerShown: false }} />
@@ -698,6 +709,7 @@ export default function TransitNavigationScreen() {
                 routeSections={routeData?.sections}
                 lat={position?.latitude}
                 lng={position?.longitude}
+                heading={position?.heading || undefined}
                 interactive={false}
                 style={{ width: "100%", height: "100%" }}
               />
@@ -736,6 +748,7 @@ export default function TransitNavigationScreen() {
             routeSections={routeData?.sections}
             lat={position?.latitude}
             lng={position?.longitude}
+            heading={position?.heading || undefined}
             zoom={currentZoomLevel}
             interactive={true}
             onMapReady={handleMapReady}

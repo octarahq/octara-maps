@@ -17,6 +17,7 @@ type State = {
   refresh: () => Promise<void>;
   startWatching: () => Promise<void>;
   stopWatching: () => void;
+  setInterpolationEnabled: (enabled: boolean) => void;
 };
 
 const PositionContext = React.createContext<State | null>(null);
@@ -42,12 +43,54 @@ export function PositionProvider({ children }: { children: React.ReactNode }) {
     timestamp: number;
   } | null>(null);
   const animRef = React.useRef<number | null>(null);
+  const interpolationRef = React.useRef(true);
+
+  const setInterpolationEnabled = React.useCallback((enabled: boolean) => {
+    interpolationRef.current = enabled;
+  }, []);
 
   const animateTo = React.useCallback(
     (from: Position, to: Position, duration: number) => {
-      // Disabled 60FPS JS-driven interpolation to prevent OOM crashes.
-      // Updates are now sent directly at 1Hz from watchPositionAsync.
-      setPosition(to);
+      if (!interpolationRef.current) {
+        setPosition(to);
+        return;
+      }
+      
+      if (animRef.current !== null) cancelAnimationFrame(animRef.current);
+      const start = Date.now();
+      const step = () => {
+        const now = Date.now();
+        const t = Math.min(1, (now - start) / duration);
+        const interpolated: Position = {
+          latitude: from.latitude + (to.latitude - from.latitude) * t,
+          longitude: from.longitude + (to.longitude - from.longitude) * t,
+          speed: to.speed,
+          heading: to.heading,
+          city: to.city,
+          country: to.country,
+        };
+
+        const prev = positionRef.current;
+        const latEq =
+          prev && Math.abs(prev.latitude - interpolated.latitude) < 1e-7;
+        const lonEq =
+          prev && Math.abs(prev.longitude - interpolated.longitude) < 1e-7;
+        const speedEq =
+          prev &&
+          (prev.speed === interpolated.speed ||
+            (prev.speed == null && interpolated.speed == null));
+
+        if (!prev || !latEq || !lonEq || !speedEq) {
+          setPosition(interpolated);
+        }
+
+        if (t < 1) {
+          animRef.current = requestAnimationFrame(step);
+        } else {
+          animRef.current = null;
+        }
+      };
+      animRef.current = requestAnimationFrame(step);
     },
     [],
   );
@@ -206,8 +249,9 @@ export function PositionProvider({ children }: { children: React.ReactNode }) {
       refresh: doRefresh,
       startWatching,
       stopWatching,
+      setInterpolationEnabled,
     }),
-    [position, loading, error, doRefresh, startWatching, stopWatching],
+    [position, loading, error, doRefresh, startWatching, stopWatching, setInterpolationEnabled],
   );
 
   return (
