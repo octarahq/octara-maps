@@ -14,7 +14,6 @@ import { Colors } from "@/constants/theme";
 import { usePosition } from "@/contexts/PositionContext";
 import { useUser } from "@/contexts/UserContext";
 import { createTranslator } from "@/i18n";
-import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
@@ -466,7 +465,12 @@ export default function RoutePlanningScreen() {
     Partial<
       Record<
         TransportMode,
-        { duration: number; distance: number; coords: Coordinate[]; transitLines?: any[] }
+        {
+          duration: number;
+          distance: number;
+          coords: Coordinate[];
+          transitLines?: any[];
+        }
       >
     >
   >({});
@@ -478,7 +482,12 @@ export default function RoutePlanningScreen() {
     Partial<
       Record<
         TransportMode,
-        { duration: number; distance: number; coords: Coordinate[]; transitLines?: any[] }[]
+        {
+          duration: number;
+          distance: number;
+          coords: Coordinate[];
+          transitLines?: any[];
+        }[]
       >
     >
   >({});
@@ -498,11 +507,21 @@ export default function RoutePlanningScreen() {
   });
 
   const [transitDate, setTransitDate] = React.useState(new Date());
-  const [transitTimeType, setTransitTimeType] = React.useState<"departure" | "arrival">("departure");
-  const [transitForbiddenModes, setTransitForbiddenModes] = React.useState<string[]>([]);
+  const [transitTimeType, setTransitTimeType] = React.useState<
+    "departure" | "arrival"
+  >("departure");
+  const [transitForbiddenModes, setTransitForbiddenModes] = React.useState<
+    string[]
+  >([]);
 
   const modeToService = (m: TransportMode): string =>
-    m === "car" ? "driving" : m === "walk" ? "walking" : m === "transit" ? "transit" : "bicycling";
+    m === "car"
+      ? "driving"
+      : m === "walk"
+        ? "walking"
+        : m === "transit"
+          ? "transit"
+          : "bicycling";
 
   const getFastestMode = (): TransportMode | null => {
     const modes: TransportMode[] = ["car", "walk", "bike", "transit"];
@@ -984,11 +1003,8 @@ export default function RoutePlanningScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolvedCoords]);
 
-
-
   const prevSelectedRouteKey = React.useRef("");
   React.useEffect(() => {
-    // We allow transit update now
     const selectedRoute = routeResults[selected];
     if (!selectedRoute) return;
 
@@ -1102,16 +1118,28 @@ export default function RoutePlanningScreen() {
                         </Text>
                       </>
                     ) : null}
-                    
-                    {selected === "transit" && routeResults["transit"]?.transitLines && (
-                      <View className="flex-row items-center flex-wrap gap-1 ml-2">
-                        {routeResults["transit"].transitLines.map((line: any, idx: number) => (
-                          <View key={idx} className="px-1.5 py-0.5 rounded-[4px]" style={{ backgroundColor: `#${line.color}` }}>
-                            <Text style={{ color: `#${line.text_color}` }} className="text-[10px] font-bold">{line.code}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    )}
+
+                    {selected === "transit" &&
+                      routeResults["transit"]?.transitLines && (
+                        <View className="flex-row items-center flex-wrap gap-1 ml-2">
+                          {routeResults["transit"].transitLines.map(
+                            (line: any, idx: number) => (
+                              <View
+                                key={idx}
+                                className="px-1.5 py-0.5 rounded-[4px]"
+                                style={{ backgroundColor: `#${line.color}` }}
+                              >
+                                <Text
+                                  style={{ color: `#${line.text_color}` }}
+                                  className="text-[10px] font-bold"
+                                >
+                                  {line.code}
+                                </Text>
+                              </View>
+                            ),
+                          )}
+                        </View>
+                      )}
                   </View>
                 )}
               </View>
@@ -1216,15 +1244,27 @@ export default function RoutePlanningScreen() {
                       </>
                     ) : null}
 
-                    {selected === "transit" && routeResults["transit"]?.transitLines && (
-                      <View className="flex-row items-center flex-wrap gap-1 ml-2">
-                        {routeResults["transit"].transitLines.map((line: any, idx: number) => (
-                          <View key={idx} className="px-1.5 py-0.5 rounded-[4px]" style={{ backgroundColor: `#${line.color}` }}>
-                            <Text style={{ color: `#${line.text_color}` }} className="text-[10px] font-bold">{line.code}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    )}
+                    {selected === "transit" &&
+                      routeResults["transit"]?.transitLines && (
+                        <View className="flex-row items-center flex-wrap gap-1 ml-2">
+                          {routeResults["transit"].transitLines.map(
+                            (line: any, idx: number) => (
+                              <View
+                                key={idx}
+                                className="px-1.5 py-0.5 rounded-[4px]"
+                                style={{ backgroundColor: `#${line.color}` }}
+                              >
+                                <Text
+                                  style={{ color: `#${line.text_color}` }}
+                                  className="text-[10px] font-bold"
+                                >
+                                  {line.code}
+                                </Text>
+                              </View>
+                            ),
+                          )}
+                        </View>
+                      )}
                   </View>
                 )}
               </View>
@@ -1264,8 +1304,6 @@ export default function RoutePlanningScreen() {
             </Animated.View>
           </>
         )}
-
-
 
         <View className="flex-row items-center justify-between mb-3">
           <Text className="text-white text-[17px] font-bold">
@@ -1370,11 +1408,26 @@ export default function RoutePlanningScreen() {
                                 </Text>
                                 {mode.id === "transit" && alt.transitLines && (
                                   <View className="flex-row items-center flex-wrap gap-1 mt-1">
-                                    {alt.transitLines.map((line: any, lidx: number) => (
-                                      <View key={lidx} className="px-1 py-[1px] rounded-[3px]" style={{ backgroundColor: `#${line.color}` }}>
-                                        <Text style={{ color: `#${line.text_color}` }} className="text-[9px] font-bold">{line.code}</Text>
-                                      </View>
-                                    ))}
+                                    {alt.transitLines.map(
+                                      (line: any, lidx: number) => (
+                                        <View
+                                          key={lidx}
+                                          className="px-1 py-[1px] rounded-[3px]"
+                                          style={{
+                                            backgroundColor: `#${line.color}`,
+                                          }}
+                                        >
+                                          <Text
+                                            style={{
+                                              color: `#${line.text_color}`,
+                                            }}
+                                            className="text-[9px] font-bold"
+                                          >
+                                            {line.code}
+                                          </Text>
+                                        </View>
+                                      ),
+                                    )}
                                   </View>
                                 )}
                               </View>
@@ -1448,15 +1501,27 @@ export default function RoutePlanningScreen() {
                     >
                       {t(`modes.${mode.id}.subtitle`)}
                     </Text>
-                    {mode.id === "transit" && routeResults["transit"]?.transitLines && (
-                      <View className="flex-row items-center flex-wrap gap-1 mt-[4px]">
-                        {routeResults["transit"].transitLines.map((line: any, idx: number) => (
-                          <View key={idx} className="px-1.5 py-[2px] rounded-[4px]" style={{ backgroundColor: `#${line.color}` }}>
-                            <Text style={{ color: `#${line.text_color}` }} className="text-[10px] font-bold">{line.code}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    )}
+                    {mode.id === "transit" &&
+                      routeResults["transit"]?.transitLines && (
+                        <View className="flex-row items-center flex-wrap gap-1 mt-[4px]">
+                          {routeResults["transit"].transitLines.map(
+                            (line: any, idx: number) => (
+                              <View
+                                key={idx}
+                                className="px-1.5 py-[2px] rounded-[4px]"
+                                style={{ backgroundColor: `#${line.color}` }}
+                              >
+                                <Text
+                                  style={{ color: `#${line.text_color}` }}
+                                  className="text-[10px] font-bold"
+                                >
+                                  {line.code}
+                                </Text>
+                              </View>
+                            ),
+                          )}
+                        </View>
+                      )}
                   </View>
                 </View>
                 <View className="items-end gap-[2px]">
@@ -1489,10 +1554,12 @@ export default function RoutePlanningScreen() {
           <TouchableOpacity
             className="bg-primary rounded-[16px] h-[56px] flex-row items-center justify-center gap-[10px] elevation-10 shadow-primary shadow-opacity-40 shadow-radius-[16px] shadow-offset-[0,6]"
             style={{ backgroundColor: Colors.dark.primary }}
-            onPress={() => router.push({
-              pathname: "/transitPlanning",
-              params: { name, address, lat, lng }
-            })}
+            onPress={() =>
+              router.push({
+                pathname: "/transitPlanning",
+                params: { name, address, lat, lng },
+              })
+            }
             activeOpacity={0.9}
           >
             <Text className="text-white text-[17px] font-extrabold">

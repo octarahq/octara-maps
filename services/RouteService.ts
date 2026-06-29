@@ -59,14 +59,16 @@ export interface RouteService {
         forbiddenModes?: string[];
       };
     },
-  ) => Promise<{ 
-    coords: Coordinate[]; 
-    duration: number; 
-    distance: number; 
-    transitLines?: any[];
-    sections?: { coords: Coordinate[]; color?: string; type: string }[];
-    rawJourney?: any;
-  }[]>;
+  ) => Promise<
+    {
+      coords: Coordinate[];
+      duration: number;
+      distance: number;
+      transitLines?: any[];
+      sections?: { coords: Coordinate[]; color?: string; type: string }[];
+      rawJourney?: any;
+    }[]
+  >;
   getMultiStepRoute: (
     waypoints: Coordinate[],
     mode?: string,
@@ -140,10 +142,10 @@ export function useRouteService(): RouteService {
   >([]);
   const [lastRawRouteData, setLastRawRouteData] = useState<any | null>(null);
   const [lastAlternatives, setLastAlternatives] = useState<
-    { 
-      coords: Coordinate[]; 
-      duration: number; 
-      distance: number; 
+    {
+      coords: Coordinate[];
+      duration: number;
+      distance: number;
       transitLines?: any[];
       sections?: { coords: Coordinate[]; color?: string; type: string }[];
       rawJourney?: any;
@@ -403,7 +405,7 @@ export function useRouteService(): RouteService {
         datetimeRepresents?: "departure" | "arrival";
         forbiddenModes?: string[];
       };
-    }
+    },
   ): Promise<{
     success: boolean;
     data?: any;
@@ -427,19 +429,21 @@ export function useRouteService(): RouteService {
     const startTs = Date.now();
     try {
       let url = `${host}/route/v1/${osrmMode}/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson&steps=true`;
-      
+
       if (mode === "transit") {
         url = `${host}/navigation/transit?from_lon=${start.longitude}&from_lat=${start.latitude}&to_lon=${end.longitude}&to_lat=${end.latitude}`;
         if (options?.transitOptions) {
-          const { datetime, datetimeRepresents, forbiddenModes } = options.transitOptions;
+          const { datetime, datetimeRepresents, forbiddenModes } =
+            options.transitOptions;
           if (datetime) url += `&datetime=${datetime}`;
-          if (datetimeRepresents) url += `&datetime_represents=${datetimeRepresents}`;
+          if (datetimeRepresents)
+            url += `&datetime_represents=${datetimeRepresents}`;
           if (forbiddenModes && forbiddenModes.length > 0) {
-            forbiddenModes.forEach(m => url += `&forbidden_uris[]=${m}`);
+            forbiddenModes.forEach((m) => (url += `&forbidden_uris[]=${m}`));
           }
         }
       }
-      
+
       const res = await fetchWithTimeout(url);
       const duration = Date.now() - startTs;
       const timing = {
@@ -536,17 +540,19 @@ export function useRouteService(): RouteService {
         : "";
       let url = `${host}/route/v1/${osrmMode}/${coordsQuery}?overview=full&geometries=geojson&steps=true&alternatives=true${excludeParam}`;
       if (mode === "transit") {
-        url = `${host}/navigation/transit?from_lon=${waypoints[0].longitude}&from_lat=${waypoints[0].latitude}&to_lon=${waypoints[waypoints.length-1].longitude}&to_lat=${waypoints[waypoints.length-1].latitude}`;
+        url = `${host}/navigation/transit?from_lon=${waypoints[0].longitude}&from_lat=${waypoints[0].latitude}&to_lon=${waypoints[waypoints.length - 1].longitude}&to_lat=${waypoints[waypoints.length - 1].latitude}`;
         if (options?.transitOptions) {
-          const { datetime, datetimeRepresents, forbiddenModes } = options.transitOptions;
+          const { datetime, datetimeRepresents, forbiddenModes } =
+            options.transitOptions;
           if (datetime) url += `&datetime=${datetime}`;
-          if (datetimeRepresents) url += `&datetime_represents=${datetimeRepresents}`;
+          if (datetimeRepresents)
+            url += `&datetime_represents=${datetimeRepresents}`;
           if (forbiddenModes && forbiddenModes.length > 0) {
-            forbiddenModes.forEach(m => url += `&forbidden_uris[]=${m}`);
+            forbiddenModes.forEach((m) => (url += `&forbidden_uris[]=${m}`));
           }
         }
       }
-      
+
       const res = await fetchWithTimeout(url);
       const duration = Date.now() - startTs;
       const timing = {
@@ -578,53 +584,65 @@ export function useRouteService(): RouteService {
           }));
         return { success: true, routes, host, rawData: data, timings };
       } else if (data?.journeys?.length) {
-        const routes = (data.journeys as any[]).slice(0, altCount).map((journey) => {
-          const coords: Coordinate[] = [];
-          const sections: { coords: Coordinate[]; color?: string; type: string; distance?: number }[] = [];
-          let distance = 0;
-          const transitLines: any[] = [];
-          if (journey.sections) {
-            journey.sections.forEach((section: any) => {
-              const secCoords: Coordinate[] = [];
-              let secDistance = 0;
-              if (section.geojson && section.geojson.coordinates) {
-                section.geojson.coordinates.forEach((coord: [number, number], index: number) => {
-                  const c = { latitude: coord[1], longitude: coord[0] };
-                  coords.push(c);
-                  secCoords.push(c);
-                  if (index > 0) {
-                    const prev = section.geojson.coordinates[index - 1];
-                    secDistance += calculateDistance(
-                      { latitude: prev[1], longitude: prev[0] },
-                      c
-                    );
-                  }
-                });
-              }
-              const info = section.display_informations;
-              if (info && info.code) {
-                transitLines.push(info);
-              }
-              distance += secDistance;
-              if (secCoords.length > 0) {
-                sections.push({
-                  coords: secCoords,
-                  color: (section.type === "public_transport" && info?.color) ? `#${info.color}` : "#0d7ff2",
-                  type: section.type,
-                  distance: secDistance,
-                });
-              }
-            });
-          }
-          return {
-            coords,
-            duration: Math.round(journey.duration / 60),
-            distance,
-            transitLines,
-            sections,
-            rawJourney: journey,
-          };
-        });
+        const routes = (data.journeys as any[])
+          .slice(0, altCount)
+          .map((journey) => {
+            const coords: Coordinate[] = [];
+            const sections: {
+              coords: Coordinate[];
+              color?: string;
+              type: string;
+              distance?: number;
+            }[] = [];
+            let distance = 0;
+            const transitLines: any[] = [];
+            if (journey.sections) {
+              journey.sections.forEach((section: any) => {
+                const secCoords: Coordinate[] = [];
+                let secDistance = 0;
+                if (section.geojson && section.geojson.coordinates) {
+                  section.geojson.coordinates.forEach(
+                    (coord: [number, number], index: number) => {
+                      const c = { latitude: coord[1], longitude: coord[0] };
+                      coords.push(c);
+                      secCoords.push(c);
+                      if (index > 0) {
+                        const prev = section.geojson.coordinates[index - 1];
+                        secDistance += calculateDistance(
+                          { latitude: prev[1], longitude: prev[0] },
+                          c,
+                        );
+                      }
+                    },
+                  );
+                }
+                const info = section.display_informations;
+                if (info && info.code) {
+                  transitLines.push(info);
+                }
+                distance += secDistance;
+                if (secCoords.length > 0) {
+                  sections.push({
+                    coords: secCoords,
+                    color:
+                      section.type === "public_transport" && info?.color
+                        ? `#${info.color}`
+                        : "#0d7ff2",
+                    type: section.type,
+                    distance: secDistance,
+                  });
+                }
+              });
+            }
+            return {
+              coords,
+              duration: Math.round(journey.duration / 60),
+              distance,
+              transitLines,
+              sections,
+              rawJourney: journey,
+            };
+          });
         return { success: true, routes, host, rawData: data, timings };
       }
 
@@ -649,7 +667,7 @@ export function useRouteService(): RouteService {
         datetimeRepresents?: "departure" | "arrival";
         forbiddenModes?: string[];
       };
-    }
+    },
   ) => {
     setRouteInfo(null);
     setLastRawRouteData(null);
@@ -674,7 +692,10 @@ export function useRouteService(): RouteService {
         setIsOsrmAvailable(true);
         setLastRawRouteData(cachedRoute.routeData);
 
-        if (cachedRoute.routeData.routes && cachedRoute.routeData.routes.length > 0) {
+        if (
+          cachedRoute.routeData.routes &&
+          cachedRoute.routeData.routes.length > 0
+        ) {
           const route = cachedRoute.routeData.routes[0];
           const coords = (route.geometry.coordinates as [number, number][]).map(
             ([lon, lat]) => ({ latitude: lat, longitude: lon }),
@@ -687,24 +708,29 @@ export function useRouteService(): RouteService {
             instruction: "Suivre l'itinéraire",
             label: computeLabel(cachedRoute.routeData),
           });
-        } else if (cachedRoute.routeData.journeys && cachedRoute.routeData.journeys.length > 0) {
+        } else if (
+          cachedRoute.routeData.journeys &&
+          cachedRoute.routeData.journeys.length > 0
+        ) {
           const journey = cachedRoute.routeData.journeys[0];
           const coords: Coordinate[] = [];
           let distance = 0;
           if (journey.sections) {
             journey.sections.forEach((section: any) => {
               if (section.geojson && section.geojson.coordinates) {
-                section.geojson.coordinates.forEach((coord: [number, number], index: number) => {
-                  const c = { latitude: coord[1], longitude: coord[0] };
-                  coords.push(c);
-                  if (index > 0) {
-                    const prev = section.geojson.coordinates[index - 1];
-                    distance += calculateDistance(
-                      { latitude: prev[1], longitude: prev[0] },
-                      c
-                    );
-                  }
-                });
+                section.geojson.coordinates.forEach(
+                  (coord: [number, number], index: number) => {
+                    const c = { latitude: coord[1], longitude: coord[0] };
+                    coords.push(c);
+                    if (index > 0) {
+                      const prev = section.geojson.coordinates[index - 1];
+                      distance += calculateDistance(
+                        { latitude: prev[1], longitude: prev[0] },
+                        c,
+                      );
+                    }
+                  },
+                );
               }
             });
           }
@@ -763,21 +789,23 @@ export function useRouteService(): RouteService {
         if (journey.sections) {
           journey.sections.forEach((section: any) => {
             if (section.geojson && section.geojson.coordinates) {
-              section.geojson.coordinates.forEach((coord: [number, number], index: number) => {
-                const c = { latitude: coord[1], longitude: coord[0] };
-                coords.push(c);
-                if (index > 0) {
-                  const prev = section.geojson.coordinates[index - 1];
-                  distance += calculateDistance(
-                    { latitude: prev[1], longitude: prev[0] },
-                    c
-                  );
-                }
-              });
+              section.geojson.coordinates.forEach(
+                (coord: [number, number], index: number) => {
+                  const c = { latitude: coord[1], longitude: coord[0] };
+                  coords.push(c);
+                  if (index > 0) {
+                    const prev = section.geojson.coordinates[index - 1];
+                    distance += calculateDistance(
+                      { latitude: prev[1], longitude: prev[0] },
+                      c,
+                    );
+                  }
+                },
+              );
             }
           });
         }
-        
+
         setRouteCoords(coords);
         setDestination(end);
         const duration = Math.round(journey.duration / 60);
@@ -876,7 +904,12 @@ export function useRouteService(): RouteService {
       avoidHighways?: boolean;
     } = {},
   ): Promise<
-    { coords: Coordinate[]; duration: number; distance: number; transitLines?: any[] }[]
+    {
+      coords: Coordinate[];
+      duration: number;
+      distance: number;
+      transitLines?: any[];
+    }[]
   > => {
     if (!waypoints || waypoints.length < 2) return [];
 
@@ -1393,8 +1426,7 @@ export async function fetchParallelRouting(
       return "https://routing.openstreetmap.de/routed-foot";
     if (mode === "bicycling")
       return "https://routing.openstreetmap.de/routed-bike";
-    if (mode === "transit")
-      return "https://4021.fr1.orionhost.xyz";
+    if (mode === "transit") return "https://4021.fr1.orionhost.xyz";
     return "https://router.project-osrm.org";
   };
 
@@ -1416,7 +1448,6 @@ export async function fetchParallelRouting(
     let url = `${host}/route/v1/${osrmMode}/${coordinates}?overview=full&geometries=geojson&steps=true${alternativesParam}`;
     if (mode === "transit") {
       url = `${host}/navigation/transit?from_lon=${start.longitude}&from_lat=${start.latitude}&to_lon=${end.longitude}&to_lat=${end.latitude}`;
-      // In fetchParallelRouting we don't pass options for transitOptions right now, but could be added later.
     }
 
     const res = await fetchWithTimeout(url);
