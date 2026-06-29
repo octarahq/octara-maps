@@ -167,7 +167,9 @@ const ShadcnMap = React.forwardRef<any, Props>(
       postToApp({type:'mapMoved', cause: e.type });
     }
 
-    map.on('dragstart', sendMove);       
+    map.on('dragstart', sendMove);
+    map.on('touchstart', sendMove);
+    map.on('mousedown', sendMove);       
     map.on('zoomend', function(){ try { postToApp({ type: 'zoomChanged', zoom: map.getZoom() }); } catch(e) {} });
     var currentBearing = 0;
         var targetBearing = 0;

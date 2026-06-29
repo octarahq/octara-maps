@@ -81,6 +81,7 @@ function MapProviderContent({
   const followRef = useRef(followUser);
   const shouldZoomToDefaultRef = useRef(false);
   const isFlyingRef = useRef(false);
+  const hasInitialCentered = useRef(false);
 
   const [mapReady, setMapReady] = useState(false);
   const pendingPositionRef = useRef<typeof position | null>(null);
@@ -120,7 +121,7 @@ function MapProviderContent({
         post({ type: "setUserMarker", lat, lng }),
       followUser,
       toggleFollow: () => {
-        setFollowUser((f) => !f);
+        setFollowUser(false);
       },
       centerAndFollow: () => {
         shouldZoomToDefaultRef.current = true;
@@ -196,9 +197,14 @@ function MapProviderContent({
       if (pos) {
         pendingPositionRef.current = null;
         
-        const shouldZoom = shouldZoomToDefaultRef.current;
+        let shouldZoom = shouldZoomToDefaultRef.current;
         shouldZoomToDefaultRef.current = false;
         
+        if (!hasInitialCentered.current) {
+          shouldZoom = true;
+          hasInitialCentered.current = true;
+        }
+
         if (shouldZoom) {
           ignoreMapMove.current = true;
           isFlyingRef.current = true;
