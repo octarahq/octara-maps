@@ -36,6 +36,10 @@
         {
           "title": "Language",
           "description": "Change the application language"
+        },
+        {
+          "title": "Marine mode",
+          "description": "Replaces left/right with port/starboard"
         }
       ]
     }, {

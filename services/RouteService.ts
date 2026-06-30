@@ -1,3 +1,4 @@
+import { useUser } from "@/contexts/UserContext";
 import { useEffect, useState } from "react";
 import { RouteCacheService } from "./RouteCacheService";
 
@@ -128,6 +129,7 @@ const DEFAULT_OSRM_HOSTS = ["https://router.project-osrm.org"];
 const DEBUG_CACHE_ENABLED = true; // true to enabled route cache
 
 export function useRouteService(): RouteService {
+  const { settings } = useUser();
   const [routeCoords, setRouteCoords] = useState<Coordinate[]>([]);
   const [destination, setDestination] = useState<Coordinate | null>(null);
   const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
@@ -1188,6 +1190,18 @@ export function useRouteService(): RouteService {
   const getNavigationData = (): NavigationData | null => {
     if (!lastRawRouteData) return null;
 
+    const processInstruction = (text: string) => {
+      if (!text) return "";
+      if (settings?.marineMode) {
+        return text
+          .replaceAll(/\bgauche\b/gi, "bâbord")
+          .replaceAll(/\bleft\b/gi, "port")
+          .replaceAll(/\bdroite\b/gi, "tribord")
+          .replaceAll(/\bright\b/gi, "starboard");
+      }
+      return text;
+    };
+
     try {
       if (lastRawRouteData.routes && lastRawRouteData.routes[0]) {
         const route = lastRawRouteData.routes[0];
@@ -1199,7 +1213,9 @@ export function useRouteService(): RouteService {
           totalDuration: route.duration || 0,
           totalDistance: route.distance || 0,
           steps: steps.map((step: any) => ({
-            instruction: step.maneuver?.instruction || step.name || "",
+            instruction: processInstruction(
+              step.maneuver?.instruction || step.name || "",
+            ),
             name: step.name || undefined,
             distance: step.distance || 0,
             duration: step.duration || 0,
@@ -1227,7 +1243,7 @@ export function useRouteService(): RouteService {
           totalDuration: feature.properties?.summary?.duration || 0,
           totalDistance: feature.properties?.summary?.distance || 0,
           steps: steps.map((step: any) => ({
-            instruction: step.instruction || "",
+            instruction: processInstruction(step.instruction || ""),
             distance: step.distance || 0,
             duration: step.duration || 0,
             coordinates: step.way_points ? [step.way_points] : undefined,
@@ -1245,7 +1261,7 @@ export function useRouteService(): RouteService {
           totalDuration: lastRawRouteData.trip.summary?.time || 0,
           totalDistance: lastRawRouteData.trip.summary?.length || 0,
           steps: allManeuvers.map((maneuver: any) => ({
-            instruction: maneuver.instruction || "",
+            instruction: processInstruction(maneuver.instruction || ""),
             distance: maneuver.length || 0,
             duration: maneuver.time || 0,
             coordinates: undefined,

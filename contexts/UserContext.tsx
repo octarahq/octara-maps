@@ -17,6 +17,7 @@ export type UserProfile = {
       | "terrain"
       | "terrain_dark";
     joinBetaProgram?: boolean;
+    marineMode?: boolean;
   };
 };
 
@@ -67,6 +68,7 @@ function loadProfile(): Promise<UserProfile & { saved?: SavedPlaces }> {
         voice: "alert",
         mapStyle: "satelite",
         joinBetaProgram: false,
+        marineMode: false,
       },
     };
   });
@@ -86,6 +88,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       voice: "alert",
       mapStyle: "satelite",
       joinBetaProgram: false,
+      marineMode: false,
     },
   });
   const [saved, setSaved] = useState<SavedPlaces>({
@@ -111,6 +114,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           voice: p.settings?.voice || "alert",
           mapStyle: p.settings?.mapStyle || "satelite",
           joinBetaProgram: !!p.settings?.joinBetaProgram,
+          marineMode: !!p.settings?.marineMode,
         },
       });
       if ((p as any).saved) {
