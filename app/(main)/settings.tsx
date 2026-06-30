@@ -232,6 +232,13 @@ export default function SettingsScreen() {
                 onSelectChange: (val: any) => setLanguage(val),
               }),
           },
+          {
+            title: t("sections.0.settings.4.title", { defaultValue: "Mode marin" }),
+            description: t("sections.0.settings.4.description", { defaultValue: "Remplace gauche/droite par bâbord/tribord" }),
+            icon: "directions-boat",
+            onValueChange: (val) => setSettings({ ...settings, marineMode: val }),
+            switchValue: !!settings.marineMode,
+          },
         ]}
       />
 

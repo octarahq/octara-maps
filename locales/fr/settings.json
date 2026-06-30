@@ -36,6 +36,10 @@
           {
             "title": "Langue",
             "description": "Changer la langue de l'application"
+          },
+          {
+            "title": "Mode marin",
+            "description": "Remplace gauche/droite par bâbord/tribord"
           }
       ]
     }, {

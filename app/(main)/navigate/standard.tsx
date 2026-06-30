@@ -1014,7 +1014,7 @@ export default function StandardNavigationScreen() {
     return "directions";
   };
 
-  const formatStepInstruction = (step?: any): string => {
+  const formatStepInstructionRaw = (step?: any): string => {
     if (!step) return "";
     const m = step.maneuver;
     const road = step.name && step.name !== "" ? step.name : null;
@@ -1107,6 +1107,19 @@ export default function StandardNavigationScreen() {
     }
 
     return step.instruction || "";
+  };
+
+  const formatStepInstruction = (step?: any): string => {
+    const text = formatStepInstructionRaw(step);
+    if (!text) return "";
+    if (settings?.marineMode) {
+      return text
+        .replaceAll(/\bgauche\b/gi, "bâbord")
+        .replaceAll(/\bleft\b/gi, "port")
+        .replaceAll(/\bdroite\b/gi, "tribord")
+        .replaceAll(/\bright\b/gi, "starboard");
+    }
+    return text;
   };
 
   React.useEffect(() => {
