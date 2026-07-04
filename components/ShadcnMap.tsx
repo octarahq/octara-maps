@@ -115,7 +115,7 @@ const ShadcnMap = React.forwardRef<any, Props>(
         }
           
         #map { width:100%; height:100%; }
-        .leaflet-container, .leaflet-pane, .leaflet-tile { background: #000 !important; }
+        .leaflet-container { background: #000 !important; }
         .leaflet-control-attribution { display: none !important; }
       </style>
     </head>
@@ -126,6 +126,7 @@ const ShadcnMap = React.forwardRef<any, Props>(
         </div>
       </div>
       <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.min.js"></script>
       <script>
         const map = L.map('map', { 
           zoomControl: false, 
@@ -140,6 +141,7 @@ const ShadcnMap = React.forwardRef<any, Props>(
           detectRetina: true,
           tileSize: 512,
           zoomOffset: -1,
+          zIndex: 1,
         }).addTo(map);
 
         const south = -85;
@@ -263,7 +265,7 @@ const ShadcnMap = React.forwardRef<any, Props>(
             }
             if (m.type === 'fitBounds') {
               map.invalidateSize();
-              setTimeout(function(){ map.fitBounds(m.bounds, { animate: false, padding: m.padding || [24, 24] }); }, 120);
+              map.fitBounds(m.bounds, { animate: false, padding: m.padding || [24, 24] });
             }
             if (m.type === 'setUserMarker') {
               const lat = m.lat; const lng = m.lng;
@@ -431,18 +433,19 @@ const ShadcnMap = React.forwardRef<any, Props>(
               setTimeout(()=>map.invalidateSize(),100);
               if (layer === 'standard') {
                 var url = 'https://{s}.basemaps.cartocdn.com/' + theme + '_all/{z}/{x}/{y}.png';
-                baseLayer = L.tileLayer(url, { maxZoom: 19, minZoom: ${initialZoom}, detectRetina: true, tileSize: 512, zoomOffset: -1 }).addTo(map);
+                baseLayer = L.tileLayer(url, { maxZoom: 19, minZoom: ${initialZoom}, detectRetina: true, tileSize: 512, zoomOffset: -1, zIndex: 1 }).addTo(map);
               } 
               else if (layer === 'satellite') {
                 var url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-                baseLayer = L.tileLayer(url, { maxZoom: 19, minZoom: ${initialZoom}, detectRetina: true, tileSize: 512, zoomOffset: -1 }).addTo(map);
+                baseLayer = L.tileLayer(url, { maxZoom: 19, minZoom: ${initialZoom}, detectRetina: true, tileSize: 512, zoomOffset: -1, zIndex: 1 }).addTo(map);
               } 
               else if (layer === 'terrain') {
                 var url = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
                 baseLayer = L.tileLayer(url, { 
                   maxZoom: 17,  
                   minZoom: ${initialZoom}, 
-                  detectRetina: true 
+                  detectRetina: true,
+                  zIndex: 1
                 }).addTo(map);
 
                 if (theme === 'dark') {
@@ -451,6 +454,67 @@ const ShadcnMap = React.forwardRef<any, Props>(
                   });
                   
                   if(baseLayer.getContainer()) baseLayer.getContainer().style.filter = 'invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%)';
+                }
+              }
+            }
+            if (m.type === 'setPublicTransport') {
+              if (m.enabled) {
+                if (window.transitLayer) {
+                  map.removeLayer(window.transitLayer);
+                  window.transitLayer = null;
+                }
+                var transitUrl = 'https://4021.fr1.orionhost.xyz/tiles/transit/{z}/{x}/{y}';
+                window.transitLayer = L.vectorGrid.protobuf(transitUrl, {
+                  zIndex: 10,
+                  vectorTileLayerStyles: {
+                      transit_idfm: function(properties, zoom) {
+                        
+                        if (properties.stop_id) {
+                          var busSvgUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg viewBox="0 -960 960 960" width="24" height="24" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="-960" width="960" height="960" rx="200" fill="#5f6368" /><path fill="#ffffff" d="M320-200v20q0 25-17.5 42.5T260-120q-25 0-42.5-17.5T200-180v-62q-18-20-29-44.5T160-340v-380q0-83 77-121.5T480-880q172 0 246 37t74 123v380q0 29-11 53.5T760-242v62q0 25-17.5 42.5T700-120q-25 0-42.5-17.5T640-180v-20H320Zm162-560h224-448 224Zm158 280H240h480-80Zm-400-80h480v-120H240v120Zm142.5 222.5Q400-355 400-380t-17.5-42.5Q365-440 340-440t-42.5 17.5Q280-405 280-380t17.5 42.5Q315-320 340-320t42.5-17.5Zm280 0Q680-355 680-380t-17.5-42.5Q645-440 620-440t-42.5 17.5Q560-405 560-380t17.5 42.5Q595-320 620-320t42.5-17.5ZM258-760h448q-15-17-64.5-28.5T482-800q-107 0-156.5 12.5T258-760Zm62 480h320q33 0 56.5-23.5T720-360v-120H240v120q0 33 23.5 56.5T320-280Z" /></svg>');
+                          return {
+                            radius: 15,
+                            icon: L.icon({
+                              iconUrl: busSvgUrl,
+                              iconSize: [2, 2],
+                              iconAnchor: [1, 1]
+                            })
+                          };
+                        }
+                        var w = 0.3; 
+                        if (zoom >= 14) w = 0.5;
+                        
+                        var rc = properties.route_color || '';
+                        var color = rc ? (rc.startsWith('#') ? rc : '#' + rc) : '#888888';
+                        
+                        return { 
+                            weight: w, 
+                            color: color, 
+                            opacity: 1,
+                            lineCap: 'round', 
+                            lineJoin: 'round' 
+                        };
+                      }
+                    },
+                    interactive: true,
+                    maxNativeZoom: 14,
+                    getFeatureId: function(f) { return f.properties.stop_id; }
+                  });
+                  window.transitLayer.on('click', function(e) {
+                    if (e.layer.properties && e.layer.properties.stop_id) {
+                      try {
+                        postToApp({ 
+                          type: 'transitStopClicked', 
+                          id: e.layer.properties.stop_id, 
+                          name: e.layer.properties.stop_name 
+                        });
+                      } catch(err){}
+                    }
+                  });
+                window.transitLayer.addTo(map);
+              } else {
+                if (window.transitLayer) {
+                  map.removeLayer(window.transitLayer);
+                  window.transitLayer = null;
                 }
               }
             }
@@ -471,6 +535,7 @@ const ShadcnMap = React.forwardRef<any, Props>(
     return (
       <View className="flex-1 bg-black">
         <WebComponent
+          key={html.length}
           originWhitelist={["*"]}
           source={{ html }}
           className="flex-1 w-full h-full bg-black"

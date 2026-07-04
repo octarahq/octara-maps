@@ -126,7 +126,7 @@ const getRoutingOSMHost = (mode: string = "driving"): string => {
 
 const DEFAULT_OSRM_HOSTS = ["https://router.project-osrm.org"];
 
-const DEBUG_CACHE_ENABLED = true; // true to enabled route cache
+const DEBUG_CACHE_ENABLED = true;
 
 export function useRouteService(): RouteService {
   const { settings } = useUser();
