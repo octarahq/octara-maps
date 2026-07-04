@@ -7,6 +7,7 @@ import {
 } from "react-native";
 
 import { usePosition } from "@/contexts/PositionContext";
+import { useRouter } from "expo-router";
 import Controls from "./Controls";
 import MapCtx, { MapControls } from "./MapContext";
 import { useMapLayers } from "./MapLayersContext";
@@ -53,6 +54,7 @@ function MapProviderContent({
   showUsersPosition = [],
   goTo,
 }: Props) {
+  const router = useRouter();
   const layers = useMapLayers();
   const webviewRef = useRef<any>(null);
   const { height: windowHeight } = useWindowDimensions();
@@ -171,13 +173,24 @@ function MapProviderContent({
         setFollowUser(false);
       }
     }
+    
+    if (msg.type === "transitStopClicked") {
+      router.push({
+        pathname: "/stop-details",
+        params: {
+          id: msg.id,
+        }
+      } as any);
+      return;
+    }
   }, []);
 
   useEffect(() => {
     if (!mapReady) return;
     const theme = layers.darkTheme ? "dark" : "light";
     post({ type: "setBaseLayer", layer: layers.mapType, theme });
-  }, [mapReady, layers.mapType, layers.darkTheme]);
+    post({ type: "setPublicTransport", enabled: layers.publicTransport });
+  }, [mapReady, layers.mapType, layers.darkTheme, layers.publicTransport]);
 
   useEffect(() => {
     if (!mapReady) {

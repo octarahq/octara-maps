@@ -21,6 +21,8 @@ const enShareLocation = require("./en/share_location.json");
 const enShareLocationView = require("./en/share_location_view.json");
 const frShareLocation = require("./fr/share_location.json");
 const frShareLocationView = require("./fr/share_location_view.json");
+const enStopDetails = require("./en/stop_details.json");
+const frStopDetails = require("./fr/stop_details.json");
 
 const translations = {
   fr: {
@@ -35,6 +37,7 @@ const translations = {
     poi_search: frPoiSearch,
     share_location: frShareLocation,
     share_location_view: frShareLocationView,
+    stop_details: frStopDetails,
   },
   en: {
     onboarding: enOnboarding,
@@ -48,6 +51,7 @@ const translations = {
     poi_search: enPoiSearch,
     share_location: enShareLocation,
     share_location_view: enShareLocationView,
+    stop_details: enStopDetails,
   },
 };
 

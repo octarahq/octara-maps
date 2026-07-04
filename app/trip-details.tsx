@@ -308,7 +308,7 @@ export default function TripDetailsScreen() {
                       </View>
                       <View className="flex-1 pl-3 justify-center">
                         <Text className="text-[#90adcb] font-medium text-[14px] bg-[#17232f] px-3 py-1.5 rounded-lg self-start">
-                          {showPrevious ? "Masquer les arrêts précédents" : `${currentIndex} arrêts précédents`}
+                          {showPrevious ? t("hidePreviousStops") : t("previousStops", { count: currentIndex })}
                         </Text>
                       </View>
                     </TouchableOpacity>

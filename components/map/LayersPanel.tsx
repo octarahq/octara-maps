@@ -160,9 +160,8 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
           <Switch
             value={layers.publicTransport}
             onValueChange={(v) => {
-              return showCommingSoonToast();
-              // triggerHaptic();
-              // layers.setPublicTransport(v);
+              triggerHaptic();
+              layers.setPublicTransport(v);
             }}
             trackColor={{
               false: "rgba(255,255,255,0.1)",
