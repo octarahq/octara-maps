@@ -1,0 +1,12 @@
+{
+  "title": "Détails de l'arrêt",
+  "publicTransportStop": "Arrêt de transport en commun",
+  "previousDepartures": "Départs précédents",
+  "upcomingDepartures": "Prochains départs",
+  "noUpcomingDepartures": "Aucun départ à venir.",
+  "noData": "Aucune donnée",
+  "errorFetchingData": "Erreur lors de la récupération des données",
+  "approaching": "À l'approche",
+  "minutes": "{{diff}} min",
+  "directions": "Itinéraire"
+}
