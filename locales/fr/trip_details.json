@@ -1,0 +1,5 @@
+{
+  "errorFetchingData": "Erreur lors de la récupération des données",
+  "hidePreviousStops": "Masquer les arrêts précédents",
+  "previousStops": "{{count}} arrêts précédents"
+}

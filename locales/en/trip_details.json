@@ -1,0 +1,5 @@
+{
+  "errorFetchingData": "Error fetching data",
+  "hidePreviousStops": "Hide previous stops",
+  "previousStops": "{{count}} previous stops"
+}

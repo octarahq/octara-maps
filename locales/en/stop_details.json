@@ -1,0 +1,12 @@
+{
+  "title": "Stop Details",
+  "publicTransportStop": "Public transport stop",
+  "previousDepartures": "Previous departures",
+  "upcomingDepartures": "Upcoming departures",
+  "noUpcomingDepartures": "No upcoming departures.",
+  "noData": "No data available",
+  "errorFetchingData": "Error fetching data",
+  "approaching": "Approaching",
+  "minutes": "{{diff}} min",
+  "directions": "Directions"
+}
