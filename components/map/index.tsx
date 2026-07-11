@@ -19,6 +19,9 @@ type Props = {
     longitude: number;
   }[];
   goTo?: { lat: number; lng: number };
+  initialZoom?: number;
+  onStreetViewClick?: (lat: number, lng: number) => void;
+  streetViewLocation?: { lat: number; lng: number; heading?: number } | null;
 };
 
 export default function MapProvider({
@@ -28,6 +31,9 @@ export default function MapProvider({
   showControls = true,
   showUsersPosition = [],
   goTo,
+  initialZoom,
+  onStreetViewClick,
+  streetViewLocation,
 }: Props) {
   return (
     <MapProviderContent
@@ -36,6 +42,9 @@ export default function MapProvider({
       showControls={showControls}
       showUsersPosition={showUsersPosition}
       goTo={goTo}
+      initialZoom={initialZoom}
+      onStreetViewClick={onStreetViewClick}
+      streetViewLocation={streetViewLocation}
     >
       {children}
     </MapProviderContent>
@@ -49,6 +58,9 @@ function MapProviderContent({
   showControls = true,
   showUsersPosition = [],
   goTo,
+  initialZoom,
+  onStreetViewClick,
+  streetViewLocation,
 }: Props) {
   const router = useRouter();
   const layers = useMapLayers();
@@ -63,7 +75,7 @@ function MapProviderContent({
 
   const isFullScreen =
     height !== null && Math.abs((height || 0) - windowHeight) < 8;
-  const initialZoom = isFullScreen ? 3 : 3;
+  const computedInitialZoom = initialZoom ?? (isFullScreen ? 3 : 3);
   const defaultCenterZoom = 17;
 
   const post = (obj: any) => {
@@ -179,7 +191,19 @@ function MapProviderContent({
       } as any);
       return;
     }
-  }, []);
+
+    if (msg.type === "streetViewClick") {
+      if (onStreetViewClick) {
+        onStreetViewClick(msg.lat, msg.lng);
+      } else {
+        router.push({
+          pathname: "/streetview",
+          params: { lat: msg.lat, lng: msg.lng },
+        } as any);
+      }
+      return;
+    }
+  }, [onStreetViewClick, router]);
 
   useEffect(() => {
     if (!mapReady) return;
@@ -215,7 +239,13 @@ function MapProviderContent({
     }
 
     if (goTo) {
-      post({ type: "panTo", lat: goTo.lat, lng: goTo.lng });
+      post({ type: "zoomTo", lat: goTo.lat, lng: goTo.lng, zoom: computedInitialZoom });
+    }
+
+    if (streetViewLocation) {
+      post({ type: "setStreetViewMarker", lat: streetViewLocation.lat, lng: streetViewLocation.lng, heading: streetViewLocation.heading, center: true });
+    } else {
+      post({ type: "setStreetViewMarker", lat: null, lng: null });
     }
 
     if (!showUserLocation) {

@@ -358,6 +358,32 @@ const ShadcnMap = React.forwardRef<any, Props>(
             if (m.type === 'clearUserMarker') {
               if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
             }
+            if (m.type === 'setStreetViewMarker') {
+              if (window.svMarker) {
+                map.removeLayer(window.svMarker);
+                window.svMarker = null;
+              }
+              if (m.lat != null && m.lng != null) {
+                var htmlContent = '<div style="width:24px;height:24px;position:relative;display:flex;align-items:center;justify-content:center;">';
+                if (m.heading != null) {
+                  htmlContent += '<div style="position:absolute;width:100%;height:100%;top:0;left:0;transform:rotate(' + m.heading + 'deg);z-index:1;">' +
+                    '<div style="width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:12px solid rgba(0, 174, 255, 0.7);position:absolute;top:-6px;left:4px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3));"></div>' +
+                  '</div>';
+                }
+                htmlContent += '<div style="width:16px;height:16px;background:#00aeff;border:2px solid #fff;border-radius:50%;box-shadow:0 0 4px rgba(0,0,0,0.4);position:relative;z-index:2;"></div></div>';
+                
+                var svIcon = L.divIcon({
+                  className: '',
+                  html: htmlContent,
+                  iconSize: [24,24],
+                  iconAnchor: [12,12]
+                });
+                window.svMarker = L.marker([m.lat, m.lng], { icon: svIcon, zIndexOffset: 900 }).addTo(map);
+                if (m.center) {
+                  map.setView([m.lat, m.lng], map.getZoom(), { animate: true });
+                }
+              }
+            }
             
             if (m.type === 'clearMarkers') {
               markers.forEach(function(mk){ map.removeLayer(mk); });
@@ -493,9 +519,20 @@ const ShadcnMap = React.forwardRef<any, Props>(
                     },
                     pictures: [],
                     images: []
-                  }
+                  },
+                  interactive: true,
+                  maxNativeZoom: 15,
+                  maxZoom: 19
                 });
                 window.streetViewLayer.addTo(map);
+                window.streetViewLayer.on('click', function(e) {
+                  L.DomEvent.stopPropagation(e);
+                  window.ReactNativeWebView.postMessage(JSON.stringify({
+                    type: 'streetViewClick',
+                    lat: e.latlng.lat,
+                    lng: e.latlng.lng
+                  }));
+                });
               } else {
                 if (window.streetViewLayer) {
                   map.removeLayer(window.streetViewLayer);
