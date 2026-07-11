@@ -188,9 +188,20 @@ function MapProviderContent({
   useEffect(() => {
     if (!mapReady) return;
     const theme = layers.darkTheme ? "dark" : "light";
-    post({ type: "setBaseLayer", layer: layers.mapType, theme });
+    
+    // Déterminer la configuration du provider pour ce mode
+    const providerConfig = (layers.mapProviders as any)[layers.mapType] || { type: "default" };
+    
+    post({ 
+      type: "setBaseLayer", 
+      layer: layers.mapType, 
+      theme,
+      providerType: providerConfig.type,
+      customUrl: providerConfig.customUrl
+    });
+    
     post({ type: "setPublicTransport", enabled: layers.publicTransport });
-  }, [mapReady, layers.mapType, layers.darkTheme, layers.publicTransport]);
+  }, [mapReady, layers.mapType, layers.darkTheme, layers.publicTransport, layers.mapProviders]);
 
   useEffect(() => {
     if (!mapReady) {

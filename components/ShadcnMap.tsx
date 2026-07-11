@@ -428,33 +428,50 @@ const ShadcnMap = React.forwardRef<any, Props>(
             if (m.type === 'setBaseLayer') {
               var layer = m.layer || 'standard';
               var theme = m.theme || 'dark';
+              var providerType = m.providerType || 'default';
+              var customUrl = m.customUrl || '';
               
               if (baseLayer) { map.removeLayer(baseLayer); }
               setTimeout(()=>map.invalidateSize(),100);
-              if (layer === 'standard') {
-                var url = 'https://{s}.basemaps.cartocdn.com/' + theme + '_all/{z}/{x}/{y}.png';
-                baseLayer = L.tileLayer(url, { maxZoom: 19, minZoom: ${initialZoom}, detectRetina: true, tileSize: 512, zoomOffset: -1, zIndex: 1 }).addTo(map);
+              
+              var url = '';
+              var maxZ = 19;
+              
+              if (providerType === 'custom' && customUrl) {
+                url = customUrl;
+              } else if (layer === 'standard') {
+                if (providerType === 'openfreemap') {
+                  url = 'https://tiles.openfreemap.org/styles/liberty';
+                } else {
+                  url = 'https://{s}.basemaps.cartocdn.com/' + theme + '_all/{z}/{x}/{y}.png';
+                }
               } 
               else if (layer === 'satellite') {
-                var url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-                baseLayer = L.tileLayer(url, { maxZoom: 19, minZoom: ${initialZoom}, detectRetina: true, tileSize: 512, zoomOffset: -1, zIndex: 1 }).addTo(map);
+                if (providerType === 'ign') {
+                  url = 'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}';
+                } else {
+                  url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+                }
               } 
               else if (layer === 'terrain') {
-                var url = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
-                baseLayer = L.tileLayer(url, { 
-                  maxZoom: 17,  
-                  minZoom: ${initialZoom}, 
-                  detectRetina: true,
-                  zIndex: 1
-                }).addTo(map);
+                if (providerType === 'opentopomap') {
+                  url = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
+                  maxZ = 17;
+                } else {
+                  url = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
+                  maxZ = 17;
+                }
+              }
+              
+              if (!url) url = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
+              
+              baseLayer = L.tileLayer(url, { maxZoom: maxZ, minZoom: ${initialZoom}, detectRetina: true, tileSize: 512, zoomOffset: -1, zIndex: 1 }).addTo(map);
 
-                if (theme === 'dark') {
+              if (layer === 'terrain' && theme === 'dark') {
                   baseLayer.on('add', function(e) {
                     e.target.getContainer().style.filter = 'invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%)';
                   });
-                  
                   if(baseLayer.getContainer()) baseLayer.getContainer().style.filter = 'invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%)';
-                }
               }
             }
             if (m.type === 'setPublicTransport') {
