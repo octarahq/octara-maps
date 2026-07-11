@@ -103,7 +103,7 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
         <Text className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3px] mb-4">{t("layers.details")}</Text>
 
         {["standard", "terrain"].includes(layers.mapType) && (
-          <View className="flex-row justify-between items-center py-3 border-b border-white/5">
+          <View className="flex-row justify-between items-center py-3 border-b border-white/5 mb-6">
             <View className="flex-row items-center gap-3">
               <View className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 items-center justify-center">
                 <MoonStarsIcon />
@@ -125,51 +125,51 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
             />
           </View>
         )}
-        <View className="flex-row justify-between items-center py-3 border-b border-white/5">
-          <View className="flex-row items-center gap-3">
-            <View className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 items-center justify-center">
-              <CarIcon />
-            </View>
-            <Text className="text-base font-medium text-white">{t("layers.traffic")}</Text>
-          </View>
-          <Switch
-            value={layers.traffic}
-            onValueChange={(v) => {
-              return showCommingSoonToast();
-              // triggerHaptic();
-              // layers.setTraffic(v);
-            }}
-            trackColor={{
-              false: "rgba(255,255,255,0.1)",
-              true: "rgba(255,255,255,0.25)",
-            }}
-            thumbColor={layers.traffic ? "#fff" : "#fff"}
-            style={{ transform: [{ scaleX: 1 }, { scaleY: 1 }] }}
-          />
-        </View>
 
-        <View className="flex-row justify-between items-center py-3 border-b border-white/5">
-          <View className="flex-row items-center gap-3">
-            <View className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 items-center justify-center">
-              <TrainIcon />
+        <View className="flex-row flex-wrap">
+          <TouchableOpacity
+            className="w-1/4 items-center gap-3 mb-4"
+            onPress={() => {
+              if (layers.traffic) {
+                triggerHaptic();
+                layers.setTraffic(false);
+              } else {
+                showCommingSoonToast();
+                // triggerHaptic();
+                // layers.setTraffic(true);
+              }
+            }}
+          >
+            <View
+              className={`w-16 h-16 rounded-full border-2 items-center justify-center ${layers.traffic ? "border-white bg-white" : "border-white/20 bg-white/5"}`}
+            >
+              <CarIcon color={layers.traffic ? "#000" : "#e3e3e3"} />
             </View>
-            <Text className="text-base font-medium text-white">
+            <Text
+              className={`text-xs text-center ${layers.traffic ? "font-bold text-white" : "font-medium text-white/60"}`}
+            >
+              {t("layers.traffic")}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="w-1/4 items-center gap-3 mb-4"
+            onPress={() => {
+              triggerHaptic();
+              layers.setPublicTransport(!layers.publicTransport);
+            }}
+          >
+            <View
+              className={`w-16 h-16 rounded-full border-2 items-center justify-center ${layers.publicTransport ? "border-white bg-white" : "border-white/20 bg-white/5"}`}
+            >
+              <TrainIcon color={layers.publicTransport ? "#000" : "#e3e3e3"} />
+            </View>
+            <Text
+              className={`text-xs text-center ${layers.publicTransport ? "font-bold text-white" : "font-medium text-white/60"}`}
+            >
               {t("layers.publicTransport")}
             </Text>
-          </View>
-          <Switch
-            value={layers.publicTransport}
-            onValueChange={(v) => {
-              triggerHaptic();
-              layers.setPublicTransport(v);
-            }}
-            trackColor={{
-              false: "rgba(255,255,255,0.1)",
-              true: "rgba(255,255,255,0.25)",
-            }}
-            thumbColor={layers.publicTransport ? "#fff" : "#fff"}
-            style={{ transform: [{ scaleX: 1 }, { scaleY: 1 }] }}
-          />
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>

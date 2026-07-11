@@ -52,6 +52,8 @@ interface MapLayersContextValue {
 
   darkTheme: boolean;
   setDarkTheme: (dark: boolean) => void;
+
+  mapProviders: NonNullable<UserProfile["settings"]["mapProviders"]>;
 }
 
 export const MapLayersContext =
@@ -94,10 +96,20 @@ export function MapLayersProvider({ children }: MapLayersProviderProps) {
   );
 
   const [layersOpen, setLayersOpen] = React.useState(false);
-  const [traffic, setTraffic] = React.useState(false);
-  const [publicTransport, setPublicTransport] = React.useState(false);
+  const [traffic, _setTraffic] = React.useState(false);
+  const [publicTransport, _setPublicTransport] = React.useState(false);
   const [buildings3d, setBuildings3d] = React.useState(true);
   const STORAGE_KEY = "map_layers_v1";
+
+  const setTraffic = React.useCallback((enabled: boolean) => {
+    _setTraffic(enabled);
+    if (enabled) _setPublicTransport(false);
+  }, []);
+
+  const setPublicTransport = React.useCallback((enabled: boolean) => {
+    _setPublicTransport(enabled);
+    if (enabled) _setTraffic(false);
+  }, []);
 
   React.useEffect(() => {
     let mounted = true;
@@ -144,6 +156,11 @@ export function MapLayersProvider({ children }: MapLayersProviderProps) {
       setBuildings3d,
       darkTheme,
       setDarkTheme,
+      mapProviders: settings.mapProviders || {
+        standard: { type: "default" },
+        satellite: { type: "default" },
+        terrain: { type: "default" },
+      },
     }),
     [
       layersOpen,
@@ -154,6 +171,7 @@ export function MapLayersProvider({ children }: MapLayersProviderProps) {
       buildings3d,
       darkTheme,
       setDarkTheme,
+      settings.mapProviders,
     ],
   );
 
