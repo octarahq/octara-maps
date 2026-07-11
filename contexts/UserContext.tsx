@@ -18,6 +18,11 @@ export type UserProfile = {
       | "terrain_dark";
     joinBetaProgram?: boolean;
     marineMode?: boolean;
+    mapProviders?: {
+      standard?: { type: string; customUrl?: string };
+      satellite?: { type: string; customUrl?: string };
+      terrain?: { type: string; customUrl?: string };
+    };
   };
 };
 
@@ -69,6 +74,11 @@ function loadProfile(): Promise<UserProfile & { saved?: SavedPlaces }> {
         mapStyle: "satelite",
         joinBetaProgram: false,
         marineMode: false,
+        mapProviders: {
+          standard: { type: "default" },
+          satellite: { type: "default" },
+          terrain: { type: "default" },
+        },
       },
     };
   });
@@ -89,6 +99,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       mapStyle: "satelite",
       joinBetaProgram: false,
       marineMode: false,
+      mapProviders: {
+        standard: { type: "default" },
+        satellite: { type: "default" },
+        terrain: { type: "default" },
+      },
     },
   });
   const [saved, setSaved] = useState<SavedPlaces>({
@@ -115,6 +130,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           mapStyle: p.settings?.mapStyle || "satelite",
           joinBetaProgram: !!p.settings?.joinBetaProgram,
           marineMode: !!p.settings?.marineMode,
+          mapProviders: p.settings?.mapProviders || {
+            standard: { type: "default" },
+            satellite: { type: "default" },
+            terrain: { type: "default" },
+          },
         },
       });
       if ((p as any).saved) {

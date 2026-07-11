@@ -204,22 +204,7 @@ export default function SettingsScreen() {
                   }),
               }),
           },
-          {
-            title: t("sections.0.settings.2.title"),
-            description: t("sections.0.settings.2.description"),
-            icon: "map",
-            onClick: () =>
-              handleSelectPress({
-                selectTitle: "Choisir le thème de la carte",
-                selectOptions: themeOptions,
-                selectedValue: settings.mapStyle,
-                onSelectChange: (val: any) =>
-                  setSettings({
-                    ...settings,
-                    mapStyle: val,
-                  }),
-              }),
-          },
+
           {
             title: t("sections.0.settings.3.title", { defaultValue: "Langue" }),
             description: t("sections.0.settings.3.description", { defaultValue: "Changer la langue de l'application" }),
@@ -241,6 +226,31 @@ export default function SettingsScreen() {
           },
         ]}
       />
+
+      <View className="w-full mt-6">
+        <Text className="text-[10px] font-bold uppercase tracking-[2px] text-[#64748b] mb-4 px-2">
+          PARAMÈTRES DE LA CARTE
+        </Text>
+        <Pressable
+          onPress={() => router.push("/(main)/provider" as any)}
+          className="bg-[#1a2530] p-4 rounded-[12px] flex-row items-center justify-between"
+        >
+          <View className="flex-row items-center gap-4 flex-1">
+            <View className="w-12 h-12 rounded-[12px] bg-[#0d7ff2]/20 items-center justify-center shrink-0">
+              <MaterialIcons name="map" size={24} color="#0d7ff2" />
+            </View>
+            <View className="flex-1 pr-2">
+              <Text className="text-white text-[16px] font-bold mb-1">
+                Paramètres de la carte
+              </Text>
+              <Text className="text-[#64748b] text-[12px] leading-[18px]">
+                Gérer les paramètres de la carte
+              </Text>
+            </View>
+          </View>
+          <MaterialIcons name="chevron-right" size={24} color="#64748b" />
+        </Pressable>
+      </View>
 
       <SettingsSection
         title={t("sections.1.title")}
