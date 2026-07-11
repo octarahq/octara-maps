@@ -1,4 +1,4 @@
-import { CarIcon, CloseIcon, MoonStarsIcon, TrainIcon } from "@/assets/icons";
+import { CarIcon, CloseIcon, MoonStarsIcon, TrainIcon, StreetViewIcon } from "@/assets/icons";
 import SvgPathIcon from "@/assets/icons/SvgPathIcon";
 import { useHapticSettings } from "@/contexts/HapticSettingsContext";
 import { createTranslator } from "@/i18n";
@@ -130,6 +130,44 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
           <TouchableOpacity
             className="w-1/4 items-center gap-3 mb-4"
             onPress={() => {
+              triggerHaptic();
+              layers.setPublicTransport(!layers.publicTransport);
+            }}
+          >
+            <View
+              className={`w-16 h-16 rounded-full border-2 items-center justify-center ${layers.publicTransport ? "border-white bg-white" : "border-white/20 bg-white/5"}`}
+            >
+              <TrainIcon color={layers.publicTransport ? "#000" : "#e3e3e3"} />
+            </View>
+            <Text
+              className={`text-xs text-center ${layers.publicTransport ? "font-bold text-white" : "font-medium text-white/60"}`}
+            >
+              {t("layers.publicTransport")}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="w-1/4 items-center gap-3 mb-4"
+            onPress={() => {
+              triggerHaptic();
+              layers.setStreetView(!layers.streetView);
+            }}
+          >
+            <View
+              className={`w-16 h-16 rounded-full border-2 items-center justify-center ${layers.streetView ? "border-white bg-white" : "border-white/20 bg-white/5"}`}
+            >
+              <StreetViewIcon color={layers.streetView ? "#000" : "#e3e3e3"} />
+            </View>
+            <Text
+              className={`text-xs text-center ${layers.streetView ? "font-bold text-white" : "font-medium text-white/60"}`}
+            >
+              Street View
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="w-1/4 items-center gap-3 mb-4"
+            onPress={() => {
               if (layers.traffic) {
                 triggerHaptic();
                 layers.setTraffic(false);
@@ -149,25 +187,6 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
               className={`text-xs text-center ${layers.traffic ? "font-bold text-white" : "font-medium text-white/60"}`}
             >
               {t("layers.traffic")}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="w-1/4 items-center gap-3 mb-4"
-            onPress={() => {
-              triggerHaptic();
-              layers.setPublicTransport(!layers.publicTransport);
-            }}
-          >
-            <View
-              className={`w-16 h-16 rounded-full border-2 items-center justify-center ${layers.publicTransport ? "border-white bg-white" : "border-white/20 bg-white/5"}`}
-            >
-              <TrainIcon color={layers.publicTransport ? "#000" : "#e3e3e3"} />
-            </View>
-            <Text
-              className={`text-xs text-center ${layers.publicTransport ? "font-bold text-white" : "font-medium text-white/60"}`}
-            >
-              {t("layers.publicTransport")}
             </Text>
           </TouchableOpacity>
         </View>

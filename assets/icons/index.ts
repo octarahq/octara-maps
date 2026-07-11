@@ -39,6 +39,7 @@ export { default as ShareIcon } from "./ShareIcon";
 export { default as StarIcon } from "./StarIcon";
 export { default as TrainIcon } from "./TrainIcon";
 export { default as TrainStationIcon } from "./TrainStationIcon";
+export { default as StreetViewIcon } from "./StreetViewIcon";
 export { default as TrashIcon } from "./TrashIcon";
 export { default as WebIcon } from "./WebIcon";
 export { default as WorkIcon } from "./WorkIcon";

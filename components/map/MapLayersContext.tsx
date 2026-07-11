@@ -47,6 +47,9 @@ interface MapLayersContextValue {
   publicTransport: boolean;
   setPublicTransport: (enabled: boolean) => void;
 
+  streetView: boolean;
+  setStreetView: (enabled: boolean) => void;
+
   buildings3d: boolean;
   setBuildings3d: (enabled: boolean) => void;
 
@@ -98,17 +101,32 @@ export function MapLayersProvider({ children }: MapLayersProviderProps) {
   const [layersOpen, setLayersOpen] = React.useState(false);
   const [traffic, _setTraffic] = React.useState(false);
   const [publicTransport, _setPublicTransport] = React.useState(false);
+  const [streetView, _setStreetView] = React.useState(false);
   const [buildings3d, setBuildings3d] = React.useState(true);
   const STORAGE_KEY = "map_layers_v1";
 
   const setTraffic = React.useCallback((enabled: boolean) => {
     _setTraffic(enabled);
-    if (enabled) _setPublicTransport(false);
+    if (enabled) {
+      _setPublicTransport(false);
+      _setStreetView(false);
+    }
   }, []);
 
   const setPublicTransport = React.useCallback((enabled: boolean) => {
     _setPublicTransport(enabled);
-    if (enabled) _setTraffic(false);
+    if (enabled) {
+      _setTraffic(false);
+      _setStreetView(false);
+    }
+  }, []);
+
+  const setStreetView = React.useCallback((enabled: boolean) => {
+    _setStreetView(enabled);
+    if (enabled) {
+      _setTraffic(false);
+      _setPublicTransport(false);
+    }
   }, []);
 
   React.useEffect(() => {
@@ -119,9 +137,11 @@ export function MapLayersProvider({ children }: MapLayersProviderProps) {
         try {
           const parsed = JSON.parse(raw);
           if (!mounted) return;
-          if (typeof parsed.traffic === "boolean") setTraffic(parsed.traffic);
+          if (typeof parsed.traffic === "boolean") _setTraffic(parsed.traffic);
           if (typeof parsed.publicTransport === "boolean")
-            setPublicTransport(parsed.publicTransport);
+            _setPublicTransport(parsed.publicTransport);
+          if (typeof parsed.streetView === "boolean")
+            _setStreetView(parsed.streetView);
           if (typeof parsed.buildings3d === "boolean")
             setBuildings3d(parsed.buildings3d);
         } catch {}
@@ -136,10 +156,11 @@ export function MapLayersProvider({ children }: MapLayersProviderProps) {
     const toSave = {
       traffic,
       publicTransport,
+      streetView,
       buildings3d,
     };
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave)).catch(() => {});
-  }, [traffic, publicTransport, buildings3d]);
+  }, [traffic, publicTransport, streetView, buildings3d]);
 
   const value: MapLayersContextValue = React.useMemo(
     () => ({
@@ -152,6 +173,8 @@ export function MapLayersProvider({ children }: MapLayersProviderProps) {
       setTraffic,
       publicTransport,
       setPublicTransport,
+      streetView,
+      setStreetView,
       buildings3d,
       setBuildings3d,
       darkTheme,
@@ -165,9 +188,10 @@ export function MapLayersProvider({ children }: MapLayersProviderProps) {
     [
       layersOpen,
       mapType,
-      setMapType,
+      mapType,
       traffic,
       publicTransport,
+      streetView,
       buildings3d,
       darkTheme,
       setDarkTheme,

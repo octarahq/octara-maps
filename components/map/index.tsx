@@ -1,10 +1,6 @@
 import ShadcnMap from "@/components/ShadcnMap";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  LayoutChangeEvent,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { LayoutChangeEvent, View, useWindowDimensions } from "react-native";
 
 import { usePosition } from "@/contexts/PositionContext";
 import { useRouter } from "expo-router";
@@ -173,13 +169,13 @@ function MapProviderContent({
         setFollowUser(false);
       }
     }
-    
+
     if (msg.type === "transitStopClicked") {
       router.push({
         pathname: "/stop-details",
         params: {
           id: msg.id,
-        }
+        },
       } as any);
       return;
     }
@@ -188,20 +184,29 @@ function MapProviderContent({
   useEffect(() => {
     if (!mapReady) return;
     const theme = layers.darkTheme ? "dark" : "light";
-    
-    // Déterminer la configuration du provider pour ce mode
-    const providerConfig = (layers.mapProviders as any)[layers.mapType] || { type: "default" };
-    
-    post({ 
-      type: "setBaseLayer", 
-      layer: layers.mapType, 
+
+    const providerConfig = (layers.mapProviders as any)[layers.mapType] || {
+      type: "default",
+    };
+
+    post({
+      type: "setBaseLayer",
+      layer: layers.mapType,
       theme,
       providerType: providerConfig.type,
-      customUrl: providerConfig.customUrl
+      customUrl: providerConfig.customUrl,
     });
-    
+
     post({ type: "setPublicTransport", enabled: layers.publicTransport });
-  }, [mapReady, layers.mapType, layers.darkTheme, layers.publicTransport, layers.mapProviders]);
+    post({ type: "setStreetView", enabled: layers.streetView });
+  }, [
+    mapReady,
+    layers.mapType,
+    layers.darkTheme,
+    layers.publicTransport,
+    layers.streetView,
+    layers.mapProviders,
+  ]);
 
   useEffect(() => {
     if (!mapReady) {
@@ -220,10 +225,10 @@ function MapProviderContent({
       const pos = position || pendingPositionRef.current;
       if (pos) {
         pendingPositionRef.current = null;
-        
+
         let shouldZoom = shouldZoomToDefaultRef.current;
         shouldZoomToDefaultRef.current = false;
-        
+
         if (!hasInitialCentered.current) {
           shouldZoom = true;
           hasInitialCentered.current = true;
@@ -242,12 +247,12 @@ function MapProviderContent({
           type: "setUserMarker",
           lat: pos.latitude,
           lng: pos.longitude,
-          center: shouldZoom ? true : (followUser && !isFlyingRef.current),
+          center: shouldZoom ? true : followUser && !isFlyingRef.current,
           offsetY: followUser ? -40 : 0,
           zoom: shouldZoom ? defaultCenterZoom : undefined,
           animate: true,
         };
-        
+
         post(payload);
       }
     }
@@ -285,4 +290,3 @@ function MapProviderContent({
     </MapCtx.Provider>
   );
 }
-

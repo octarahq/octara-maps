@@ -474,6 +474,35 @@ const ShadcnMap = React.forwardRef<any, Props>(
                   if(baseLayer.getContainer()) baseLayer.getContainer().style.filter = 'invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%)';
               }
             }
+            if (m.type === 'setStreetView') {
+              if (m.enabled) {
+                if (window.streetViewLayer) {
+                  map.removeLayer(window.streetViewLayer);
+                  window.streetViewLayer = null;
+                }
+                var svUrl = 'https://panoramax.ign.fr/api/map/{z}/{x}/{y}.mvt';
+                window.streetViewLayer = L.vectorGrid.protobuf(svUrl, {
+                  zIndex: 9,
+                  vectorTileLayerStyles: {
+                    sequences: {
+                      weight: 2,
+                      color: '#00aeff',
+                      opacity: 0.8,
+                      radius: 0,
+                      fill: false
+                    },
+                    pictures: [],
+                    images: []
+                  }
+                });
+                window.streetViewLayer.addTo(map);
+              } else {
+                if (window.streetViewLayer) {
+                  map.removeLayer(window.streetViewLayer);
+                  window.streetViewLayer = null;
+                }
+              }
+            }
             if (m.type === 'setPublicTransport') {
               if (m.enabled) {
                 if (window.transitLayer) {
