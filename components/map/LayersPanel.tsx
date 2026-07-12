@@ -172,9 +172,8 @@ export default function LayersPanel({ onClose }: LayersPanelProps) {
                 triggerHaptic();
                 layers.setTraffic(false);
               } else {
-                showCommingSoonToast();
-                // triggerHaptic();
-                // layers.setTraffic(true);
+                triggerHaptic();
+                layers.setTraffic(true);
               }
             }}
           >

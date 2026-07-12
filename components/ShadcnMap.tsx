@@ -1,4 +1,17 @@
-import { addressSvg } from "@/assets/icons/svgStrings";
+import {
+  AbnormalTrafficSvg,
+  AccidentSvg,
+  addressSvg,
+  AnimalPresenceObstructionSvg,
+  AuthorityOperationSvg,
+  ConstructionWorksSvg,
+  EnvironmentalObstructionSvg,
+  GeneralObstructionSvg,
+  InfrastructureDamageObstructionSvg,
+  NonWeatherRelatedRoadConditionsSvg,
+  VehicleObstructionSvg,
+  WarningSvg
+} from "@/assets/icons/svgStrings";
 import React from "react";
 import { Platform, View } from "react-native";
 import { WebView, WebViewProps } from "react-native-webview";
@@ -45,11 +58,26 @@ WebWebView.displayName = "WebWebView";
 type Props = {
   initialZoom?: number;
   onMapMessage?: (msg: any) => void;
+  options?: { enableLongPress?: boolean };
 };
 
 const ShadcnMap = React.forwardRef<any, Props>(
-  ({ initialZoom = 2, onMapMessage }, ref) => {
+  ({ initialZoom = 2, onMapMessage, options }, ref) => {
     const addressSvgString = addressSvg("#0d7ff2");
+
+    const trafficSvgs = {
+      Accident: AccidentSvg(),
+      AbnormalTraffic: AbnormalTrafficSvg(),
+      ConstructionWorks: ConstructionWorksSvg(),
+      AnimalPresenceObstruction: AnimalPresenceObstructionSvg(),
+      EnvironmentalObstruction: EnvironmentalObstructionSvg(),
+      AuthorityOperation: AuthorityOperationSvg(),
+      Warning: WarningSvg(),
+      VehicleObstruction: VehicleObstructionSvg(),
+      GeneralObstruction: GeneralObstructionSvg(),
+      NonWeatherRelatedRoadConditions: NonWeatherRelatedRoadConditionsSvg(),
+      InfrastructureDamageObstruction: InfrastructureDamageObstructionSvg()
+    };
 
     const html: string = `<!doctype html>
     <html>
@@ -173,6 +201,64 @@ const ShadcnMap = React.forwardRef<any, Props>(
     map.on('touchstart', sendMove);
     map.on('mousedown', sendMove);       
     map.on('zoomend', function(){ try { postToApp({ type: 'zoomChanged', zoom: map.getZoom() }); } catch(e) {} });
+    map.on('moveend', function(){ try { postToApp({ type: 'centerChanged', lat: map.getCenter().lat, lng: map.getCenter().lng }); } catch(e) {} });
+
+    var pressTimer = null;
+    var pressStartX = 0;
+    var pressStartY = 0;
+
+    function startPress(e) {
+      if (e.type === 'touchstart' && e.touches && e.touches.length > 1) return;
+      var clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+      var clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      pressStartX = clientX;
+      pressStartY = clientY;
+      
+      pressTimer = setTimeout(function() {
+        if (pressTimer) {
+          var rect = map.getContainer().getBoundingClientRect();
+          var point = L.point(clientX - rect.left, clientY - rect.top);
+          var latlng = map.containerPointToLatLng(point);
+          try {
+            if (${!!options?.enableLongPress}) {
+              postToApp({ type: 'mapLongPress', lat: latlng.lat, lng: latlng.lng });
+            }
+          } catch(err) {}
+          pressTimer = null;
+        }
+      }, 500);
+    }
+
+    function movePress(e) {
+      if (pressTimer) {
+        var clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        var clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+        var dx = clientX - pressStartX;
+        var dy = clientY - pressStartY;
+        if (Math.abs(dx) > 15 || Math.abs(dy) > 15) {
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+      }
+    }
+
+    function endPress(e) {
+      if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+    }
+
+    var mc = document.getElementById('mapViewport');
+    if (mc) {
+      mc.addEventListener('mousedown', startPress, { passive: true });
+      mc.addEventListener('touchstart', startPress, { passive: true });
+      mc.addEventListener('mousemove', movePress, { passive: true });
+      mc.addEventListener('touchmove', movePress, { passive: true });
+      window.addEventListener('mouseup', endPress, { passive: true });
+      window.addEventListener('touchend', endPress, { passive: true });
+      window.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+    }
     var currentBearing = 0;
         var targetBearing = 0;
         var bearingRaf = null;
@@ -598,6 +684,117 @@ const ShadcnMap = React.forwardRef<any, Props>(
                 if (window.transitLayer) {
                   map.removeLayer(window.transitLayer);
                   window.transitLayer = null;
+                }
+              }
+            }
+            if (m.type === 'setTraffic') {
+              if (m.enabled) {
+                if (!window.trafficLayerGroup) {
+                  window.trafficLayerGroup = L.layerGroup().addTo(map);
+                  window.trafficMarkers = new Map();
+                  window.trafficTileRefs = new Map();
+                  window.trafficGridEvents = new Map();
+                  
+                  window.trafficGridLayer = L.gridLayer({ zIndex: 10, updateWhenIdle: false });
+                  var trafficSvgs = ${JSON.stringify(trafficSvgs)};
+                  var getIconSvg = function(type) {
+                    if (type === 'MaintenanceWorks' || type === 'RoadOrCarriagewayOrLaneManagement') type = 'ConstructionWorks';
+                    if (type === 'Conditions' || type === 'PoorEnvironmentConditions') type = 'EnvironmentalObstruction';
+                    return trafficSvgs[type] || trafficSvgs['Warning'];
+                  };
+
+                  window.trafficGridLayer.createTile = function(coords, done) {
+                    var tile = document.createElement('div');
+                    var tileKey = coords.z + ':' + coords.x + ':' + coords.y;
+                    var url = 'https://4021.fr1.orionhost.xyz/data/traffic/' + coords.z + '/' + coords.x + '/' + coords.y;
+                    
+                    window.trafficGridEvents.set(tileKey, []);
+                    
+                    fetch(url)
+                      .then(function(res) { return res.json(); })
+                      .then(function(data) {
+                        if (!Array.isArray(data)) {
+                           done(null, tile);
+                           return;
+                        }
+                        data.forEach(function(event) {
+                          window.trafficGridEvents.get(tileKey).push(event.ID);
+                          
+                          if (!window.trafficTileRefs.has(event.ID)) {
+                            window.trafficTileRefs.set(event.ID, new Set());
+                          }
+                          window.trafficTileRefs.get(event.ID).add(tileKey);
+
+                          if (!window.trafficMarkers.has(event.ID)) {
+                            var color = '#f59e0b';
+                            if (event.Severity === 'high') color = '#ef4444';
+                            else if (event.Severity === 'low') color = '#3b82f6';
+                            
+                            var iconHtml = '<div style="width:28px;height:28px;background-color:' + color + ';border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,0.3);border:2px solid white;">' + getIconSvg(event.Type) + '</div>';
+                            var customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
+                            
+                            var mk = L.marker([event.Lat, event.Lon], { icon: customIcon });
+                            (function(eventType) {
+                              mk.on('click', function(e) {
+                                L.DomEvent.stopPropagation(e);
+                                postToApp({ type: 'trafficMarkerClicked', eventType: eventType });
+                              });
+                            })(event.Type);
+                            if (window.trafficLayerGroup) {
+                               mk.addTo(window.trafficLayerGroup);
+                            }
+                            window.trafficMarkers.set(event.ID, mk);
+                          }
+                        });
+                        done(null, tile);
+                      })
+                      .catch(function(err) {
+                        done(err, tile);
+                      });
+                      
+                    return tile;
+                  };
+                  
+                  window.trafficGridLayer.on('tileunload', function(e) {
+                    var coords = e.coords;
+                    var tileKey = coords.z + ':' + coords.x + ':' + coords.y;
+                    var eventIDs = window.trafficGridEvents.get(tileKey);
+                    
+                    if (eventIDs) {
+                      eventIDs.forEach(function(eventID) {
+                        var keys = window.trafficTileRefs.get(eventID);
+                        if (keys) {
+                          keys.delete(tileKey);
+                          if (keys.size === 0) {
+                            var mk = window.trafficMarkers.get(eventID);
+                            if (mk && window.trafficLayerGroup) {
+                              window.trafficLayerGroup.removeLayer(mk);
+                            }
+                            window.trafficMarkers.delete(eventID);
+                            window.trafficTileRefs.delete(eventID);
+                          }
+                        }
+                      });
+                      window.trafficGridEvents.delete(tileKey);
+                    }
+                  });
+                }
+                
+                if (!map.hasLayer(window.trafficGridLayer)) {
+                  map.addLayer(window.trafficGridLayer);
+                }
+              } else {
+                if (window.trafficGridLayer) {
+                  map.removeLayer(window.trafficGridLayer);
+                  if (window.trafficLayerGroup) {
+                    window.trafficLayerGroup.clearLayers();
+                    map.removeLayer(window.trafficLayerGroup);
+                    window.trafficLayerGroup = null;
+                  }
+                  window.trafficMarkers.clear();
+                  window.trafficTileRefs.clear();
+                  window.trafficGridEvents.clear();
+                  window.trafficGridLayer = null;
                 }
               }
             }

@@ -14,6 +14,7 @@ import {
     TouchableOpacity,
     View,
     useWindowDimensions,
+    ScrollView,
 } from "react-native";
 import MapOverlay from "./_components/MapOverlay";
 
@@ -32,7 +33,7 @@ export default function MainScreen() {
   React.useEffect(() => {}, []);
 
   return (
-    <MapProvider style={{ flex: 1 }}>
+    <MapProvider style={{ flex: 1 }} allowedLayers="all" options={{ enableLongPress: true }}>
       <View className="flex-1 bg-transparent" pointerEvents="box-none">
         <StatusBar
           hidden
@@ -68,69 +69,30 @@ export default function MainScreen() {
                 : t("sheet.exploreArea")}
             </Text>
             <View className="flex-row w-full justify-between">
-              <TouchableOpacity
-                className="items-center w-[22%]"
-                  onPress={() => { router.push({
-                    pathname: "/(main)/poiresult",
-                    params: { amenity: "fuel", title: t("items.gas") }
-                  }); }}
-              >
-                <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
-                  <GasIcon />
-                </View>
-
-                <Text className="text-white/60 text-[12px] mt-1.5">
-                  {t("items.gas")}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="items-center w-[22%]"
-                  onPress={() => { router.push({
-                    pathname: "/(main)/poiresult",
-                    params: { amenity: "restaurant|fast_food|cafe", title: t("items.food") }
-                  }); }}
-              >
-                <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
-                  <FoodIcon />
-                </View>
-
-                <Text className="text-white/60 text-[12px] mt-1.5">
-                  {t("items.food")}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="items-center w-[22%]"
-                  onPress={() => { router.push({
-                    pathname: "/(main)/poiresult",
-                    params: { amenity: "cafe", title: t("items.coffee") }
-                  }); }}
-              >
-                <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
-                  <CoffeeIcon />
-                </View>
-
-                <Text className="text-white/60 text-[12px] mt-1.5">
-                  {t("items.coffee")}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="items-center w-[22%]"
-                  onPress={() => { router.push({
-                    pathname: "/(main)/poiresult",
-                    params: { amenity: "parking", title: t("items.parking") }
-                  }); }}
-              >
-                <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
-                  <ParkingIcon />
-                </View>
-
-                <Text className="text-white/60 text-[12px] mt-1.5">
-                  {t("items.parking")}
-                </Text>
-              </TouchableOpacity>
+              {[
+                { icon: <GasIcon />, label: t("items.gas"), amenity: "fuel" },
+                { icon: <FoodIcon />, label: t("items.food"), amenity: "restaurant|fast_food|cafe" },
+                { icon: <CoffeeIcon />, label: t("items.coffee"), amenity: "cafe" },
+                { icon: <ParkingIcon />, label: t("items.parking"), amenity: "parking" }
+              ].map((c) => (
+                <TouchableOpacity
+                  key={c.label}
+                  className="items-center w-[22%]"
+                  onPress={() => {
+                    router.push({
+                      pathname: "/(main)/poiresult",
+                      params: { amenity: c.amenity, title: c.label }
+                    });
+                  }}
+                >
+                  <View className="w-14 h-14 rounded-[16px] bg-white/[0.04] border border-white/[0.08] items-center justify-center">
+                    {c.icon}
+                  </View>
+                  <Text className="text-white/60 text-[12px] mt-1.5" numberOfLines={1}>
+                    {c.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </BottomSheetView>
         </BottomSheet>

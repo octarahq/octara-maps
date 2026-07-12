@@ -1,6 +1,7 @@
 import ShadcnMap from "@/components/ShadcnMap";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { LayoutChangeEvent, View, useWindowDimensions } from "react-native";
+import { LayoutChangeEvent, Platform, ToastAndroid, View, useWindowDimensions } from "react-native";
+import { createTranslator } from "@/i18n";
 
 import { usePosition } from "@/contexts/PositionContext";
 import { useRouter } from "expo-router";
@@ -21,7 +22,11 @@ type Props = {
   goTo?: { lat: number; lng: number };
   initialZoom?: number;
   onStreetViewClick?: (lat: number, lng: number) => void;
+  onCenterChange?: (lat: number, lng: number) => void;
   streetViewLocation?: { lat: number; lng: number; heading?: number } | null;
+  allowedLayers: "all" | ("traffic" | "transit" | "streetView")[];
+  forceLayers?: ("traffic" | "transit" | "streetView")[];
+  options?: { enableLongPress?: boolean };
 };
 
 export default function MapProvider({
@@ -33,7 +38,11 @@ export default function MapProvider({
   goTo,
   initialZoom,
   onStreetViewClick,
+  onCenterChange,
   streetViewLocation,
+  allowedLayers,
+  forceLayers,
+  options,
 }: Props) {
   return (
     <MapProviderContent
@@ -44,7 +53,11 @@ export default function MapProvider({
       goTo={goTo}
       initialZoom={initialZoom}
       onStreetViewClick={onStreetViewClick}
+      onCenterChange={onCenterChange}
       streetViewLocation={streetViewLocation}
+      allowedLayers={allowedLayers}
+      forceLayers={forceLayers}
+      options={options}
     >
       {children}
     </MapProviderContent>
@@ -60,7 +73,11 @@ function MapProviderContent({
   goTo,
   initialZoom,
   onStreetViewClick,
+  onCenterChange,
   streetViewLocation,
+  allowedLayers,
+  forceLayers,
+  options,
 }: Props) {
   const router = useRouter();
   const layers = useMapLayers();
@@ -160,7 +177,9 @@ function MapProviderContent({
     };
   }, [followUser, position, layers.mapType, currentZoom]);
 
-  const handleMapMsg = React.useCallback((msg: any) => {
+  const { t: tTraffic } = createTranslator("traffic");
+
+  const handleMapMsg = React.useCallback(async (msg: any) => {
     if (!msg) return;
     if (msg.type === "mapReady") {
       setMapReady(true);
@@ -180,6 +199,14 @@ function MapProviderContent({
       if (!ignoreMapMove.current && followRef.current) {
         setFollowUser(false);
       }
+    }
+
+    if (msg.type === "trafficMarkerClicked") {
+      const label = tTraffic(`eventTypes.${msg.eventType}`);
+      if (Platform.OS === "android") {
+        ToastAndroid.show(label, ToastAndroid.SHORT);
+      }
+      return;
     }
 
     if (msg.type === "transitStopClicked") {
@@ -203,7 +230,50 @@ function MapProviderContent({
       }
       return;
     }
-  }, [onStreetViewClick, router]);
+
+    if (msg.type === "centerChanged") {
+      if (onCenterChange) {
+        onCenterChange(msg.lat, msg.lng);
+      }
+      return;
+    }
+
+    if (msg.type === "mapLongPress") {
+      const { lat, lng } = msg;
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+          { headers: { "Accept-Language": "fr" } }
+        );
+        const data = await res.json();
+        const name = data.name || data.display_name?.split(",")[0] || "";
+        const address = data.display_name || "";
+        const osmId = data.osm_id ? String(data.osm_id) : undefined;
+        const osmType = data.osm_type
+          ? (data.osm_type.charAt(0).toUpperCase() as "N" | "W" | "R")
+          : undefined;
+        const osmValue = data.type || data.class || undefined;
+        router.push({
+          pathname: "/(main)/place",
+          params: {
+            name,
+            address,
+            lat: String(lat),
+            lng: String(lng),
+            ...(osmId ? { osm_id: osmId } : {}),
+            ...(osmType ? { osm_type: osmType } : {}),
+            ...(osmValue ? { osm_value: osmValue } : {}),
+          },
+        } as any);
+      } catch {
+        router.push({
+          pathname: "/(main)/place",
+          params: { lat: String(lat), lng: String(lng) },
+        } as any);
+      }
+      return;
+    }
+  }, [onStreetViewClick, router, tTraffic]);
 
   useEffect(() => {
     if (!mapReady) return;
@@ -221,15 +291,22 @@ function MapProviderContent({
       customUrl: providerConfig.customUrl,
     });
 
-    post({ type: "setPublicTransport", enabled: layers.publicTransport });
-    post({ type: "setStreetView", enabled: layers.streetView });
+    const isAllowed = (layer: "traffic" | "transit" | "streetView") => allowedLayers === "all" || allowedLayers.includes(layer);
+    const isForced = (layer: "traffic" | "transit" | "streetView") => forceLayers && forceLayers.includes(layer);
+
+    post({ type: "setPublicTransport", enabled: isForced("transit") ? true : (isAllowed("transit") ? layers.publicTransport : false) });
+    post({ type: "setStreetView", enabled: isForced("streetView") ? true : (isAllowed("streetView") ? layers.streetView : false) });
+    post({ type: "setTraffic", enabled: isForced("traffic") ? true : (isAllowed("traffic") ? layers.traffic : false) });
   }, [
     mapReady,
     layers.mapType,
     layers.darkTheme,
     layers.publicTransport,
     layers.streetView,
+    layers.traffic,
     layers.mapProviders,
+    allowedLayers,
+    forceLayers,
   ]);
 
   useEffect(() => {
@@ -311,6 +388,7 @@ function MapProviderContent({
           ref={webviewRef}
           initialZoom={initialZoom}
           onMapMessage={handleMapMsg}
+          options={options}
         />
         <View className="absolute inset-0" pointerEvents="box-none">
           {children}

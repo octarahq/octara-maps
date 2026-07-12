@@ -362,6 +362,7 @@ export default function StreetViewScreen() {
 
       <View style={styles.bottomHalf}>
         <MapProvider
+          allowedLayers="all"
           showControls={false}
           showUserLocation={false}
           initialZoom={15}
