@@ -41,6 +41,7 @@ import {
     StarIcon,
     TrainStationIcon,
     WorkIcon,
+    MapIcon,
 } from "@/assets/icons";
 
 import BackIcon from "@/assets/icons/BackIcon";
@@ -276,6 +277,14 @@ export default function SearchScreen() {
           {mode === "search" && compact && (
             <View className="mt-2 px-3">
               <ScrollView keyboardShouldPersistTaps="handled">
+                <SearchResult
+                  icon={<MapIcon color={Colors.dark.primary} />}
+                  title="Pointer sur la carte"
+                  onPress={() => {
+                    router.push("/(main)/point-on-map");
+                  }}
+                />
+
                 {filteredAmenities.length > 0 &&
                   filteredAmenities.slice(0, 10).map((a) => {
                     const key = `amenity_${a.value}`;
@@ -437,6 +446,7 @@ export default function SearchScreen() {
                 className="mb-3"
               >
                 {[
+                  { icon: <MapIcon />, label: "Pointer sur la carte", route: "/(main)/point-on-map" },
                   { icon: <GasIcon />, label: t("chip_gas"), amenity: "fuel" },
                   { icon: <ParkingIcon />, label: t("chip_parking"), amenity: "parking" },
                   { icon: <CoffeeIcon />, label: t("chip_coffee"), amenity: "cafe" },
@@ -446,7 +456,13 @@ export default function SearchScreen() {
                   <TouchableOpacity
                     key={c.label}
                     className="bg-[#223649] px-3.5 py-2 rounded-[8px] mr-2 flex-row items-center"
-                    onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: c.amenity, title: c.label } })}
+                    onPress={() => {
+                      if (c.route) {
+                        router.push(c.route as any);
+                      } else {
+                        router.push({ pathname: "/(main)/poiresult", params: { amenity: c.amenity, title: c.label } });
+                      }
+                    }}
                   >
                     <View className="mr-2 w-6 h-6 items-center justify-center">
                       {c.icon}

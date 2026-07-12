@@ -60,6 +60,9 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
   const { position } = usePosition();
   const { saved, setSavedPlace, addOtherPlace, removeOtherPlace } = useUser();
   const lastQueryRef = React.useRef<string | null>(null);
+  
+  const posLat = position?.latitude;
+  const posLon = position?.longitude;
 
   const [modalPlaceName, setModalPlaceName] = React.useState(initialName);
   const [modalSelectedIcon, setModalSelectedIcon] = React.useState("heart");
@@ -82,7 +85,7 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
   React.useEffect(() => {
     const q = addrText.trim();
     if (!visible || !q || (addrLat && addrLng)) {
-      setAddrResults([]);
+      setAddrResults((prev) => (prev.length > 0 ? [] : prev));
       return;
     }
     if (lastQueryRef.current === q) return;
@@ -91,8 +94,8 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
       try {
         const results = await SearchEngineService.photonSearch(q, {
           limit: 5,
-          lat: position?.latitude,
-          lon: position?.longitude,
+          lat: posLat,
+          lon: posLon,
         });
         lastQueryRef.current = q;
         setAddrResults(results);
@@ -101,7 +104,7 @@ export const SavePlaceModal: React.FC<SavePlaceModalProps> = ({
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [addrText, visible, addrLat, addrLng, position]);
+  }, [addrText, visible, addrLat, addrLng, posLat, posLon]);
 
   const isEditing =
     visible &&

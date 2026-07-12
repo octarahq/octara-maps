@@ -38,10 +38,8 @@ export default function POISearchScreen() {
   useEffect(() => {}, []);
 
   useEffect(() => {
-    console.log("test", hasFetchedRef.current, position);
     if (position && !hasFetchedRef.current) {
       hasFetchedRef.current = true;
-      console.log("fetch");
       OverpassService.fetchNeerAmenity(
         position.latitude,
         position.longitude,
@@ -49,11 +47,9 @@ export default function POISearchScreen() {
         amenity,
       )
         .then((res) => {
-          console.log("Overpass results:", res);
           setResults(res);
         })
         .catch((e) => {
-          console.error("Error fetching Overpass results:", e);
           setResults([]);
         });
     }
