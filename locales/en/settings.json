@@ -40,6 +40,10 @@
         {
           "title": "Marine mode",
           "description": "Replaces left/right with port/starboard"
+        },
+        {
+          "title": "Traffic alerts",
+          "description": "Receive real-time traffic alerts while navigating"
         }
       ]
     }, {

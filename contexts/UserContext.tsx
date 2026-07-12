@@ -23,6 +23,7 @@ export type UserProfile = {
       satellite?: { type: string; customUrl?: string };
       terrain?: { type: string; customUrl?: string };
     };
+    trafficAlerts?: boolean;
   };
 };
 
@@ -79,6 +80,7 @@ function loadProfile(): Promise<UserProfile & { saved?: SavedPlaces }> {
           satellite: { type: "default" },
           terrain: { type: "default" },
         },
+        trafficAlerts: true,
       },
     };
   });
@@ -104,6 +106,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         satellite: { type: "default" },
         terrain: { type: "default" },
       },
+      trafficAlerts: true,
     },
   });
   const [saved, setSaved] = useState<SavedPlaces>({
@@ -135,6 +138,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             satellite: { type: "default" },
             terrain: { type: "default" },
           },
+          trafficAlerts: p.settings?.trafficAlerts !== false,
         },
       });
       if ((p as any).saved) {

@@ -40,6 +40,10 @@
           {
             "title": "Mode marin",
             "description": "Remplace gauche/droite par bâbord/tribord"
+          },
+          {
+            "title": "Alertes trafic",
+            "description": "Recevoir des alertes de trafic en temps réel pendant la navigation"
           }
       ]
     }, {

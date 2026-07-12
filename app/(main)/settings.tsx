@@ -6,16 +6,16 @@ import Constants from "expo-constants";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActionSheetIOS,
-    ActivityIndicator,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View,
+  ActionSheetIOS,
+  ActivityIndicator,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -223,6 +223,13 @@ export default function SettingsScreen() {
             icon: "directions-boat",
             onValueChange: (val) => setSettings({ ...settings, marineMode: val }),
             switchValue: !!settings.marineMode,
+          },
+          {
+            title: t("sections.0.settings.5.title", { defaultValue: "Alertes trafic" }),
+            description: t("sections.0.settings.5.description", { defaultValue: "Recevoir des alertes de trafic en temps réel pendant la navigation" }),
+            icon: "traffic",
+            onValueChange: (val) => setSettings({ ...settings, trafficAlerts: val }),
+            switchValue: settings.trafficAlerts !== false,
           },
         ]}
       />
