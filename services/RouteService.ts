@@ -21,6 +21,8 @@ export interface NavigationData {
   steps: {
     instruction: string;
     name?: string;
+    ref?: string;
+    destinations?: string;
     distance: number;
     duration: number;
     coordinates?: [number, number][];
@@ -121,7 +123,7 @@ const getRoutingOSMHost = (mode: string = "driving"): string => {
   if (mode === "bicycling")
     return "https://routing.openstreetmap.de/routed-bike";
   if (mode === "transit") return "https://4021.fr1.orionhost.xyz";
-  return "https://router.project-osrm.org";
+  return "https://routing.openstreetmap.de/routed-car";
 };
 
 const DEFAULT_OSRM_HOSTS = ["https://router.project-osrm.org"];
@@ -1217,6 +1219,8 @@ export function useRouteService(): RouteService {
               step.maneuver?.instruction || step.name || "",
             ),
             name: step.name || undefined,
+            ref: step.ref || undefined,
+            destinations: step.destinations || undefined,
             distance: step.distance || 0,
             duration: step.duration || 0,
             coordinates: step.geometry?.coordinates,
@@ -1443,7 +1447,7 @@ export async function fetchParallelRouting(
     if (mode === "bicycling")
       return "https://routing.openstreetmap.de/routed-bike";
     if (mode === "transit") return "https://4021.fr1.orionhost.xyz";
-    return "https://router.project-osrm.org";
+    return "https://routing.openstreetmap.de/routed-car";
   };
 
   try {

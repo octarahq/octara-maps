@@ -7,6 +7,7 @@ const enSearch = require("./en/search.json");
 const enSettings = require("./en/settings.json");
 const enTripHistory = require("./en/trip_history.json");
 const enPoiSearch = require("./en/poi_search.json");
+const enTraffic = require("./en/traffic.json");
 const frMain = require("./fr/main.json");
 const frNavigate = require("./fr/navigate.json");
 const frOnboarding = require("./fr/onboarding.json");
@@ -16,6 +17,7 @@ const frSearch = require("./fr/search.json");
 const frSettings = require("./fr/settings.json");
 const frTripHistory = require("./fr/trip_history.json");
 const frPoiSearch = require("./fr/poi_search.json");
+const frTraffic = require("./fr/traffic.json");
 
 const enShareLocation = require("./en/share_location.json");
 const enShareLocationView = require("./en/share_location_view.json");
@@ -35,6 +37,7 @@ const translations = {
     place: frPlace,
     trip_history: frTripHistory,
     poi_search: frPoiSearch,
+    traffic: frTraffic,
     share_location: frShareLocation,
     share_location_view: frShareLocationView,
     stop_details: frStopDetails,
@@ -49,6 +52,7 @@ const translations = {
     place: enPlace,
     trip_history: enTripHistory,
     poi_search: enPoiSearch,
+    traffic: enTraffic,
     share_location: enShareLocation,
     share_location_view: enShareLocationView,
     stop_details: enStopDetails,

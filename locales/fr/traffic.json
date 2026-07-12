@@ -1,0 +1,22 @@
+{
+  "eventTypes": {
+    "Accident": "Accident",
+    "AbnormalTraffic": "Trafic anormal",
+    "ConstructionWorks": "Travaux",
+    "MaintenanceWorks": "Travaux d'entretien",
+    "RoadOrCarriagewayOrLaneManagement": "Gestion de voie",
+    "AnimalPresenceObstruction": "Animal sur la route",
+    "EnvironmentalObstruction": "Obstacle environnemental",
+    "Conditions": "Conditions météo",
+    "PoorEnvironmentConditions": "Mauvaises conditions météo",
+    "AuthorityOperation": "Opération des forces de l'ordre",
+    "Warning": "Avertissement",
+    "VehicleObstruction": "Véhicule en panne",
+    "GeneralObstruction": "Obstacle sur la route",
+    "NonWeatherRelatedRoadConditions": "État de la chaussée",
+    "InfrastructureDamageObstruction": "Dommage sur l'infrastructure"
+  },
+  "reminder": "RAPPEL",
+  "trafficAlert": "Alerte trafic",
+  "disturbanceReported": "Perturbation signalée"
+}

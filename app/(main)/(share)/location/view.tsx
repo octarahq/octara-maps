@@ -185,6 +185,7 @@ export default function ShareLocationViewScreen() {
 
       <View className="flex-1 mx-4 mb-4 rounded-2xl overflow-hidden border border-[#2e3a4c] bg-[#1a2533]">
         <MapProvider
+          allowedLayers="all"
           showUserLocation={true}
           showControls={false}
           style={{
