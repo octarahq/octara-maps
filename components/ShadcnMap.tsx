@@ -201,6 +201,13 @@ const ShadcnMap = React.forwardRef<any, Props>(
     map.on('touchstart', sendMove);
     map.on('mousedown', sendMove);       
     map.on('zoomend', function(){ try { postToApp({ type: 'zoomChanged', zoom: map.getZoom() }); } catch(e) {} });
+    map.on('zoom', function() {
+      var z = map.getZoom();
+      if (routePolyline) routePolyline.setStyle({ weight: getRouteWeight(z) });
+      if (overlayPolylines && overlayPolylines.length > 0) {
+        overlayPolylines.forEach(function(p) { p.setStyle({ weight: getRouteWeight(z) * 1.5 }); });
+      }
+    });
     map.on('moveend', function(){ try { postToApp({ type: 'centerChanged', lat: map.getCenter().lat, lng: map.getCenter().lng }); } catch(e) {} });
 
     var pressTimer = null;
@@ -266,6 +273,16 @@ const ShadcnMap = React.forwardRef<any, Props>(
         var markers = [];
         var routePolyline = null;
         var overlayPolylines = [];
+
+        function getRouteWeight(z) {
+          if (z >= 18) return 24;
+          if (z >= 17) return 18;
+          if (z >= 16) return 12;
+          if (z >= 15) return 9;
+          if (z >= 14) return 7;
+          if (z >= 12) return 5;
+          return 4;
+        }
 
         function normalizeBearing(angle) {
           var a = Number(angle) || 0;
@@ -497,14 +514,14 @@ const ShadcnMap = React.forwardRef<any, Props>(
             if (m.type === 'setPolyline') {
               if (routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
               if (m.latlngs && m.latlngs.length > 1) {
-                var polylineOpts = { color: m.color || '#0d7ff2', weight: m.weight || 2.5, opacity: m.opacity || 0.85 };
+                var polylineOpts = { color: m.color || '#0d7ff2', weight: getRouteWeight(map.getZoom()), opacity: m.opacity || 0.85 };
                 if (m.dashArray) polylineOpts.dashArray = m.dashArray;
                 routePolyline = L.polyline(m.latlngs, polylineOpts).addTo(map);
               }
             }
             if (m.type === 'addOverlayPolyline') {
               if (m.latlngs && m.latlngs.length > 1) {
-                var polylineOpts = { color: m.color || '#fff', weight: m.weight || 4, opacity: m.opacity || 1 };
+                var polylineOpts = { color: m.color || '#fff', weight: getRouteWeight(map.getZoom()) * 1.5, opacity: m.opacity || 1 };
                 var overlay = L.polyline(m.latlngs, polylineOpts).addTo(map);
                 overlayPolylines.push(overlay);
                 
