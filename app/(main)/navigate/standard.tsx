@@ -958,30 +958,39 @@ export default function StandardNavigationScreen() {
     navigationData?.steps?.length,
   ]);
 
-  const targetZoom = React.useMemo(() => {
-    let baseZoom = 17;
-    const speedKmH = (position?.speed ?? 0) * 3.6;
+  const currentSpeedKmH = (position?.speed ?? 0) * 3.6;
+  const limitNum = isCarMode && speedLimit ? parseInt(speedLimit, 10) : null;
 
-    if (speedKmH >= 110) {
+  const targetZoom = React.useMemo(() => {
+    let baseZoom = 17.5;
+    const speedRef = limitNum !== null ? Math.max(limitNum, currentSpeedKmH) : currentSpeedKmH;
+
+    if (speedRef >= 110) {
+      baseZoom = 14.0;
+    } else if (speedRef >= 80) {
       baseZoom = 14.5;
-    } else if (speedKmH >= 80) {
-      baseZoom = 15;
-    } else if (speedKmH >= 50) {
-      baseZoom = 16;
+    } else if (speedRef >= 50) {
+      baseZoom = 15.5;
+    }
+
+    if (approachingStep && distanceToNextManeuver < 300) {
+      if (speedRef >= 110) {
+        baseZoom = 13.5;
+      } else if (speedRef >= 80) {
+        baseZoom = 14.0;
+      } else if (speedRef >= 50) {
+        baseZoom = 15.0;
+      } else {
+        baseZoom = 17.0;
+      }
     }
 
     let maxLayerZoom = 19;
     if (baseLayer === "terrain") maxLayerZoom = 17;
 
-    if (approachingStep && distanceToNextManeuver < 200) {
-      return Math.min(baseZoom + 1, maxLayerZoom);
-    }
     return Math.min(baseZoom, maxLayerZoom);
-  }, [distanceToNextManeuver, approachingStep, baseLayer, position?.speed]);
+  }, [distanceToNextManeuver, approachingStep, baseLayer, currentSpeedKmH, limitNum]);
   const lastCameraZoomRef = React.useRef<number | null>(null);
-
-  const currentSpeedKmH = (position?.speed ?? 0) * 3.6;
-  const limitNum = isCarMode && speedLimit ? parseInt(speedLimit, 10) : null;
   const targetSpeedDiff = React.useMemo(() => {
     if (limitNum === null) return 0;
     return Math.max(-20, Math.min(15, currentSpeedKmH - limitNum));
@@ -1411,6 +1420,13 @@ export default function StandardNavigationScreen() {
 
         const cameraOffsetY = 140;
 
+        const currentSpeedKmhEffect = (position.speed ?? 0) * 3.6;
+        const speedRef = limitNum !== null ? Math.max(limitNum, currentSpeedKmhEffect) : currentSpeedKmhEffect;
+        let targetPitch = 0;
+        if ((!approachingStep || distanceToNextManeuver >= 300) && speedRef > 50) {
+          targetPitch = 45;
+        }
+
         suppressMapMove.current = true;
         post({
           type: "panTo",
@@ -1418,6 +1434,7 @@ export default function StandardNavigationScreen() {
           lng: position.longitude,
           zoom: targetZoom,
           bearing,
+          pitch: targetPitch,
           offsetY: cameraOffsetY,
           animate: shouldAnimateZoom,
           duration: shouldAnimateZoom ? 0.45 : 0,

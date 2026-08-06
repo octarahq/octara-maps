@@ -10,7 +10,7 @@ import {
   InfrastructureDamageObstructionSvg,
   NonWeatherRelatedRoadConditionsSvg,
   VehicleObstructionSvg,
-  WarningSvg
+  WarningSvg,
 } from "@/assets/icons/svgStrings";
 import React from "react";
 import { Platform, View } from "react-native";
@@ -76,7 +76,7 @@ const ShadcnMap = React.forwardRef<any, Props>(
       VehicleObstruction: VehicleObstructionSvg(),
       GeneralObstruction: GeneralObstructionSvg(),
       NonWeatherRelatedRoadConditions: NonWeatherRelatedRoadConditionsSvg(),
-      InfrastructureDamageObstruction: InfrastructureDamageObstructionSvg()
+      InfrastructureDamageObstruction: InfrastructureDamageObstructionSvg(),
     };
 
     const html: string = `<!doctype html>
@@ -130,15 +130,19 @@ const ShadcnMap = React.forwardRef<any, Props>(
           height: 100%;
           overflow: hidden;
           background: #000;
+          perspective: 1200px;
+          perspective-origin: 50% 20%;
         }
         #mapRotate {
           position: absolute;
           left: 50%;
           top: 50%;
-          width: 170vmax;
-          height: 170vmax;
-          transform: translate(-50%, -50%);
+          width: 350vmax;
+          height: 350vmax;
+          margin-left: -175vmax;
+          margin-top: -175vmax;
           transform-origin: 50% 50%;
+          transform-style: preserve-3d;
           will-change: transform;
         }
           
@@ -160,16 +164,18 @@ const ShadcnMap = React.forwardRef<any, Props>(
           zoomControl: false, 
           worldCopyJump: true, 
           maxBoundsViscosity: 1, 
-          attributionControl: false 
+          attributionControl: false,
+          zoomSnap: 0,
+          zoomDelta: 0.5,
+          wheelPxPerZoomLevel: 120,
+          renderer: L.svg({ padding: 0.2 })
         }).setView([0,0], ${initialZoom});
 
         var baseLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
           maxZoom: 19,
-          minZoom: ${initialZoom},
-          detectRetina: true,
           tileSize: 512,
           zoomOffset: -1,
-          zIndex: 1,
+          zIndex: 1
         }).addTo(map);
 
         const south = -85;
@@ -267,12 +273,14 @@ const ShadcnMap = React.forwardRef<any, Props>(
       window.addEventListener('contextmenu', function(e) { e.preventDefault(); });
     }
     var currentBearing = 0;
-        var targetBearing = 0;
-        var bearingRaf = null;
-        var userMarker = null;
-        var markers = [];
-        var routePolyline = null;
-        var overlayPolylines = [];
+    var targetBearing = 0;
+    var currentPitch = 0;
+    var targetPitch = 0;
+    var bearingRaf = null;
+    var userMarker = null;
+    var markers = [];
+    var routePolyline = null;
+    var overlayPolylines = [];
 
         function getRouteWeight(z) {
           if (z >= 18) return 24;
@@ -297,36 +305,42 @@ const ShadcnMap = React.forwardRef<any, Props>(
           return d;
         }
 
-        function applyBearingTransform(angle) {
+        function applyBearingTransform(angle, pitch) {
           var rotateEl = document.getElementById('mapRotate');
           if (!rotateEl) return;
 
           rotateEl.style.transition = 'none';
-          rotateEl.style.transform = 'translate(-50%, -50%) rotate(' + (-angle) + 'deg)';
+          rotateEl.style.transform = 'perspective(1200px) rotateX(' + (pitch || 0) + 'deg) rotate(' + (-angle) + 'deg)';
         }
 
         function animateBearingStep() {
-          var delta = shortestDelta(currentBearing, targetBearing);
+          var deltaBearing = shortestDelta(currentBearing, targetBearing);
+          var deltaPitch = targetPitch - currentPitch;
 
-          if (Math.abs(delta) < 0.2) {
+          if (Math.abs(deltaBearing) < 0.2 && Math.abs(deltaPitch) < 0.2) {
             currentBearing = targetBearing;
-            applyBearingTransform(currentBearing);
+            currentPitch = targetPitch;
+            applyBearingTransform(currentBearing, currentPitch);
             bearingRaf = null;
             return;
           }
 
-          var easedStep = delta * 0.18;
-          var clampedStep = Math.max(-10, Math.min(10, easedStep));
-          currentBearing = currentBearing + clampedStep;
+          var easedStepBearing = deltaBearing * 0.18;
+          var clampedStepBearing = Math.max(-10, Math.min(10, easedStepBearing));
+          currentBearing = currentBearing + clampedStepBearing;
+          
+          var easedStepPitch = deltaPitch * 0.18;
+          var clampedStepPitch = Math.max(-5, Math.min(5, easedStepPitch));
+          currentPitch = currentPitch + clampedStepPitch;
 
-          applyBearingTransform(currentBearing);
+          applyBearingTransform(currentBearing, currentPitch);
           bearingRaf = requestAnimationFrame(animateBearingStep);
         }
 
-        function applyBearing(nextBearing) {
-          targetBearing = normalizeBearing(nextBearing);
-
-          if (bearingRaf == null) {
+        function applyBearing(angle, pitch) {
+          targetBearing = normalizeBearing(angle);
+          if (pitch != null) targetPitch = pitch;
+          if (!bearingRaf) {
             bearingRaf = requestAnimationFrame(animateBearingStep);
           }
         }
@@ -363,8 +377,8 @@ const ShadcnMap = React.forwardRef<any, Props>(
               } else {
                 map.panTo(targetLatLng, { animate: m.animate !== false, duration: m.duration || 0.6 });
               }
-              if (m.bearing != null) {
-                applyBearing(m.bearing);
+              if (m.bearing != null || m.pitch != null) {
+                applyBearing(m.bearing != null ? m.bearing : currentBearing, m.pitch);
               }
             }
             if (m.type === 'setTileBuffer') {
@@ -869,4 +883,3 @@ const ShadcnMap = React.forwardRef<any, Props>(
 ShadcnMap.displayName = "ShadcnMap";
 
 export default ShadcnMap;
-
