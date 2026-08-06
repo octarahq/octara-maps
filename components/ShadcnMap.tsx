@@ -346,10 +346,22 @@ const ShadcnMap = React.forwardRef<any, Props>(
             if (m.type === 'setZoom') { map.setZoom(m.zoom, { animate: m.animate !== false }); }
             if (m.type === 'zoomBy') { map.setZoom(map.getZoom() + (m.delta || 0), { animate: m.animate !== false }); }
             if (m.type === 'panTo') {
+              var targetZoom = m.zoom != null ? m.zoom : map.getZoom();
+              var targetLatLng = L.latLng(m.lat, m.lng);
+              
+              if (m.offsetY) {
+                var targetPoint = map.project(targetLatLng, targetZoom);
+                var bearingToUse = m.bearing != null ? m.bearing : currentBearing;
+                var rad = (bearingToUse || 0) * Math.PI / 180;
+                targetPoint.x += m.offsetY * Math.sin(rad);
+                targetPoint.y -= m.offsetY * Math.cos(rad);
+                targetLatLng = map.unproject(targetPoint, targetZoom);
+              }
+
               if (m.zoom != null) {
-                map.setView([m.lat, m.lng], m.zoom, { animate: m.animate !== false, duration: m.duration || 0.6 });
+                map.setView(targetLatLng, targetZoom, { animate: m.animate !== false, duration: m.duration || 0.6 });
               } else {
-                map.panTo([m.lat, m.lng], { animate: m.animate !== false, duration: m.duration || 0.6 });
+                map.panTo(targetLatLng, { animate: m.animate !== false, duration: m.duration || 0.6 });
               }
               if (m.bearing != null) {
                 applyBearing(m.bearing);

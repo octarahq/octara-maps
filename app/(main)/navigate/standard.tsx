@@ -4,7 +4,10 @@ import { useMapLayers } from "@/components/map/MapLayersContext";
 import { Colors } from "@/constants/theme";
 import { usePosition } from "@/contexts/PositionContext";
 import { useUser } from "@/contexts/UserContext";
-import { useTrafficAlerts, type TrafficAlertData } from "@/hooks/useTrafficAlerts";
+import {
+  useTrafficAlerts,
+  type TrafficAlertData,
+} from "@/hooks/useTrafficAlerts";
 import { createTranslator } from "@/i18n";
 import type { Coordinate } from "@/services/RouteService";
 import { useRouteService } from "@/services/RouteService";
@@ -650,26 +653,32 @@ export default function StandardNavigationScreen() {
     setShowStepsSheet(true);
   };
 
-  const [activeTrafficAlert, setActiveTrafficAlert] = React.useState<TrafficAlertData | null>(null);
+  const [activeTrafficAlert, setActiveTrafficAlert] =
+    React.useState<TrafficAlertData | null>(null);
   const alertAnim = React.useRef(new Animated.Value(0)).current;
-  const alertDismissTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const alertDismissTimer = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
-  const showAlert = React.useCallback((alert: TrafficAlertData) => {
-    setActiveTrafficAlert(alert);
-    Vibration.vibrate([0, 80, 60, 40]);
-    alertAnim.setValue(0);
-    Animated.spring(alertAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-      tension: 80,
-      friction: 9,
-    }).start();
+  const showAlert = React.useCallback(
+    (alert: TrafficAlertData) => {
+      setActiveTrafficAlert(alert);
+      Vibration.vibrate([0, 80, 60, 40]);
+      alertAnim.setValue(0);
+      Animated.spring(alertAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 80,
+        friction: 9,
+      }).start();
 
-    if (alertDismissTimer.current) clearTimeout(alertDismissTimer.current);
-    alertDismissTimer.current = setTimeout(() => {
-      dismissAlert();
-    }, 20000);
-  }, [alertAnim]);
+      if (alertDismissTimer.current) clearTimeout(alertDismissTimer.current);
+      alertDismissTimer.current = setTimeout(() => {
+        dismissAlert();
+      }, 20000);
+    },
+    [alertAnim],
+  );
 
   const dismissAlert = React.useCallback(() => {
     Animated.timing(alertAnim, {
@@ -700,18 +709,18 @@ export default function StandardNavigationScreen() {
     for (const step of navigationData.steps) {
       if (cumulativeDuration > 3600) break;
       cumulativeDuration += step.duration || 0;
-      
+
       const stepName = step.name?.trim() || "";
       const stepRef = step.ref?.trim() || "";
-      
+
       if (stepName !== "" || stepRef !== "") {
         const textToSearch = `${stepName} ${stepRef}`;
         const matches = Array.from(textToSearch.matchAll(ROUTE_REGEX));
-        
+
         if (matches.length > 0) {
           for (const match of matches) {
             const prefix = match[1].toUpperCase();
-            const numStr = match[2].padStart(4, '0');
+            const numStr = match[2].padStart(4, "0");
             names.add(`${prefix}${numStr}`);
           }
         } else if (stepName !== "") {
@@ -774,7 +783,11 @@ export default function StandardNavigationScreen() {
   const remainingDistance = React.useMemo(() => {
     if (!navigationData?.steps) return navigationData?.totalDistance ?? 0;
     let dist = Math.max(0, distanceToNextManeuver);
-    for (let i = approachingStepIndex + 1; i < navigationData.steps.length; i++) {
+    for (
+      let i = approachingStepIndex + 1;
+      i < navigationData.steps.length;
+      i++
+    ) {
       dist += navigationData.steps[i].distance || 0;
     }
     return dist;
@@ -783,7 +796,11 @@ export default function StandardNavigationScreen() {
   const remainingDuration = React.useMemo(() => {
     if (!navigationData?.steps) return navigationData?.totalDuration ?? 0;
     let dur = Math.max(0, timeToNextManeuver);
-    for (let i = approachingStepIndex + 1; i < navigationData.steps.length; i++) {
+    for (
+      let i = approachingStepIndex + 1;
+      i < navigationData.steps.length;
+      i++
+    ) {
       dur += navigationData.steps[i].duration || 0;
     }
     return dur;
@@ -805,7 +822,11 @@ export default function StandardNavigationScreen() {
   const combinedStepsData = React.useMemo(() => {
     const rawSteps = navigationData?.steps || [];
     if (!activeTrafficAlerts || activeTrafficAlerts.length === 0) {
-      return rawSteps.map((step, index) => ({ type: "step", data: step, originalIndex: index }));
+      return rawSteps.map((step, index) => ({
+        type: "step",
+        data: step,
+        originalIndex: index,
+      }));
     }
 
     const alertsByStep = new Map<number, TrafficAlertData[]>();
@@ -819,7 +840,7 @@ export default function StandardNavigationScreen() {
         for (const coord of step.coordinates) {
           const d = calculateDistance(
             { latitude: coord[1], longitude: coord[0] },
-            { latitude: alert.Lat, longitude: alert.Lon }
+            { latitude: alert.Lat, longitude: alert.Lon },
           );
           if (d < minDistance) {
             minDistance = d;
@@ -875,7 +896,8 @@ export default function StandardNavigationScreen() {
     }
 
     const isLastStep =
-      currentStepIndex === Math.max(0, (navigationData?.steps?.length || 1) - 1);
+      currentStepIndex ===
+      Math.max(0, (navigationData?.steps?.length || 1) - 1);
     if (!isLastStep) return;
 
     const distanceToDestination = calculateDistance(
@@ -1387,6 +1409,8 @@ export default function StandardNavigationScreen() {
         };
         lastKnownBearingRef.current = bearing;
 
+        const cameraOffsetY = 140;
+
         suppressMapMove.current = true;
         post({
           type: "panTo",
@@ -1394,12 +1418,13 @@ export default function StandardNavigationScreen() {
           lng: position.longitude,
           zoom: targetZoom,
           bearing,
+          offsetY: cameraOffsetY,
           animate: shouldAnimateZoom,
           duration: shouldAnimateZoom ? 0.45 : 0,
         });
       })();
     }
-  }, [position, following, mapReady, targetZoom]);
+  }, [position, following, mapReady, targetZoom, limitNum]);
 
   const stepDistanceLabel = approachingStep
     ? `${formatDistance(distanceToNextManeuver)}${timeToNextManeuver >= 1 ? " • " + formatDuration(timeToNextManeuver) : ""}`
@@ -1497,7 +1522,9 @@ export default function StandardNavigationScreen() {
           <View
             className="absolute top-0 left-0 right-0 w-full"
             pointerEvents="box-none"
-            style={{ paddingTop: Math.max(insets.top, Constants.statusBarHeight) + 16 }}
+            style={{
+              paddingTop: Math.max(insets.top, Constants.statusBarHeight) + 16,
+            }}
           >
             <View className="mx-4 rounded-xl bg-[#12202a]/80 p-4 flex-row items-center">
               <View className="w-12 h-12 mr-4 items-center justify-center">
@@ -1562,125 +1589,150 @@ export default function StandardNavigationScreen() {
           }}
           pointerEvents="box-none"
         >
-          <Animated.View style={{
-            opacity: alertAnim,
-            transform: [
-              {
-                translateY: alertAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [24, 0],
-                }),
-              },
-            ],
-          }}>
-            <View
-              style={{
-                backgroundColor:
-                activeTrafficAlert.Severity === "high"
-                  ? "#1a0a0a"
-                  : activeTrafficAlert.Severity === "low"
-                    ? "#0a0f1a"
-                    : "#1a110a",
-              borderRadius: 16,
-              borderWidth: 1,
-              borderColor:
-                activeTrafficAlert.Severity === "high"
-                  ? "#ef4444"
-                  : activeTrafficAlert.Severity === "low"
-                    ? "#3b82f6"
-                    : "#f59e0b",
-              padding: 12,
-              flexDirection: "row",
-              alignItems: "center",
-              shadowColor: "#000",
-              shadowOpacity: 0.4,
-              shadowRadius: 8,
-              shadowOffset: { width: 0, height: 2 },
-              elevation: 6,
+          <Animated.View
+            style={{
+              opacity: alertAnim,
+              transform: [
+                {
+                  translateY: alertAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [24, 0],
+                  }),
+                },
+              ],
             }}
           >
             <View
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
                 backgroundColor:
                   activeTrafficAlert.Severity === "high"
-                    ? "#ef444420"
+                    ? "#1a0a0a"
                     : activeTrafficAlert.Severity === "low"
-                      ? "#3b82f620"
-                      : "#f59e0b20",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 10,
-                flexShrink: 0,
-              }}
-            >
-              <MaterialIcons
-                name={
-                  activeTrafficAlert.Type === "Accident"
-                    ? "car-crash"
-                    : activeTrafficAlert.Type === "ConstructionWorks" ||
-                        activeTrafficAlert.Type === "MaintenanceWorks"
-                      ? "construction"
-                      : activeTrafficAlert.Type === "AbnormalTraffic"
-                        ? "traffic"
-                        : activeTrafficAlert.Type === "VehicleObstruction"
-                          ? "directions-car"
-                          : activeTrafficAlert.Type === "AuthorityOperation"
-                            ? "local-police"
-                            : "warning"
-                }
-                size={18}
-                color={
+                      ? "#0a0f1a"
+                      : "#1a110a",
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor:
                   activeTrafficAlert.Severity === "high"
                     ? "#ef4444"
                     : activeTrafficAlert.Severity === "low"
                       ? "#3b82f6"
-                      : "#f59e0b"
-                }
-              />
-            </View>
+                      : "#f59e0b",
+                padding: 12,
+                flexDirection: "row",
+                alignItems: "center",
+                shadowColor: "#000",
+                shadowOpacity: 0.4,
+                shadowRadius: 8,
+                shadowOffset: { width: 0, height: 2 },
+                elevation: 6,
+              }}
+            >
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  backgroundColor:
+                    activeTrafficAlert.Severity === "high"
+                      ? "#ef444420"
+                      : activeTrafficAlert.Severity === "low"
+                        ? "#3b82f620"
+                        : "#f59e0b20",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 10,
+                  flexShrink: 0,
+                }}
+              >
+                <MaterialIcons
+                  name={
+                    activeTrafficAlert.Type === "Accident"
+                      ? "car-crash"
+                      : activeTrafficAlert.Type === "ConstructionWorks" ||
+                          activeTrafficAlert.Type === "MaintenanceWorks"
+                        ? "construction"
+                        : activeTrafficAlert.Type === "AbnormalTraffic"
+                          ? "traffic"
+                          : activeTrafficAlert.Type === "VehicleObstruction"
+                            ? "directions-car"
+                            : activeTrafficAlert.Type === "AuthorityOperation"
+                              ? "local-police"
+                              : "warning"
+                  }
+                  size={18}
+                  color={
+                    activeTrafficAlert.Severity === "high"
+                      ? "#ef4444"
+                      : activeTrafficAlert.Severity === "low"
+                        ? "#3b82f6"
+                        : "#f59e0b"
+                  }
+                />
+              </View>
 
-            <View style={{ flex: 1, marginRight: 8 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 2 }}>
-                {activeTrafficAlert.isReminder && (
-                  <View
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 2,
+                  }}
+                >
+                  {activeTrafficAlert.isReminder && (
+                    <View
+                      style={{
+                        backgroundColor: "#f59e0b20",
+                        borderRadius: 4,
+                        paddingHorizontal: 5,
+                        paddingVertical: 1,
+                        marginRight: 6,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: "#f59e0b",
+                          fontSize: 9,
+                          fontWeight: "700",
+                        }}
+                      >
+                        {tTraffic("reminder")}
+                      </Text>
+                    </View>
+                  )}
+                  <Text
                     style={{
-                      backgroundColor: "#f59e0b20",
-                      borderRadius: 4,
-                      paddingHorizontal: 5,
-                      paddingVertical: 1,
-                      marginRight: 6,
+                      color: "#ffffff",
+                      fontSize: 13,
+                      fontWeight: "700",
+                      flex: 1,
                     }}
+                    numberOfLines={1}
                   >
-                    <Text style={{ color: "#f59e0b", fontSize: 9, fontWeight: "700" }}>
-                      {tTraffic("reminder")}
-                    </Text>
-                  </View>
-                )}
+                    {tTraffic(`eventTypes.${activeTrafficAlert.Type}`, {
+                      defaultValue: tTraffic("trafficAlert"),
+                    })}
+                  </Text>
+                </View>
                 <Text
-                  style={{ color: "#ffffff", fontSize: 13, fontWeight: "700", flex: 1 }}
+                  style={{ color: "#94a3b8", fontSize: 11, fontWeight: "600" }}
                   numberOfLines={1}
                 >
-                  {tTraffic(`eventTypes.${activeTrafficAlert.Type}`, { defaultValue: tTraffic("trafficAlert") })}
+                  {activeTrafficAlert.RoadName
+                    ? `${activeTrafficAlert.RoadName} · `
+                    : ""}
+                  {activeTrafficAlert.Description ||
+                    tTraffic("disturbanceReported")}
                 </Text>
               </View>
-              <Text style={{ color: "#94a3b8", fontSize: 11, fontWeight: "600" }} numberOfLines={1}>
-                {activeTrafficAlert.RoadName
-                  ? `${activeTrafficAlert.RoadName} · `
-                  : ""}
-                {activeTrafficAlert.Description || tTraffic("disturbanceReported")}
-              </Text>
-            </View>
 
-            <TouchableOpacity
-              onPress={dismissActiveAlert}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <MaterialIcons name="close" size={16} color="#64748b" />
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity
+                onPress={dismissActiveAlert}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <MaterialIcons name="close" size={16} color="#64748b" />
+              </TouchableOpacity>
+            </View>
           </Animated.View>
         </Animated.View>
       )}
@@ -1709,7 +1761,7 @@ export default function StandardNavigationScreen() {
         style={{ borderRadius: 30, overflow: "hidden" }}
         handleIndicatorStyle={{ backgroundColor: "rgba(255,255,255,0.3)" }}
       >
-          <BottomSheetView className="flex-1 z-20 px-5 pt-6 pb-[env(safe-area-inset-bottom)+16px]">
+        <BottomSheetView className="flex-1 z-20 px-5 pt-6 pb-[env(safe-area-inset-bottom)+16px]">
           <View className="flex-row justify-between items-end mb-4">
             <View>
               <Text className="text-white text-[30px] font-bold">
@@ -1717,7 +1769,10 @@ export default function StandardNavigationScreen() {
                   ? "…"
                   : formatDuration(totalDuration)}
               </Text>
-              <Text className="text-[#90adcb] text-[13px] mt-0.5" numberOfLines={1}>
+              <Text
+                className="text-[#90adcb] text-[13px] mt-0.5"
+                numberOfLines={1}
+              >
                 {formatDistance(totalDistance)}
                 {etaLabel ? ` • ${t("eta", { time: etaLabel })}` : ""}
               </Text>
@@ -1734,10 +1789,12 @@ export default function StandardNavigationScreen() {
                 size={18}
                 color={Colors.dark.primary}
               />
-              <Text className="text-[#0d7ff2] font-bold text-[14px]">{t("addStop")}</Text>
+              <Text className="text-[#0d7ff2] font-bold text-[14px]">
+                {t("addStop")}
+              </Text>
             </TouchableOpacity>
           </View>
-          
+
           <View className="flex-row gap-3 mt-1.5">
             {!following ? (
               <TouchableOpacity
@@ -1746,7 +1803,9 @@ export default function StandardNavigationScreen() {
                 activeOpacity={0.8}
               >
                 <MaterialIcons name="my-location" size={18} color="#fff" />
-                <Text className="text-white font-bold text-[14px]">{t("recenter")}</Text>
+                <Text className="text-white font-bold text-[14px]">
+                  {t("recenter")}
+                </Text>
               </TouchableOpacity>
             ) : (
               <>
@@ -1756,7 +1815,9 @@ export default function StandardNavigationScreen() {
                   activeOpacity={0.8}
                 >
                   <MaterialIcons name="alt-route" size={18} color="#fff" />
-                  <Text className="text-white font-bold text-[14px]">{t("route")}</Text>
+                  <Text className="text-white font-bold text-[14px]">
+                    {t("route")}
+                  </Text>
                   {activeTrafficAlerts && activeTrafficAlerts.length > 0 && (
                     <MaterialIcons name="warning" size={14} color="#f59e0b" />
                   )}
@@ -1768,7 +1829,9 @@ export default function StandardNavigationScreen() {
                   activeOpacity={0.8}
                 >
                   <MaterialIcons name="stop" size={18} color="#fff" />
-                  <Text className="text-white font-bold text-[14px]">{t("stopTrip")}</Text>
+                  <Text className="text-white font-bold text-[14px]">
+                    {t("stopTrip")}
+                  </Text>
                 </TouchableOpacity>
               </>
             )}
@@ -1778,7 +1841,9 @@ export default function StandardNavigationScreen() {
 
           <View className="flex-1">
             <View className="flex-row items-center justify-between mb-3">
-              <Text className="text-white text-[15px] font-bold">{t("mapStyle")}</Text>
+              <Text className="text-white text-[15px] font-bold">
+                {t("mapStyle")}
+              </Text>
               <MaterialIcons name="layers" size={20} color="#8a8a8a" />
             </View>
 
@@ -1786,14 +1851,14 @@ export default function StandardNavigationScreen() {
               <TouchableOpacity
                 className={cn(
                   "flex-1 mx-1 py-2.5 rounded-lg items-center bg-transparent",
-                  baseLayer === "standard" && "bg-white/5"
+                  baseLayer === "standard" && "bg-white/5",
                 )}
                 onPress={() => layers.setMapType("standard")}
               >
                 <Text
                   className={cn(
                     "text-[#9aa4b2] font-bold text-[13px]",
-                    baseLayer === "standard" && "text-white"
+                    baseLayer === "standard" && "text-white",
                   )}
                 >
                   {t("layerStandard")}
@@ -1803,14 +1868,14 @@ export default function StandardNavigationScreen() {
               <TouchableOpacity
                 className={cn(
                   "flex-1 mx-1 py-2.5 rounded-lg items-center bg-transparent",
-                  baseLayer === "satellite" && "bg-white/5"
+                  baseLayer === "satellite" && "bg-white/5",
                 )}
                 onPress={() => layers.setMapType("satellite")}
               >
                 <Text
                   className={cn(
                     "text-[#9aa4b2] font-bold text-[13px]",
-                    baseLayer === "satellite" && "text-white"
+                    baseLayer === "satellite" && "text-white",
                   )}
                 >
                   {t("layerSatellite")}
@@ -1820,14 +1885,14 @@ export default function StandardNavigationScreen() {
               <TouchableOpacity
                 className={cn(
                   "flex-1 mx-1 py-2.5 rounded-lg items-center bg-transparent",
-                  baseLayer === "terrain" && "bg-white/5"
+                  baseLayer === "terrain" && "bg-white/5",
                 )}
                 onPress={() => layers.setMapType("terrain")}
               >
                 <Text
                   className={cn(
                     "text-[#9aa4b2] font-bold text-[13px]",
-                    baseLayer === "terrain" && "text-white"
+                    baseLayer === "terrain" && "text-white",
                   )}
                 >
                   {t("layerTerrain")}
@@ -1837,7 +1902,9 @@ export default function StandardNavigationScreen() {
 
             {baseLayer !== "satellite" && (
               <View className="flex-row items-center justify-between mt-2.5">
-                <Text className="text-[#c1c8cf] text-[13px] font-semibold">{t("darkMode")}</Text>
+                <Text className="text-[#c1c8cf] text-[13px] font-semibold">
+                  {t("darkMode")}
+                </Text>
                 <Switch
                   value={themeMode === "dark"}
                   onValueChange={() => layers.setDarkTheme(!layers.darkTheme)}
@@ -1849,7 +1916,9 @@ export default function StandardNavigationScreen() {
 
             <View className="mt-4">
               <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-white text-[15px] font-bold">{t("guideVolume")}</Text>
+                <Text className="text-white text-[15px] font-bold">
+                  {t("guideVolume")}
+                </Text>
                 <TouchableOpacity
                   onPress={async () => {
                     await Speech.speak(t("guideVolumeSample"), {
@@ -1865,14 +1934,14 @@ export default function StandardNavigationScreen() {
                 <TouchableOpacity
                   className={cn(
                     "flex-1 mx-1 py-2.5 rounded-lg items-center bg-transparent",
-                    guideMode === "off" && "bg-white/5"
+                    guideMode === "off" && "bg-white/5",
                   )}
                   onPress={() => setGuideMode("off")}
                 >
                   <Text
                     className={cn(
                       "text-[#9aa4b2] font-bold text-[13px]",
-                      guideMode === "off" && "text-white"
+                      guideMode === "off" && "text-white",
                     )}
                   >
                     {t("volumeMute")}
@@ -1882,7 +1951,7 @@ export default function StandardNavigationScreen() {
                 <TouchableOpacity
                   className={cn(
                     "flex-1 mx-1 py-2.5 rounded-lg items-center bg-transparent",
-                    guideMode === "alert" && "bg-white/5"
+                    guideMode === "alert" && "bg-white/5",
                   )}
                   onPress={() => {
                     setGuideMode("alert");
@@ -1891,7 +1960,7 @@ export default function StandardNavigationScreen() {
                   <Text
                     className={cn(
                       "text-[#9aa4b2] font-bold text-[13px]",
-                      guideMode === "alert" && "text-white"
+                      guideMode === "alert" && "text-white",
                     )}
                   >
                     {t("volumeAlerts")}
@@ -1901,7 +1970,7 @@ export default function StandardNavigationScreen() {
                 <TouchableOpacity
                   className={cn(
                     "flex-1 mx-1 py-2.5 rounded-lg items-center bg-transparent",
-                    guideMode === "all" && "bg-[#0d7ff2]"
+                    guideMode === "all" && "bg-[#0d7ff2]",
                   )}
                   onPress={() => {
                     setGuideMode("all");
@@ -1910,7 +1979,7 @@ export default function StandardNavigationScreen() {
                   <Text
                     className={cn(
                       "text-[#9aa4b2] font-bold text-[13px]",
-                      guideMode === "all" && "text-white"
+                      guideMode === "all" && "text-white",
                     )}
                   >
                     {t("volumeFull")}
@@ -1964,51 +2033,96 @@ export default function StandardNavigationScreen() {
             nestedScrollEnabled={true}
             data={combinedStepsData}
             keyExtractor={(item: any, index: number) => index.toString()}
-            renderItem={({
-              item,
-              index: i,
-            }: {
-              item: any;
-              index: number;
-            }) => {
+            renderItem={({ item, index: i }: { item: any; index: number }) => {
               if (item.type === "alert") {
                 const alert = item.data as TrafficAlertData;
-                const bgColor = alert.Severity === "high" ? "#1a0a0a" : alert.Severity === "low" ? "#0a0f1a" : "#1a110a";
-                const borderColor = alert.Severity === "high" ? "#ef4444" : alert.Severity === "low" ? "#3b82f6" : "#f59e0b";
-                const iconBgColor = alert.Severity === "high" ? "#ef444420" : alert.Severity === "low" ? "#3b82f620" : "#f59e0b20";
+                const bgColor =
+                  alert.Severity === "high"
+                    ? "#1a0a0a"
+                    : alert.Severity === "low"
+                      ? "#0a0f1a"
+                      : "#1a110a";
+                const borderColor =
+                  alert.Severity === "high"
+                    ? "#ef4444"
+                    : alert.Severity === "low"
+                      ? "#3b82f6"
+                      : "#f59e0b";
+                const iconBgColor =
+                  alert.Severity === "high"
+                    ? "#ef444420"
+                    : alert.Severity === "low"
+                      ? "#3b82f620"
+                      : "#f59e0b20";
                 const iconColor = borderColor;
-                
+
                 let iconName = "warning";
-                if (alert.Type === "Accident") { iconName = "car-crash"; }
-                else if (alert.Type === "ConstructionWorks" || alert.Type === "MaintenanceWorks") { iconName = "construction"; }
-                else if (alert.Type === "AbnormalTraffic") { iconName = "traffic"; }
-                else if (alert.Type === "VehicleObstruction") { iconName = "directions-car"; }
-                else if (alert.Type === "AuthorityOperation") { iconName = "local-police"; }
-                
-                const title = tTraffic(`eventTypes.${alert.Type}`, { defaultValue: tTraffic("trafficAlert") });
+                if (alert.Type === "Accident") {
+                  iconName = "car-crash";
+                } else if (
+                  alert.Type === "ConstructionWorks" ||
+                  alert.Type === "MaintenanceWorks"
+                ) {
+                  iconName = "construction";
+                } else if (alert.Type === "AbnormalTraffic") {
+                  iconName = "traffic";
+                } else if (alert.Type === "VehicleObstruction") {
+                  iconName = "directions-car";
+                } else if (alert.Type === "AuthorityOperation") {
+                  iconName = "local-police";
+                }
+
+                const title = tTraffic(`eventTypes.${alert.Type}`, {
+                  defaultValue: tTraffic("trafficAlert"),
+                });
 
                 return (
-                  <View style={{
-                    backgroundColor: bgColor,
-                    borderColor: borderColor,
-                    borderWidth: 1,
-                    borderRadius: 12,
-                    padding: 10,
-                    marginVertical: 6,
-                    marginLeft: 24,
-                    flexDirection: "row",
-                    alignItems: "center"
-                  }}>
-                    <View style={{
-                      width: 28, height: 28, borderRadius: 14, backgroundColor: iconBgColor,
-                      alignItems: "center", justifyContent: "center", marginRight: 8
-                    }}>
-                      <MaterialIcons name={iconName as any} size={14} color={iconColor} />
+                  <View
+                    style={{
+                      backgroundColor: bgColor,
+                      borderColor: borderColor,
+                      borderWidth: 1,
+                      borderRadius: 12,
+                      padding: 10,
+                      marginVertical: 6,
+                      marginLeft: 24,
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 14,
+                        backgroundColor: iconBgColor,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginRight: 8,
+                      }}
+                    >
+                      <MaterialIcons
+                        name={iconName as any}
+                        size={14}
+                        color={iconColor}
+                      />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}>{title}</Text>
-                      <Text style={{ color: "#94a3b8", fontSize: 11 }} numberOfLines={1}>
-                        {alert.RoadName ? `${alert.RoadName} · ` : ""}{alert.Description || tTraffic("disturbanceReported")}
+                      <Text
+                        style={{
+                          color: "#fff",
+                          fontSize: 13,
+                          fontWeight: "700",
+                        }}
+                      >
+                        {title}
+                      </Text>
+                      <Text
+                        style={{ color: "#94a3b8", fontSize: 11 }}
+                        numberOfLines={1}
+                      >
+                        {alert.RoadName ? `${alert.RoadName} · ` : ""}
+                        {alert.Description || tTraffic("disturbanceReported")}
                       </Text>
                     </View>
                   </View>
