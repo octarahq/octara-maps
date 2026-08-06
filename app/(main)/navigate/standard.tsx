@@ -937,7 +937,17 @@ export default function StandardNavigationScreen() {
   ]);
 
   const targetZoom = React.useMemo(() => {
-    const baseZoom = 17;
+    let baseZoom = 17;
+    const speedKmH = (position?.speed ?? 0) * 3.6;
+
+    if (speedKmH >= 110) {
+      baseZoom = 14.5;
+    } else if (speedKmH >= 80) {
+      baseZoom = 15;
+    } else if (speedKmH >= 50) {
+      baseZoom = 16;
+    }
+
     let maxLayerZoom = 19;
     if (baseLayer === "terrain") maxLayerZoom = 17;
 
@@ -945,7 +955,7 @@ export default function StandardNavigationScreen() {
       return Math.min(baseZoom + 1, maxLayerZoom);
     }
     return Math.min(baseZoom, maxLayerZoom);
-  }, [distanceToNextManeuver, approachingStep, baseLayer]);
+  }, [distanceToNextManeuver, approachingStep, baseLayer, position?.speed]);
   const lastCameraZoomRef = React.useRef<number | null>(null);
 
   const currentSpeedKmH = (position?.speed ?? 0) * 3.6;
