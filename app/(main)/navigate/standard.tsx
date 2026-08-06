@@ -23,6 +23,7 @@ import BottomSheet, {
 import Constants from "expo-constants";
 import * as Localization from "expo-localization";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { Accelerometer } from "expo-sensors";
 import * as Speech from "expo-speech";
 import React from "react";
 import {
@@ -152,7 +153,7 @@ export default function StandardNavigationScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { lat, lng, mode, name, multi } = useLocalSearchParams();
-  const { position } = usePosition();
+  const { position, lastUpdate } = usePosition();
   const positionRef = React.useRef(position);
   React.useEffect(() => {
     positionRef.current = position;
@@ -963,7 +964,8 @@ export default function StandardNavigationScreen() {
 
   const targetZoom = React.useMemo(() => {
     let baseZoom = 17.5;
-    const speedRef = limitNum !== null ? Math.max(limitNum, currentSpeedKmH) : currentSpeedKmH;
+    const speedRef =
+      limitNum !== null ? Math.max(limitNum, currentSpeedKmH) : currentSpeedKmH;
 
     if (speedRef >= 110) {
       baseZoom = 14.0;
@@ -989,7 +991,151 @@ export default function StandardNavigationScreen() {
     if (baseLayer === "terrain") maxLayerZoom = 17;
 
     return Math.min(baseZoom, maxLayerZoom);
-  }, [distanceToNextManeuver, approachingStep, baseLayer, currentSpeedKmH, limitNum]);
+  }, [
+    distanceToNextManeuver,
+    approachingStep,
+    baseLayer,
+    currentSpeedKmH,
+    limitNum,
+  ]);
+
+  const isDeadReckoningRef = React.useRef(false);
+  const [isSimulated, setIsSimulated] = React.useState(false);
+  const deadReckoningSpeedRef = React.useRef(0);
+  const simulatedPositionRef = React.useRef<Coordinate | null>(null);
+
+  React.useEffect(() => {
+    if (
+      position?.speed !== undefined &&
+      position?.speed !== null &&
+      !isDeadReckoningRef.current
+    ) {
+      deadReckoningSpeedRef.current = position.speed;
+    }
+  }, [position]);
+
+  React.useEffect(() => {
+    let subscription: any;
+    Accelerometer.setUpdateInterval(200);
+    subscription = Accelerometer.addListener(({ x, y, z }) => {
+      if (z > 0.15 || y < -0.15) {
+        deadReckoningSpeedRef.current = Math.max(
+          0,
+          deadReckoningSpeedRef.current - 0.5,
+        );
+      }
+
+      if (isDeadReckoningRef.current) {
+        if (z < -0.15 || y > 0.15) {
+          deadReckoningSpeedRef.current += 0.5;
+        }
+      }
+    });
+    return () => subscription?.remove();
+  }, []);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      if (!position) return;
+      const now = Date.now();
+      const timeSinceGps = now - lastUpdate;
+
+      if (timeSinceGps > 5000 && deadReckoningSpeedRef.current > 2.0) {
+        if (!isDeadReckoningRef.current) {
+          isDeadReckoningRef.current = true;
+          setIsSimulated(true);
+          simulatedPositionRef.current = {
+            latitude: position.latitude,
+            longitude: position.longitude,
+          };
+        }
+
+        const currentSimPos = simulatedPositionRef.current;
+        if (currentSimPos && routeService.routeCoords.length > 0) {
+          let closestIdx = 0;
+          let minD = Infinity;
+          routeService.routeCoords.forEach((c, idx) => {
+            const d = calculateDistance(currentSimPos, c);
+            if (d < minD) {
+              minD = d;
+              closestIdx = idx;
+            }
+          });
+
+          const dt = 0.5;
+          const distanceToMove = deadReckoningSpeedRef.current * dt;
+
+          if (closestIdx < routeService.routeCoords.length - 1) {
+            const nextCoord = routeService.routeCoords[closestIdx + 1];
+            const segmentD = calculateDistance(currentSimPos, nextCoord);
+
+            let newLat, newLng;
+            if (segmentD <= distanceToMove || segmentD === 0) {
+              newLat = nextCoord.latitude;
+              newLng = nextCoord.longitude;
+            } else {
+              const ratio = distanceToMove / segmentD;
+              newLat =
+                currentSimPos.latitude +
+                (nextCoord.latitude - currentSimPos.latitude) * ratio;
+              newLng =
+                currentSimPos.longitude +
+                (nextCoord.longitude - currentSimPos.longitude) * ratio;
+            }
+            simulatedPositionRef.current = {
+              latitude: newLat,
+              longitude: newLng,
+            };
+
+            const bearing = calculateBearing(currentSimPos, {
+              latitude: newLat,
+              longitude: newLng,
+            });
+            const speedKmh = deadReckoningSpeedRef.current * 3.6;
+
+            if (following) {
+              post({
+                type: "panTo",
+                lat: newLat,
+                lng: newLng,
+                zoom: targetZoom,
+                bearing: bearing,
+                pitch: speedKmh > 50 ? 45 : 0,
+                offsetY: 140,
+                animate: true,
+                duration: 0.5,
+              });
+            }
+            post({
+              type: "setUserMarker",
+              lat: newLat,
+              lng: newLng,
+              heading: bearing,
+              icon: "circle",
+              animate: true,
+            });
+          }
+        }
+      } else {
+        if (isDeadReckoningRef.current && timeSinceGps <= 5000) {
+          isDeadReckoningRef.current = false;
+          setIsSimulated(false);
+          if (position && following) {
+            post({
+              type: "panTo",
+              lat: position.latitude,
+              lng: position.longitude,
+              zoom: targetZoom,
+              animate: true,
+              duration: 0.5,
+            });
+          }
+        }
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, [lastUpdate, position, routeService.routeCoords, targetZoom, following]);
+
   const lastCameraZoomRef = React.useRef<number | null>(null);
   const targetSpeedDiff = React.useMemo(() => {
     if (limitNum === null) return 0;
@@ -1334,7 +1480,8 @@ export default function StandardNavigationScreen() {
       !mapReady ||
       !position ||
       !Number.isFinite(position.latitude) ||
-      !Number.isFinite(position.longitude)
+      !Number.isFinite(position.longitude) ||
+      isDeadReckoningRef.current
     )
       return;
 
@@ -1380,6 +1527,7 @@ export default function StandardNavigationScreen() {
     if (
       mapReady &&
       following &&
+      !isDeadReckoningRef.current &&
       position &&
       Number.isFinite(position.latitude) &&
       Number.isFinite(position.longitude)
@@ -1421,9 +1569,15 @@ export default function StandardNavigationScreen() {
         const cameraOffsetY = 140;
 
         const currentSpeedKmhEffect = (position.speed ?? 0) * 3.6;
-        const speedRef = limitNum !== null ? Math.max(limitNum, currentSpeedKmhEffect) : currentSpeedKmhEffect;
+        const speedRef =
+          limitNum !== null
+            ? Math.max(limitNum, currentSpeedKmhEffect)
+            : currentSpeedKmhEffect;
         let targetPitch = 0;
-        if ((!approachingStep || distanceToNextManeuver >= 300) && speedRef > 50) {
+        if (
+          (!approachingStep || distanceToNextManeuver >= 300) &&
+          speedRef > 50
+        ) {
           targetPitch = 45;
         }
 
@@ -1581,6 +1735,13 @@ export default function StandardNavigationScreen() {
               </View>
             </View>
           </View>
+          {isSimulated && (
+            <View className="absolute top-[20px] bg-[#e01e1e] px-4 py-2 rounded-full z-50 shadow-md">
+              <Text className="text-white font-bold text-sm">
+                Signal GPS perdu - Estimation
+              </Text>
+            </View>
+          )}
         </View>
       </View>
 

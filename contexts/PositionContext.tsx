@@ -18,6 +18,7 @@ type State = {
   startWatching: () => Promise<void>;
   stopWatching: () => void;
   setInterpolationEnabled: (enabled: boolean) => void;
+  lastUpdate: number;
 };
 
 const PositionContext = React.createContext<State | null>(null);
@@ -32,6 +33,7 @@ export function PositionProvider({ children }: { children: React.ReactNode }) {
   const [position, setPosition] = React.useState<Position | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = React.useState<number>(Date.now());
   const subscriberRef = React.useRef<Location.LocationSubscription | null>(
     null,
   );
@@ -130,6 +132,7 @@ export function PositionProvider({ children }: { children: React.ReactNode }) {
         heading: coords.heading,
         timestamp: now,
       };
+      setLastUpdate(Date.now());
       if (positionRef.current) {
         animateTo(positionRef.current, newPos, 300);
       } else {
@@ -168,6 +171,7 @@ export function PositionProvider({ children }: { children: React.ReactNode }) {
           const newRaw = { latitude, longitude, speed, heading, timestamp };
           const prevRaw = lastRawRef.current;
           lastRawRef.current = newRaw;
+          setLastUpdate(Date.now());
 
           const newPos: Position = {
             latitude,
@@ -250,8 +254,9 @@ export function PositionProvider({ children }: { children: React.ReactNode }) {
       startWatching,
       stopWatching,
       setInterpolationEnabled,
+      lastUpdate,
     }),
-    [position, loading, error, doRefresh, startWatching, stopWatching, setInterpolationEnabled],
+    [position, loading, error, doRefresh, startWatching, stopWatching, setInterpolationEnabled, lastUpdate],
   );
 
   return (
