@@ -137,13 +137,12 @@ const ShadcnMap = React.forwardRef<any, Props>(
           position: absolute;
           left: 50%;
           top: 50%;
-          width: 350vmax;
-          height: 350vmax;
-          margin-left: -175vmax;
-          margin-top: -175vmax;
-          transform-origin: 50% 50%;
+          width: 150vmax;
+          height: 150vmax;
+          margin-left: -75vmax;
+          margin-top: -75vmax;
           transform-style: preserve-3d;
-          will-change: transform;
+          transition: transform 1s linear;
         }
           
         #map { width:100%; height:100%; }
@@ -305,44 +304,25 @@ const ShadcnMap = React.forwardRef<any, Props>(
           return d;
         }
 
-        function applyBearingTransform(angle, pitch) {
+        var currentAccumulatedBearing = 0;
+        
+        function applyBearingTransform(accumAngle, pitch) {
           var rotateEl = document.getElementById('mapRotate');
           if (!rotateEl) return;
 
-          rotateEl.style.transition = 'none';
-          rotateEl.style.transform = 'perspective(1200px) rotateX(' + (pitch || 0) + 'deg) rotate(' + (-angle) + 'deg)';
-        }
-
-        function animateBearingStep() {
-          var deltaBearing = shortestDelta(currentBearing, targetBearing);
-          var deltaPitch = targetPitch - currentPitch;
-
-          if (Math.abs(deltaBearing) < 0.2 && Math.abs(deltaPitch) < 0.2) {
-            currentBearing = targetBearing;
-            currentPitch = targetPitch;
-            applyBearingTransform(currentBearing, currentPitch);
-            bearingRaf = null;
-            return;
-          }
-
-          var easedStepBearing = deltaBearing * 0.18;
-          var clampedStepBearing = Math.max(-10, Math.min(10, easedStepBearing));
-          currentBearing = currentBearing + clampedStepBearing;
-          
-          var easedStepPitch = deltaPitch * 0.18;
-          var clampedStepPitch = Math.max(-5, Math.min(5, easedStepPitch));
-          currentPitch = currentPitch + clampedStepPitch;
-
-          applyBearingTransform(currentBearing, currentPitch);
-          bearingRaf = requestAnimationFrame(animateBearingStep);
+          rotateEl.style.transform = 'perspective(1200px) rotateX(' + (pitch || 0) + 'deg) rotate(' + (-accumAngle) + 'deg)';
         }
 
         function applyBearing(angle, pitch) {
-          targetBearing = normalizeBearing(angle);
           if (pitch != null) targetPitch = pitch;
-          if (!bearingRaf) {
-            bearingRaf = requestAnimationFrame(animateBearingStep);
-          }
+          
+          var normalizedAngle = normalizeBearing(angle);
+          var normalizedCurrent = normalizeBearing(currentAccumulatedBearing);
+          var delta = shortestDelta(normalizedCurrent, normalizedAngle);
+          
+          currentAccumulatedBearing += delta;
+          
+          applyBearingTransform(currentAccumulatedBearing, targetPitch);
         }
 
         function handleMessage(msg) {
@@ -400,14 +380,14 @@ const ShadcnMap = React.forwardRef<any, Props>(
               const lat = m.lat; const lng = m.lng;
               const iconType = m.icon || null;
               
-              if (userMarker) {
-                map.removeLayer(userMarker);
-                userMarker = null;
-              }
               if (iconType === 'address') {
+                if (userMarker) {
+                  map.removeLayer(userMarker);
+                  userMarker = null;
+                }
                 const svg = ${JSON.stringify(addressSvgString)};
                 const myIcon = L.divIcon({
-                  className: '',
+                  className: 'user-nav-address',
                   html: svg,
                   iconSize: [24,24],
                   iconAnchor: [12,24]
@@ -422,13 +402,23 @@ const ShadcnMap = React.forwardRef<any, Props>(
                   '</div>';
                 }
                 htmlContent += '</div>';
-                var myIcon = L.divIcon({
-                  className: '',
-                  html: htmlContent,
-                  iconSize: [20,20],
-                  iconAnchor: [10,10]
-                });
-                userMarker = L.marker([lat, lng], { icon: myIcon, zIndexOffset: 1000 }).addTo(map);
+                
+                if (userMarker && userMarker.options.icon.options.className === 'user-nav-marker') {
+                  userMarker.setLatLng([lat, lng]);
+                  var el = userMarker.getElement();
+                  if (el) el.innerHTML = htmlContent;
+                } else {
+                  if (userMarker) {
+                    map.removeLayer(userMarker);
+                  }
+                  var myIcon = L.divIcon({
+                    className: 'user-nav-marker',
+                    html: htmlContent,
+                    iconSize: [20,20],
+                    iconAnchor: [10,10]
+                  });
+                  userMarker = L.marker([lat, lng], { icon: myIcon, zIndexOffset: 1000 }).addTo(map);
+                }
               }
               if (m.center) {
                 const targetZoom = m.zoom || map.getZoom();
@@ -538,16 +528,22 @@ const ShadcnMap = React.forwardRef<any, Props>(
               if (routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
             }
             if (m.type === 'setPolyline') {
-              if (routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
               if (m.latlngs && m.latlngs.length > 1) {
-                var polylineOpts = { color: m.color || '#0d7ff2', weight: getRouteWeight(map.getZoom()), opacity: m.opacity || 0.85 };
-                if (m.dashArray) polylineOpts.dashArray = m.dashArray;
-                routePolyline = L.polyline(m.latlngs, polylineOpts).addTo(map);
+                if (routePolyline) {
+                  routePolyline.setLatLngs(m.latlngs);
+                } else {
+                  var polylineOpts = { color: m.color || '#0d7ff2', weight: getRouteWeight(map.getZoom()), opacity: m.opacity || 1.0 };
+                  if (m.dashArray) polylineOpts.dashArray = m.dashArray;
+                  routePolyline = L.polyline(m.latlngs, polylineOpts).addTo(map);
+                }
+              } else if (routePolyline) {
+                map.removeLayer(routePolyline);
+                routePolyline = null;
               }
             }
             if (m.type === 'addOverlayPolyline') {
               if (m.latlngs && m.latlngs.length > 1) {
-                var polylineOpts = { color: m.color || '#fff', weight: getRouteWeight(map.getZoom()) * 1.5, opacity: m.opacity || 1 };
+                var polylineOpts = { color: m.color || '#fff', weight: getRouteWeight(map.getZoom()) * 0.6, opacity: m.opacity || 1 };
                 var overlay = L.polyline(m.latlngs, polylineOpts).addTo(map);
                 overlayPolylines.push(overlay);
                 

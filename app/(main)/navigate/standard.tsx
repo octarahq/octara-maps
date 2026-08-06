@@ -474,7 +474,6 @@ export default function StandardNavigationScreen() {
 
                 try {
                   if (mapReady && routeService.routeCoords.length >= 2) {
-                    post({ type: "clearPolyline" });
                     post({
                       type: "setPolyline",
                       latlngs: routeService.routeCoords.map((c) => [
@@ -537,7 +536,6 @@ export default function StandardNavigationScreen() {
 
                   try {
                     if (mapReady && routeService.routeCoords.length >= 2) {
-                      post({ type: "clearPolyline" });
                       post({
                         type: "setPolyline",
                         latlngs: routeService.routeCoords.map((c) => [
@@ -1451,14 +1449,14 @@ export default function StandardNavigationScreen() {
 
   React.useEffect(() => {
     if (!mapReady) return;
-    post({ type: "clearPolyline" });
+    
     if (routeService.routeCoords.length >= 2) {
       post({
         type: "setPolyline",
         latlngs: routeService.routeCoords.map((c) => [c.latitude, c.longitude]),
         color: "#0d7ff2",
         weight: 3,
-        opacity: 0.8,
+        opacity: 1.0,
       });
     }
 
