@@ -51,10 +51,15 @@ export function PositionProvider({ children }: { children: React.ReactNode }) {
     interpolationRef.current = enabled;
   }, []);
 
+  const setPositionInternal = React.useCallback((pos: Position) => {
+    positionRef.current = pos;
+    setPosition(pos);
+  }, []);
+
   const animateTo = React.useCallback(
     (from: Position, to: Position, duration: number) => {
       if (!interpolationRef.current) {
-        setPosition(to);
+        setPositionInternal(to);
         return;
       }
       
@@ -83,7 +88,7 @@ export function PositionProvider({ children }: { children: React.ReactNode }) {
             (prev.speed == null && interpolated.speed == null));
 
         if (!prev || !latEq || !lonEq || !speedEq) {
-          setPosition(interpolated);
+          setPositionInternal(interpolated);
         }
 
         if (t < 1) {
@@ -136,7 +141,7 @@ export function PositionProvider({ children }: { children: React.ReactNode }) {
       if (positionRef.current) {
         animateTo(positionRef.current, newPos, 300);
       } else {
-        setPosition(newPos);
+        setPositionInternal(newPos);
       }
     } catch (err: any) {
       setError(err?.message || String(err));
@@ -146,9 +151,6 @@ export function PositionProvider({ children }: { children: React.ReactNode }) {
   }, [animateTo]);
 
   const positionRef = React.useRef<Position | null>(null);
-  React.useEffect(() => {
-    positionRef.current = position;
-  }, [position]);
 
   const startWatching = React.useCallback(async () => {
     try {
@@ -183,7 +185,7 @@ export function PositionProvider({ children }: { children: React.ReactNode }) {
           };
 
           if (!prevRaw || !positionRef.current) {
-            setPosition(newPos);
+            setPositionInternal(newPos);
             return;
           }
 
@@ -223,7 +225,7 @@ export function PositionProvider({ children }: { children: React.ReactNode }) {
         if (status === "granted") {
           const lastKnown = await Location.getLastKnownPositionAsync({});
           if (lastKnown && active && !positionRef.current) {
-            setPosition({
+            setPositionInternal({
               latitude: lastKnown.coords.latitude,
               longitude: lastKnown.coords.longitude,
               speed: lastKnown.coords.speed,

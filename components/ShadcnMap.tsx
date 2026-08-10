@@ -142,7 +142,7 @@ const ShadcnMap = React.forwardRef<any, Props>(
           margin-left: -75vmax;
           margin-top: -75vmax;
           transform-style: preserve-3d;
-          transition: transform 1s linear;
+          transition: top 0.5s ease-out, transform 1s linear;
         }
           
         #map { width:100%; height:100%; }
@@ -343,14 +343,9 @@ const ShadcnMap = React.forwardRef<any, Props>(
               var targetZoom = m.zoom != null ? m.zoom : map.getZoom();
               var targetLatLng = L.latLng(m.lat, m.lng);
               
-              if (m.offsetY) {
-                var targetPoint = map.project(targetLatLng, targetZoom);
-                var bearingToUse = m.bearing != null ? m.bearing : currentBearing;
-                var rad = (bearingToUse || 0) * Math.PI / 180;
-                targetPoint.x += m.offsetY * Math.sin(rad);
-                targetPoint.y -= m.offsetY * Math.cos(rad);
-                targetLatLng = map.unproject(targetPoint, targetZoom);
-              }
+              var offsetY = m.offsetY || 0;
+              var rotateEl = document.getElementById('mapRotate');
+              if (rotateEl) rotateEl.style.top = 'calc(50% + ' + offsetY + 'px)';
 
               if (m.zoom != null) {
                 map.setView(targetLatLng, targetZoom, { animate: m.animate !== false, duration: m.duration || 0.6 });
@@ -422,9 +417,12 @@ const ShadcnMap = React.forwardRef<any, Props>(
               }
               if (m.center) {
                 const targetZoom = m.zoom || map.getZoom();
-                const point = map.project([lat, lng], targetZoom);
-                point.y += (m.offsetY || 0);
-                const target = map.unproject(point, targetZoom);
+                const target = L.latLng(lat, lng);
+                
+                var offsetY = m.offsetY || 0;
+                var rotateEl = document.getElementById('mapRotate');
+                if (rotateEl) rotateEl.style.top = 'calc(50% + ' + offsetY + 'px)';
+                
                 if (m.animate !== false) {
                   if (m.zoom) {
                     map.flyTo(target, targetZoom, { duration: 0.8 });
