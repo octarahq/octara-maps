@@ -137,10 +137,10 @@ const ShadcnMap = React.forwardRef<any, Props>(
           position: absolute;
           left: 50%;
           top: 50%;
-          width: 150vmax;
-          height: 150vmax;
-          margin-left: -75vmax;
-          margin-top: -75vmax;
+          width: 260vmax;
+          height: 260vmax;
+          margin-left: -130vmax;
+          margin-top: -130vmax;
           transform-style: preserve-3d;
           transition: top 0.5s ease-out, transform 1s linear;
         }
@@ -174,7 +174,8 @@ const ShadcnMap = React.forwardRef<any, Props>(
           maxZoom: 19,
           tileSize: 512,
           zoomOffset: -1,
-          zIndex: 1
+          zIndex: 1,
+          keepBuffer: 8
         }).addTo(map);
 
         const south = -85;
@@ -614,7 +615,7 @@ const ShadcnMap = React.forwardRef<any, Props>(
               
               if (!url) url = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
               
-              baseLayer = L.tileLayer(url, { maxZoom: maxZ, minZoom: ${initialZoom}, detectRetina: true, tileSize: 512, zoomOffset: -1, zIndex: 1 }).addTo(map);
+              baseLayer = L.tileLayer(url, { maxZoom: maxZ, minZoom: ${initialZoom}, detectRetina: true, tileSize: 512, zoomOffset: -1, zIndex: 1, keepBuffer: 8 }).addTo(map);
 
               if (layer === 'terrain' && theme === 'dark') {
                   baseLayer.on('add', function(e) {

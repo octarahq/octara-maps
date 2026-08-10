@@ -961,28 +961,22 @@ export default function StandardNavigationScreen() {
   const limitNum = isCarMode && speedLimit ? parseInt(speedLimit, 10) : null;
 
   const targetZoom = React.useMemo(() => {
-    let baseZoom = 17.5;
     const speedRef =
       limitNum !== null ? Math.max(limitNum, currentSpeedKmH) : currentSpeedKmH;
 
-    if (speedRef >= 110) {
-      baseZoom = 14.0;
-    } else if (speedRef >= 80) {
-      baseZoom = 14.5;
-    } else if (speedRef >= 50) {
-      baseZoom = 15.5;
+    let baseZoom = 17.5;
+    if (speedRef > 30) {
+      if (speedRef >= 130) {
+        baseZoom = 14.0;
+      } else {
+        baseZoom = 17.5 - (speedRef - 30) * 0.035;
+      }
     }
 
-    if (approachingStep && distanceToNextManeuver < 300) {
-      if (speedRef >= 110) {
-        baseZoom = 13.5;
-      } else if (speedRef >= 80) {
-        baseZoom = 14.0;
-      } else if (speedRef >= 50) {
-        baseZoom = 15.0;
-      } else {
-        baseZoom = 17.0;
-      }
+    if (approachingStep && distanceToNextManeuver < 400) {
+      const intersectionZoom = Math.min(18.5, baseZoom + 1.2);
+      const progress = 1 - distanceToNextManeuver / 400;
+      baseZoom = baseZoom + (intersectionZoom - baseZoom) * progress;
     }
 
     let maxLayerZoom = 19;
@@ -996,6 +990,8 @@ export default function StandardNavigationScreen() {
     currentSpeedKmH,
     limitNum,
   ]);
+
+  const currentPitchRef = React.useRef(45);
 
   const isDeadReckoningRef = React.useRef(false);
   const [isSimulated, setIsSimulated] = React.useState(false);
@@ -1114,25 +1110,30 @@ export default function StandardNavigationScreen() {
             });
           }
         }
-      } else {
-        if (isDeadReckoningRef.current && timeSinceGps <= 5000) {
-          isDeadReckoningRef.current = false;
-          setIsSimulated(false);
-          if (position && following) {
-            post({
-              type: "panTo",
-              lat: position.latitude,
-              lng: position.longitude,
-              zoom: targetZoom,
-              animate: true,
-              duration: 0.5,
-            });
-          }
-        }
       }
     }, 500);
     return () => clearInterval(interval);
   }, [lastUpdate, position, routeService.routeCoords, targetZoom, following]);
+
+  React.useEffect(() => {
+    if (!position) return;
+    const now = Date.now();
+    const timeSinceGps = now - lastUpdate;
+    if (isDeadReckoningRef.current && timeSinceGps <= 5000) {
+      isDeadReckoningRef.current = false;
+      setIsSimulated(false);
+      if (following) {
+        post({
+          type: "panTo",
+          lat: position.latitude,
+          lng: position.longitude,
+          zoom: targetZoom,
+          animate: true,
+          duration: 0.5,
+        });
+      }
+    }
+  }, [lastUpdate, position, following, targetZoom]);
 
   const lastCameraZoomRef = React.useRef<number | null>(null);
   const targetSpeedDiff = React.useMemo(() => {
@@ -1449,7 +1450,7 @@ export default function StandardNavigationScreen() {
 
   React.useEffect(() => {
     if (!mapReady) return;
-    
+
     if (routeService.routeCoords.length >= 2) {
       post({
         type: "setPolyline",
@@ -1567,17 +1568,14 @@ export default function StandardNavigationScreen() {
         const cameraOffsetY = 140;
 
         const currentSpeedKmhEffect = (position.speed ?? 0) * 3.6;
-        const speedRef =
-          limitNum !== null
-            ? Math.max(limitNum, currentSpeedKmhEffect)
-            : currentSpeedKmhEffect;
-        let targetPitch = 0;
-        if (
-          (!approachingStep || distanceToNextManeuver >= 300) &&
-          speedRef > 50
-        ) {
+
+        let targetPitch = currentPitchRef.current;
+        if (currentSpeedKmhEffect > 15) {
           targetPitch = 45;
+        } else if (currentSpeedKmhEffect < 5) {
+          targetPitch = 0;
         }
+        currentPitchRef.current = targetPitch;
 
         suppressMapMove.current = true;
         post({
