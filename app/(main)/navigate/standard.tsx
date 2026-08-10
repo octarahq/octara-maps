@@ -1343,7 +1343,7 @@ export default function StandardNavigationScreen() {
   const formatStepInstructionRaw = (step?: any): string => {
     if (!step) return "";
     const m = step.maneuver;
-    const road = step.name && step.name !== "" ? step.name : null;
+    const road = step.ref || step.name || undefined;
 
     if (!m?.type) {
       return step.instruction || "";
