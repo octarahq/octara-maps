@@ -9,39 +9,40 @@ import Constants from "expo-constants";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
-    ImageBackground,
-    ScrollView,
-    StatusBar,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ImageBackground,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  ActivityIndicator,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
-    AddPlaceIcon,
-    AddressIcon,
-    AmenityIcon,
-    ArrowRightIcon,
-    BatimentIcon,
-    BusStopIcon,
-    CoffeeIcon,
-    CommercialIcon,
-    EditIcon,
-    EvIcon,
-    FoodIcon,
-    GasIcon,
-    HealthIcon,
-    HistoryIcon,
-    HomeIcon,
-    ParkingIcon,
-    SchoolIcon,
-    SearchIcon,
-    StarIcon,
-    TrainStationIcon,
-    WorkIcon,
-    MapIcon,
+  AddPlaceIcon,
+  AddressIcon,
+  AmenityIcon,
+  ArrowRightIcon,
+  BatimentIcon,
+  BusStopIcon,
+  CoffeeIcon,
+  CommercialIcon,
+  EditIcon,
+  EvIcon,
+  FoodIcon,
+  GasIcon,
+  HealthIcon,
+  HistoryIcon,
+  HomeIcon,
+  MapIcon,
+  ParkingIcon,
+  SchoolIcon,
+  SearchIcon,
+  StarIcon,
+  TrainStationIcon,
+  WorkIcon,
 } from "@/assets/icons";
 
 import BackIcon from "@/assets/icons/BackIcon";
@@ -59,8 +60,8 @@ import { AvatarImg } from "@/components/AvatarImg";
 import MapSnapshot from "@/components/MapSnapshot";
 import OverPassAmenityList from "../../../assets/config/poiList";
 import {
-    PhotonFeature,
-    SearchEngineService,
+  PhotonFeature,
+  SearchEngineService,
 } from "../../../services/SearchEngineService";
 
 const PlaceIcons = [
@@ -151,7 +152,8 @@ export default function SearchScreen() {
     return OverPassAmenityList.filter((a) => {
       const key = `amenity_${a.value}`;
       const translated = t(key);
-      const localizedLabel = translated === `search:${key}` ? a.label : translated;
+      const localizedLabel =
+        translated === `search:${key}` ? a.label : translated;
       return (
         localizedLabel.toLowerCase().includes(q) ||
         a.value.toLowerCase().includes(q)
@@ -162,6 +164,7 @@ export default function SearchScreen() {
   const [addressResults, setAddressResults] = React.useState<PhotonFeature[]>(
     [],
   );
+  const [isSearching, setIsSearching] = React.useState(false);
   const [recentTrips, setRecentTrips] = React.useState<any[]>([]);
   const [visibleRecentCount, setVisibleRecentCount] = React.useState(5);
 
@@ -190,6 +193,7 @@ export default function SearchScreen() {
 
     const startTime = Date.now();
     const t = setTimeout(async () => {
+      setIsSearching(true);
       try {
         const results = await SearchEngineService.photonSearch(q, {
           limit: 10,
@@ -218,6 +222,8 @@ export default function SearchScreen() {
           } else {
           }
         }
+      } finally {
+        if (mounted) setIsSearching(false);
       }
     }, 300);
 
@@ -225,7 +231,7 @@ export default function SearchScreen() {
       mounted = false;
       clearTimeout(t);
     };
-  }, [query, position?.latitude, position?.longitude]);
+  }, [query]);
 
   return (
     <View className="flex-1 bg-[#101922]">
@@ -272,6 +278,11 @@ export default function SearchScreen() {
                 value={query}
                 onChangeText={setQuery}
               />
+              {isSearching && (
+                <View className="ml-2">
+                  <ActivityIndicator color="#0d7ff2" size="small" />
+                </View>
+              )}
             </View>
           )}
           {mode === "search" && compact && (
@@ -289,7 +300,8 @@ export default function SearchScreen() {
                   filteredAmenities.slice(0, 10).map((a) => {
                     const key = `amenity_${a.value}`;
                     const translated = t(key);
-                    const label = translated === `search:${key}` ? a.label : translated;
+                    const label =
+                      translated === `search:${key}` ? a.label : translated;
                     return (
                       <SearchResult
                         key={a.value}
@@ -446,12 +458,32 @@ export default function SearchScreen() {
                 className="mb-3"
               >
                 {[
-                  { icon: <MapIcon />, label: "Pointer sur la carte", route: "/(main)/point-on-map" },
+                  {
+                    icon: <MapIcon />,
+                    label: "Pointer sur la carte",
+                    route: "/(main)/point-on-map",
+                  },
                   { icon: <GasIcon />, label: t("chip_gas"), amenity: "fuel" },
-                  { icon: <ParkingIcon />, label: t("chip_parking"), amenity: "parking" },
-                  { icon: <CoffeeIcon />, label: t("chip_coffee"), amenity: "cafe" },
-                  { icon: <EvIcon />, label: t("chip_ev"), amenity: "charging_station" },
-                  { icon: <FoodIcon />, label: t("chip_food"), amenity: "restaurant|fast_food|cafe" },
+                  {
+                    icon: <ParkingIcon />,
+                    label: t("chip_parking"),
+                    amenity: "parking",
+                  },
+                  {
+                    icon: <CoffeeIcon />,
+                    label: t("chip_coffee"),
+                    amenity: "cafe",
+                  },
+                  {
+                    icon: <EvIcon />,
+                    label: t("chip_ev"),
+                    amenity: "charging_station",
+                  },
+                  {
+                    icon: <FoodIcon />,
+                    label: t("chip_food"),
+                    amenity: "restaurant|fast_food|cafe",
+                  },
                 ].map((c) => (
                   <TouchableOpacity
                     key={c.label}
@@ -460,7 +492,10 @@ export default function SearchScreen() {
                       if (c.route) {
                         router.push(c.route as any);
                       } else {
-                        router.push({ pathname: "/(main)/poiresult", params: { amenity: c.amenity, title: c.label } });
+                        router.push({
+                          pathname: "/(main)/poiresult",
+                          params: { amenity: c.amenity, title: c.label },
+                        });
                       }
                     }}
                   >
@@ -538,7 +573,15 @@ export default function SearchScreen() {
                 <View className="flex-row flex-wrap justify-between">
                   <TouchableOpacity
                     className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2 overflow-hidden"
-                    onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "restaurant|cafe", title: t("card_top_dining") } })}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/(main)/poiresult",
+                        params: {
+                          amenity: "restaurant|cafe",
+                          title: t("card_top_dining"),
+                        },
+                      })
+                    }
                   >
                     <ImageBackground
                       source={topDiningImg}
@@ -553,7 +596,15 @@ export default function SearchScreen() {
                   </TouchableOpacity>
                   <TouchableOpacity
                     className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2 overflow-hidden"
-                    onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "bar|pub|nightclub", title: t("card_nightlife") } })}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/(main)/poiresult",
+                        params: {
+                          amenity: "bar|pub|nightclub",
+                          title: t("card_nightlife"),
+                        },
+                      })
+                    }
                   >
                     <ImageBackground
                       source={nightlifeImg}
@@ -568,7 +619,15 @@ export default function SearchScreen() {
                   </TouchableOpacity>
                   <TouchableOpacity
                     className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2 overflow-hidden"
-                    onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "park|forest|nature_reserve", title: t("card_nature") } })}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/(main)/poiresult",
+                        params: {
+                          amenity: "park|forest|nature_reserve",
+                          title: t("card_nature"),
+                        },
+                      })
+                    }
                   >
                     <ImageBackground
                       source={natureImg}
@@ -583,7 +642,15 @@ export default function SearchScreen() {
                   </TouchableOpacity>
                   <TouchableOpacity
                     className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2 overflow-hidden"
-                    onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "marketplace|mall|supermarket|clothes", title: t("card_shopping") } })}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/(main)/poiresult",
+                        params: {
+                          amenity: "marketplace|mall|supermarket|clothes",
+                          title: t("card_shopping"),
+                        },
+                      })
+                    }
                   >
                     <ImageBackground
                       source={shoppingImg}
@@ -608,7 +675,15 @@ export default function SearchScreen() {
               <View className="flex-row flex-wrap justify-between">
                 <TouchableOpacity
                   className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2 overflow-hidden"
-                  onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "restaurant|cafe", title: t("card_top_dining") } })}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(main)/poiresult",
+                      params: {
+                        amenity: "restaurant|cafe",
+                        title: t("card_top_dining"),
+                      },
+                    })
+                  }
                 >
                   <ImageBackground
                     source={topDiningImg}
@@ -623,7 +698,15 @@ export default function SearchScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2 overflow-hidden"
-                  onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "bar|pub|nightclub", title: t("card_nightlife") } })}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(main)/poiresult",
+                      params: {
+                        amenity: "bar|pub|nightclub",
+                        title: t("card_nightlife"),
+                      },
+                    })
+                  }
                 >
                   <ImageBackground
                     source={nightlifeImg}
@@ -638,7 +721,15 @@ export default function SearchScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2 overflow-hidden"
-                  onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "park|forest|nature_reserve", title: t("card_nature") } })}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(main)/poiresult",
+                      params: {
+                        amenity: "park|forest|nature_reserve",
+                        title: t("card_nature"),
+                      },
+                    })
+                  }
                 >
                   <ImageBackground
                     source={natureImg}
@@ -653,7 +744,15 @@ export default function SearchScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="w-[48%] aspect-video rounded-[16px] bg-[#334155] mb-3 justify-end p-2 overflow-hidden"
-                  onPress={() => router.push({ pathname: "/(main)/poiresult", params: { amenity: "marketplace|mall|supermarket|clothes", title: t("card_shopping") } })}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(main)/poiresult",
+                      params: {
+                        amenity: "marketplace|mall|supermarket|clothes",
+                        title: t("card_shopping"),
+                      },
+                    })
+                  }
                 >
                   <ImageBackground
                     source={shoppingImg}
