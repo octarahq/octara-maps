@@ -1,6 +1,7 @@
 import { WaypointPin } from "@/components/MapSnapshot";
 import ShadcnMap from "@/components/ShadcnMap";
 import { useMapLayers } from "@/components/map/MapLayersContext";
+import LaneArrow from "@/components/LaneArrow";
 import { Colors } from "@/constants/theme";
 import { usePosition } from "@/contexts/PositionContext";
 import { useUser } from "@/contexts/UserContext";
@@ -1722,6 +1723,13 @@ export default function StandardNavigationScreen() {
                 <Text className="text-gray-400" numberOfLines={2}>
                   {stepDistanceLabel}
                 </Text>
+                {approachingStep?.intersections?.[0]?.lanes && approachingStep.intersections[0].lanes.length > 0 && (
+                  <View className="flex-row items-center mt-1.5 gap-1 bg-black/40 self-start px-2 py-1 rounded-lg border border-white/10">
+                    {approachingStep.intersections[0].lanes.map((lane: any, idx: number) => (
+                      <LaneArrow key={idx} indications={lane.indications || []} valid={lane.valid} color="#ffffff" invalidColor="#555555" />
+                    ))}
+                  </View>
+                )}
               </View>
             </View>
           </View>

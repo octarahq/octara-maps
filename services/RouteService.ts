@@ -32,6 +32,7 @@ export interface NavigationData {
       exit?: number;
       location?: [number, number];
     };
+    intersections?: any[];
   }[];
 }
 
@@ -1233,6 +1234,7 @@ export function useRouteService(): RouteService {
                   : undefined,
               location: step.maneuver?.location || undefined,
             },
+            intersections: step.intersections || undefined,
           })),
         };
       }
