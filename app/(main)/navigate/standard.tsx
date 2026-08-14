@@ -14,6 +14,7 @@ import { useRouteService } from "@/services/RouteService";
 import { cn } from "@/utils/cn";
 import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { addRecentTrip } from "@/utils/recentTrips";
+import { clearActiveNavigation } from "@/utils/activeNavigation";
 import { snapPointsPercent } from "@/utils/snapPoints";
 import { MaterialIcons } from "@expo/vector-icons";
 import BottomSheet, {
@@ -163,7 +164,6 @@ export default function StandardNavigationScreen() {
   const mapRef = React.useRef<any>(null);
   const [mapReady, setMapReady] = React.useState(false);
   const [following, setFollowing] = React.useState(true);
-  const suppressMapMove = React.useRef(false);
   const { height: screenHeight } = useWindowDimensions();
   const [guideMode, setGuideMode] = React.useState<"alert" | "all" | "off">(
     settings.voice ?? "alert",
@@ -201,7 +201,6 @@ export default function StandardNavigationScreen() {
               Number.isFinite(position.latitude) &&
               Number.isFinite(position.longitude)
             ) {
-              suppressMapMove.current = true;
               post({
                 type: "panTo",
                 lat: position.latitude,
@@ -214,11 +213,7 @@ export default function StandardNavigationScreen() {
         }
       }
       if (msg?.type === "mapMoved") {
-        if (suppressMapMove.current) {
-          suppressMapMove.current = false;
-        } else {
-          setFollowing(false);
-        }
+        setFollowing(false);
       }
     },
     [position],
@@ -645,6 +640,7 @@ export default function StandardNavigationScreen() {
 
   const handleStopTrip = () => {
     routeService.clearRoute();
+    clearActiveNavigation();
     router.back();
   };
 
@@ -1576,8 +1572,6 @@ export default function StandardNavigationScreen() {
           targetPitch = 0;
         }
         currentPitchRef.current = targetPitch;
-
-        suppressMapMove.current = true;
         post({
           type: "panTo",
           lat: position.latitude,

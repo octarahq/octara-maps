@@ -271,6 +271,26 @@ const ShadcnMap = React.forwardRef<any, Props>(
       window.addEventListener('mouseup', endPress, { passive: true });
       window.addEventListener('touchend', endPress, { passive: true });
       window.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+      function snapFlat(e) {
+        if (targetPitch !== 0 || currentAccumulatedBearing !== 0) {
+          var rotateEl = document.getElementById('mapRotate');
+          if (rotateEl) {
+            rotateEl.style.transition = 'none';
+            currentAccumulatedBearing = 0;
+            targetPitch = 0;
+            applyBearingTransform(0, 0);
+            void rotateEl.offsetWidth; 
+            setTimeout(function() {
+              rotateEl.style.transition = 'top 0.5s ease-out, transform 1s linear';
+            }, 50);
+            sendMove(e);
+          }
+        }
+      }
+      
+      mc.addEventListener('touchstart', snapFlat, true);
+      mc.addEventListener('mousedown', snapFlat, true);
     }
     var currentBearing = 0;
     var targetBearing = 0;
@@ -366,7 +386,22 @@ const ShadcnMap = React.forwardRef<any, Props>(
               }
             }
             if (m.type === 'setBearing') {
-              applyBearing(m.bearing || 0);
+              applyBearing(m.bearing || 0, m.pitch);
+            }
+            if (m.type === 'setPitch') {
+              applyBearing(currentAccumulatedBearing, m.pitch);
+            }
+            if (m.type === 'resetTransform') {
+              var rotateEl = document.getElementById('mapRotate');
+              if (rotateEl) {
+                rotateEl.style.transition = 'none';
+                currentAccumulatedBearing = 0;
+                targetPitch = 0;
+                applyBearingTransform(0, 0);
+                setTimeout(function() {
+                  rotateEl.style.transition = 'top 0.5s ease-out, transform 1s linear';
+                }, 50);
+              }
             }
             if (m.type === 'fitBounds') {
               map.invalidateSize();
