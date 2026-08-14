@@ -9,12 +9,12 @@ import Constants from "expo-constants";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
+  ActivityIndicator,
   ImageBackground,
   ScrollView,
   StatusBar,
   Text,
   TextInput,
-  ActivityIndicator,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -200,6 +200,7 @@ export default function SearchScreen() {
           lat: position?.latitude,
           lon: position?.longitude,
         });
+        console.log(results);
 
         if (mounted) {
           lastAddressQueryRef.current = q;
@@ -290,7 +291,7 @@ export default function SearchScreen() {
               <ScrollView keyboardShouldPersistTaps="handled">
                 <SearchResult
                   icon={<MapIcon color={Colors.dark.primary} />}
-                  title="Pointer sur la carte"
+                  title="Pointer sur&& la carte"
                   onPress={() => {
                     router.push("/(main)/point-on-map");
                   }}
@@ -318,12 +319,39 @@ export default function SearchScreen() {
 
                 {addressResults.length > 0 &&
                   addressResults.slice(0, 10).map((r) => {
-                    const isStationQuay = /\bquai\b/i.test(
-                      r.properties?.street || "",
-                    );
-                    const isStation =
+                    const p = r.properties || {};
+                    const v = p.osm_value || "";
+
+                    const streetInfo = [p.housenumber, p.street]
+                      .filter(Boolean)
+                      .join(" ");
+
+                    const title =
+                      p.name ||
+                      streetInfo ||
+                      p.city ||
+                      p.state ||
+                      p.country ||
+                      t("unknown_place");
+
+                    const subtitleParts = [
+                      p.name && streetInfo && p.name !== streetInfo
+                        ? streetInfo
+                        : null,
+                      p.city,
+                      p.county,
+                      p.state,
+                      p.country,
+                    ].filter(Boolean);
+
+                    const subtitle = Array.from(new Set(subtitleParts))
+                      .filter((part) => part !== title)
+                      .join(", ");
+
+                    let PlaceIcon = <AddressIcon />;
+                    if (["bus_stop"].includes(v)) PlaceIcon = <BusStopIcon />;
+                    else if (
                       [
-                        "bus_stop",
                         "bus_station",
                         "train_station",
                         "train_station_entrance",
@@ -331,80 +359,38 @@ export default function SearchScreen() {
                         "halt",
                         "tram_stop",
                         "subway_entrance",
-                      ].includes(r.properties?.osm_value || "") ||
-                      isStationQuay;
-                    const isFoodPlace = [
-                      "restaurant",
-                      "fast_food",
-                      "cafe",
-                      "bar",
-                      "pub",
-                      "food_court",
-                    ].includes(r.properties?.osm_value || "");
-                    const isCommercial = [
-                      "retail",
-                      "supermarket",
-                      "bakery",
-                      "convenience",
-                      "pharmacy",
-                      "clothes",
-                    ].includes(r.properties?.osm_value || "");
-                    const isParking = r.properties?.osm_value === "parking";
-                    const isFuel = r.properties?.osm_value === "fuel";
-                    const isHealth = [
-                      "hospital",
-                      "clinic",
-                      "pharmacy",
-                      "doctors",
-                    ].includes(r.properties?.osm_value || "");
-
-                    const noStreet =
-                      !r.properties?.housenumber && !r.properties?.street;
-                    const streetInfo = [
-                      r.properties?.housenumber,
-                      r.properties?.street,
-                    ]
-                      .filter(Boolean)
-                      .join(" ");
-
-                    const title =
-                      (isStation ||
-                        isFoodPlace ||
-                        isCommercial ||
-                        isParking ||
-                        isFuel ||
-                        isHealth) &&
-                      r.properties?.name
-                        ? r.properties.name
-                        : noStreet
-                          ? r.properties?.city
-                          : streetInfo;
-
-                    const subtitle = noStreet
-                      ? r.properties?.country
-                      : [streetInfo, r.properties?.city]
-                          .filter(Boolean)
-                          .join(", ");
-
-                    const PlaceIcon = noStreet ? (
-                      <BatimentIcon />
-                    ) : r.properties.osm_value === "bus_stop" ? (
-                      <BusStopIcon />
-                    ) : isStation ? (
-                      <TrainStationIcon />
-                    ) : isFoodPlace ? (
-                      <FoodIcon />
-                    ) : isCommercial ? (
-                      <CommercialIcon />
-                    ) : isHealth ? (
-                      <HealthIcon />
-                    ) : isParking ? (
-                      <ParkingIcon />
-                    ) : isFuel ? (
-                      <GasIcon />
-                    ) : (
-                      <AddressIcon />
-                    );
+                      ].includes(v) ||
+                      /\bquai\b/i.test(p.street || "")
+                    )
+                      PlaceIcon = <TrainStationIcon />;
+                    else if (
+                      [
+                        "restaurant",
+                        "fast_food",
+                        "cafe",
+                        "bar",
+                        "pub",
+                        "food_court",
+                      ].includes(v)
+                    )
+                      PlaceIcon = <FoodIcon />;
+                    else if (
+                      [
+                        "retail",
+                        "supermarket",
+                        "bakery",
+                        "convenience",
+                        "pharmacy",
+                        "clothes",
+                      ].includes(v)
+                    )
+                      PlaceIcon = <CommercialIcon />;
+                    else if (["hospital", "clinic", "doctors"].includes(v))
+                      PlaceIcon = <HealthIcon />;
+                    else if (v === "parking") PlaceIcon = <ParkingIcon />;
+                    else if (v === "fuel") PlaceIcon = <GasIcon />;
+                    else if (!p.housenumber && !p.street)
+                      PlaceIcon = <BatimentIcon />;
 
                     return (
                       <SearchResult
