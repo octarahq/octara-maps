@@ -5,6 +5,7 @@ import { createTranslator } from "@/i18n";
 import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { clearActiveNavigation } from "@/utils/activeNavigation";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Constants from "expo-constants";
@@ -70,7 +71,9 @@ export default function ArrivedScreen() {
     return [{ lat: destLat, lng: destLng, type: "destination" as const }];
   }, [hasDestination, destLat, destLng]);
 
-  React.useEffect(() => {}, [params.mode, totalDistance, totalDuration]);
+  React.useEffect(() => {
+    clearActiveNavigation();
+  }, [params.mode, totalDistance, totalDuration]);
 
   const routeCoords: { latitude: number; longitude: number }[] = [];
 

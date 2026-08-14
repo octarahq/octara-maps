@@ -14,6 +14,7 @@ import { Colors } from "@/constants/theme";
 import { usePosition } from "@/contexts/PositionContext";
 import { useUser } from "@/contexts/UserContext";
 import { createTranslator } from "@/i18n";
+import { setActiveNavigation } from "@/utils/activeNavigation";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
@@ -832,6 +833,14 @@ export default function RoutePlanningScreen() {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
     }
+
+    setActiveNavigation({
+      lat: String(destinationCoords.lat),
+      lng: String(destinationCoords.lng),
+      mode: navigationModeForIntent,
+      name: destinationLabel,
+      multi: coords.length > 2 ? "1" : undefined,
+    });
 
     router.push({
       pathname: "/navigate/standard",
