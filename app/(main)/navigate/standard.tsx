@@ -265,6 +265,7 @@ export default function StandardNavigationScreen() {
         startCoordinate,
         { latitude: destLat, longitude: destLng },
         serviceMode,
+        typeof (startCoordinate as any).heading === 'number' && (startCoordinate as any).heading >= 0 ? { heading: (startCoordinate as any).heading } : undefined
       )
       .catch(() => {});
 
@@ -444,9 +445,12 @@ export default function StandardNavigationScreen() {
             try {
               let ok = false;
               if (routeService.recalculateIfOffRoute) {
+                const heading = (currentPos as any).heading;
+                const opts = typeof heading === 'number' && heading >= 0 ? { heading } : undefined;
                 const res = await routeService.recalculateIfOffRoute(
                   currentPos,
                   serviceMode,
+                  opts
                 );
                 ok = res !== false && res !== null && res !== undefined;
               } else {
@@ -457,6 +461,7 @@ export default function StandardNavigationScreen() {
                   },
                   { latitude: destLat, longitude: destLng },
                   serviceMode,
+                  typeof (currentPos as any).heading === 'number' && (currentPos as any).heading >= 0 ? { heading: (currentPos as any).heading } : undefined
                 );
                 ok = !!res;
               }
@@ -506,9 +511,12 @@ export default function StandardNavigationScreen() {
               try {
                 let ok = false;
                 if (routeService.recalculateIfOffRoute) {
+                  const heading = (currentPos as any).heading;
+                  const opts = typeof heading === 'number' && heading >= 0 ? { heading } : undefined;
                   const res = await routeService.recalculateIfOffRoute(
                     currentPos,
                     serviceMode,
+                    opts
                   );
                   ok = res !== false && res !== null && res !== undefined;
                 } else {
@@ -519,6 +527,7 @@ export default function StandardNavigationScreen() {
                     },
                     { latitude: destLat, longitude: destLng },
                     serviceMode,
+                    typeof (currentPos as any).heading === 'number' && (currentPos as any).heading >= 0 ? { heading: (currentPos as any).heading } : undefined
                   );
                   ok = !!res;
                 }

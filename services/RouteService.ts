@@ -49,6 +49,14 @@ export interface RouteService {
     start: Coordinate,
     end: Coordinate,
     mode?: string,
+    options?: {
+      transitOptions?: {
+        datetime?: string;
+        datetimeRepresents?: "departure" | "arrival";
+        forbiddenModes?: string[];
+      };
+      heading?: number;
+    }
   ) => Promise<boolean>;
   getRoutes: (
     waypoints: Coordinate[],
@@ -62,6 +70,7 @@ export interface RouteService {
         datetimeRepresents?: "departure" | "arrival";
         forbiddenModes?: string[];
       };
+      heading?: number;
     },
   ) => Promise<
     {
@@ -87,6 +96,7 @@ export interface RouteService {
     start: Coordinate,
     end: Coordinate,
     mode?: string,
+    options?: { heading?: number }
   ) => Promise<boolean>;
   getDistanceToRoute: (location: Coordinate) => number;
   detectOffRoute: (location: Coordinate, tolerance?: number) => boolean;
@@ -94,6 +104,7 @@ export interface RouteService {
   recalculateIfOffRoute: (
     currentLocation: Coordinate,
     mode?: string,
+    options?: { heading?: number }
   ) => Promise<Coordinate | false>;
   lastRequestTimings: {
     host: string;
@@ -410,6 +421,7 @@ export function useRouteService(): RouteService {
         datetimeRepresents?: "departure" | "arrival";
         forbiddenModes?: string[];
       };
+      heading?: number;
     },
   ): Promise<{
     success: boolean;
@@ -433,7 +445,10 @@ export function useRouteService(): RouteService {
 
     const startTs = Date.now();
     try {
-      let url = `${host}/route/v1/${osrmMode}/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson&steps=true`;
+      const bearingsParam = options?.heading !== undefined 
+        ? `&bearings=${Math.round(options.heading)},45;`
+        : "";
+      let url = `${host}/route/v1/${osrmMode}/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson&steps=true${bearingsParam}`;
 
       if (mode === "transit") {
         url = `${host}/navigation/transit?from_lon=${start.longitude}&from_lat=${start.latitude}&to_lon=${end.longitude}&to_lat=${end.latitude}`;
@@ -508,6 +523,7 @@ export function useRouteService(): RouteService {
         datetimeRepresents?: "departure" | "arrival";
         forbiddenModes?: string[];
       };
+      heading?: number;
     } = {},
   ): Promise<{
     success: boolean;
@@ -543,7 +559,10 @@ export function useRouteService(): RouteService {
       const excludeParam = excludes.length
         ? `&exclude=${excludes.join(",")}`
         : "";
-      let url = `${host}/route/v1/${osrmMode}/${coordsQuery}?overview=full&geometries=geojson&steps=true&alternatives=true${excludeParam}`;
+      const bearingsParam = options.heading !== undefined 
+        ? `&bearings=${Math.round(options.heading)},45${';'.repeat(waypoints.length - 1)}`
+        : "";
+      let url = `${host}/route/v1/${osrmMode}/${coordsQuery}?overview=full&geometries=geojson&steps=true&alternatives=true${excludeParam}${bearingsParam}`;
       if (mode === "transit") {
         url = `${host}/navigation/transit?from_lon=${waypoints[0].longitude}&from_lat=${waypoints[0].latitude}&to_lon=${waypoints[waypoints.length - 1].longitude}&to_lat=${waypoints[waypoints.length - 1].latitude}`;
         if (options?.transitOptions) {
@@ -907,6 +926,7 @@ export function useRouteService(): RouteService {
       alternatives?: number;
       avoidTolls?: boolean;
       avoidHighways?: boolean;
+      heading?: number;
     } = {},
   ): Promise<
     {
@@ -1022,6 +1042,7 @@ export function useRouteService(): RouteService {
     start: Coordinate,
     end: Coordinate,
     mode = "driving",
+    options?: { heading?: number }
   ) => {
     setRouteInfo(null);
     setLastRawRouteData(null);
@@ -1049,7 +1070,10 @@ export function useRouteService(): RouteService {
         const host = getRoutingOSMHost(mode);
         const startTs = Date.now();
         try {
-          const url = `${host}/route/v1/${osrmMode}/${nearestStart.longitude},${nearestStart.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson&steps=true`;
+          const bearingsParam = options?.heading !== undefined 
+            ? `&bearings=${Math.round(options.heading)},45;`
+            : "";
+          const url = `${host}/route/v1/${osrmMode}/${nearestStart.longitude},${nearestStart.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson&steps=true${bearingsParam}`;
           const res = await fetchWithTimeout(url);
           const duration = Date.now() - startTs;
           const ok = res.ok;
@@ -1080,7 +1104,10 @@ export function useRouteService(): RouteService {
         const host = getRoutingOSMHost(mode);
         const startTs = Date.now();
         try {
-          const url = `${host}/route/v1/${osrmMode}/${correctedStart.longitude},${correctedStart.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson&steps=true`;
+          const bearingsParam = options?.heading !== undefined 
+            ? `&bearings=${Math.round(options.heading)},45;`
+            : "";
+          const url = `${host}/route/v1/${osrmMode}/${correctedStart.longitude},${correctedStart.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson&steps=true${bearingsParam}`;
           const res = await fetchWithTimeout(url);
           const duration = Date.now() - startTs;
           const ok = res.ok;
@@ -1144,12 +1171,13 @@ export function useRouteService(): RouteService {
   const recalculateIfOffRoute = async (
     currentLocation: Coordinate,
     mode: string = "driving",
+    options?: { heading?: number }
   ) => {
     if (!destination) return false;
     const OFF_ROUTE_TOLERANCE = 20;
     const onRoute = isOnRoute(currentLocation, OFF_ROUTE_TOLERANCE);
     if (!onRoute) {
-      const ok = await getHybridRoute(currentLocation, destination, mode);
+      const ok = await getHybridRoute(currentLocation, destination, mode, options);
       if (ok) {
         setIsOffRoute(false);
         return currentLocation;
