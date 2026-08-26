@@ -11,6 +11,7 @@ import React from "react";
 import {
   ActivityIndicator,
   ImageBackground,
+  Keyboard,
   ScrollView,
   StatusBar,
   Text,
@@ -310,8 +311,14 @@ export default function SearchScreen() {
                         title={label}
                         subtitle={t(`type_${a.type.toLowerCase()}`)}
                         onPress={() => {
-                          setQuery(label);
-                          showCommingSoonToast();
+                          Keyboard.dismiss();
+                          router.push({
+                            pathname: "/(main)/poiresult",
+                            params: {
+                              amenity: a.value,
+                              title: label,
+                            },
+                          });
                         }}
                       />
                     );
