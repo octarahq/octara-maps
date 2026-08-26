@@ -1,7 +1,7 @@
+import LaneArrow from "@/components/LaneArrow";
 import { WaypointPin } from "@/components/MapSnapshot";
 import ShadcnMap from "@/components/ShadcnMap";
 import { useMapLayers } from "@/components/map/MapLayersContext";
-import LaneArrow from "@/components/LaneArrow";
 import { Colors } from "@/constants/theme";
 import { usePosition } from "@/contexts/PositionContext";
 import { useUser } from "@/contexts/UserContext";
@@ -12,10 +12,10 @@ import {
 import { createTranslator } from "@/i18n";
 import type { Coordinate } from "@/services/RouteService";
 import { useRouteService } from "@/services/RouteService";
+import { clearActiveNavigation } from "@/utils/activeNavigation";
 import { cn } from "@/utils/cn";
 import { showCommingSoonToast } from "@/utils/commingSoonToast";
 import { addRecentTrip } from "@/utils/recentTrips";
-import { clearActiveNavigation } from "@/utils/activeNavigation";
 import { snapPointsPercent } from "@/utils/snapPoints";
 import { MaterialIcons } from "@expo/vector-icons";
 import BottomSheet, {
@@ -29,6 +29,7 @@ import { Accelerometer } from "expo-sensors";
 import * as Speech from "expo-speech";
 import React from "react";
 import {
+  ActivityIndicator,
   Animated,
   Easing,
   StatusBar,
@@ -265,7 +266,10 @@ export default function StandardNavigationScreen() {
         startCoordinate,
         { latitude: destLat, longitude: destLng },
         serviceMode,
-        typeof (startCoordinate as any).heading === 'number' && (startCoordinate as any).heading >= 0 ? { heading: (startCoordinate as any).heading } : undefined
+        typeof (startCoordinate as any).heading === "number" &&
+          (startCoordinate as any).heading >= 0
+          ? { heading: (startCoordinate as any).heading }
+          : undefined,
       )
       .catch(() => {});
 
@@ -446,11 +450,14 @@ export default function StandardNavigationScreen() {
               let ok = false;
               if (routeService.recalculateIfOffRoute) {
                 const heading = (currentPos as any).heading;
-                const opts = typeof heading === 'number' && heading >= 0 ? { heading } : undefined;
+                const opts =
+                  typeof heading === "number" && heading >= 0
+                    ? { heading }
+                    : undefined;
                 const res = await routeService.recalculateIfOffRoute(
                   currentPos,
                   serviceMode,
-                  opts
+                  opts,
                 );
                 ok = res !== false && res !== null && res !== undefined;
               } else {
@@ -461,7 +468,10 @@ export default function StandardNavigationScreen() {
                   },
                   { latitude: destLat, longitude: destLng },
                   serviceMode,
-                  typeof (currentPos as any).heading === 'number' && (currentPos as any).heading >= 0 ? { heading: (currentPos as any).heading } : undefined
+                  typeof (currentPos as any).heading === "number" &&
+                    (currentPos as any).heading >= 0
+                    ? { heading: (currentPos as any).heading }
+                    : undefined,
                 );
                 ok = !!res;
               }
@@ -512,11 +522,14 @@ export default function StandardNavigationScreen() {
                 let ok = false;
                 if (routeService.recalculateIfOffRoute) {
                   const heading = (currentPos as any).heading;
-                  const opts = typeof heading === 'number' && heading >= 0 ? { heading } : undefined;
+                  const opts =
+                    typeof heading === "number" && heading >= 0
+                      ? { heading }
+                      : undefined;
                   const res = await routeService.recalculateIfOffRoute(
                     currentPos,
                     serviceMode,
-                    opts
+                    opts,
                   );
                   ok = res !== false && res !== null && res !== undefined;
                 } else {
@@ -527,7 +540,10 @@ export default function StandardNavigationScreen() {
                     },
                     { latitude: destLat, longitude: destLng },
                     serviceMode,
-                    typeof (currentPos as any).heading === 'number' && (currentPos as any).heading >= 0 ? { heading: (currentPos as any).heading } : undefined
+                    typeof (currentPos as any).heading === "number" &&
+                      (currentPos as any).heading >= 0
+                      ? { heading: (currentPos as any).heading }
+                      : undefined,
                   );
                   ok = !!res;
                 }
@@ -700,10 +716,102 @@ export default function StandardNavigationScreen() {
   React.useEffect(() => {
     return () => {
       if (alertDismissTimer.current) clearTimeout(alertDismissTimer.current);
+      if (hazardDismissTimer.current) clearTimeout(hazardDismissTimer.current);
     };
   }, []);
 
+  const [activeHazardAlert, setActiveHazardAlert] = React.useState<any | null>(
+    null,
+  );
+  const hazardAlertAnim = React.useRef(new Animated.Value(0)).current;
+  const hazardDismissTimer = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  const dismissHazardAlert = React.useCallback(() => {
+    Animated.timing(hazardAlertAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setActiveHazardAlert(null));
+    if (hazardDismissTimer.current) {
+      clearTimeout(hazardDismissTimer.current);
+      hazardDismissTimer.current = null;
+    }
+  }, [hazardAlertAnim]);
+
+  const showHazardAlert = React.useCallback(
+    (hazard: any) => {
+      setActiveHazardAlert(hazard);
+      Vibration.vibrate([0, 80, 60, 40]);
+      hazardAlertAnim.setValue(0);
+      Animated.spring(hazardAlertAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 80,
+        friction: 9,
+      }).start();
+
+      if (hazardDismissTimer.current) clearTimeout(hazardDismissTimer.current);
+      hazardDismissTimer.current = setTimeout(() => {
+        dismissHazardAlert();
+      }, 10000);
+    },
+    [hazardAlertAnim, dismissHazardAlert],
+  );
+
+  const dismissedHazardsRef = React.useRef<Set<number>>(new Set());
+
+  const distanceM = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ) => {
+    const p = 0.017453292519943295;
+    const c = Math.cos;
+    const a =
+      0.5 -
+      c((lat2 - lat1) * p) / 2 +
+      (c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))) / 2;
+    return 12742000 * Math.asin(Math.sqrt(a));
+  };
+
   const navigationData = routeService.getNavigationData();
+
+  React.useEffect(() => {
+    if (!position || !navigationData?.routeData?.routes?.[0]?.hazards) return;
+    const hazards = navigationData.routeData.routes[0].hazards;
+    for (const h of hazards) {
+      if (dismissedHazardsRef.current.has(h.id)) continue;
+      const dist = distanceM(
+        position.latitude,
+        position.longitude,
+        h.lat,
+        h.lon,
+      );
+      if (dist < 200) {
+        showHazardAlert({ ...h, distance: Math.round(dist) });
+        dismissedHazardsRef.current.add(h.id);
+        break;
+      }
+    }
+  }, [position, navigationData?.routeData?.routes, showHazardAlert]);
+
+  React.useEffect(() => {
+    if (mapReady && navigationData?.routeData?.routes?.[0]?.hazards) {
+      mapRef.current?.postMessage(
+        JSON.stringify({
+          type: "setHazards",
+          hazards: navigationData.routeData.routes[0].hazards,
+        }),
+      );
+    } else if (mapReady) {
+      mapRef.current?.postMessage(
+        JSON.stringify({ type: "setHazards", hazards: [] }),
+      );
+    }
+  }, [mapReady, navigationData?.routeData?.routes]);
 
   const routeNamesInNextHour = React.useMemo(() => {
     if (!navigationData?.steps) return [];
@@ -1678,9 +1786,14 @@ export default function StandardNavigationScreen() {
         translucent
         backgroundColor="transparent"
       />
-      <View className="flex-1">
+      <View className="flex-1 rounded-2xl overflow-hidden relative">
+        {routeService.isCalculating && routeService.routeCoords.length === 0 ? (
+          <View className="absolute inset-0 bg-black/60 items-center justify-center z-50">
+            <ActivityIndicator size="large" color="#ffffff" />
+          </View>
+        ) : null}
         <ShadcnMap ref={mapRef} initialZoom={2} onMapMessage={handleMapMsg} />
-        <View className="absolute inset-0 items-center">
+        <View className="absolute inset-0 items-center pointer-events-none">
           <Svg height={320} className="pointer-events-none" width="100%">
             <Defs>
               <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="0.6">
@@ -1732,13 +1845,22 @@ export default function StandardNavigationScreen() {
                 <Text className="text-gray-400" numberOfLines={2}>
                   {stepDistanceLabel}
                 </Text>
-                {approachingStep?.intersections?.[0]?.lanes && approachingStep.intersections[0].lanes.length > 0 && (
-                  <View className="flex-row items-center mt-1.5 gap-1 bg-black/40 self-start px-2 py-1 rounded-lg border border-white/10">
-                    {approachingStep.intersections[0].lanes.map((lane: any, idx: number) => (
-                      <LaneArrow key={idx} indications={lane.indications || []} valid={lane.valid} color="#ffffff" invalidColor="#555555" />
-                    ))}
-                  </View>
-                )}
+                {approachingStep?.intersections?.[0]?.lanes &&
+                  approachingStep.intersections[0].lanes.length > 0 && (
+                    <View className="flex-row items-center mt-1.5 gap-1 bg-black/40 self-start px-2 py-1 rounded-lg border border-white/10">
+                      {approachingStep.intersections[0].lanes.map(
+                        (lane: any, idx: number) => (
+                          <LaneArrow
+                            key={idx}
+                            indications={lane.indications || []}
+                            valid={lane.valid}
+                            color="#ffffff"
+                            invalidColor="#555555"
+                          />
+                        ),
+                      )}
+                    </View>
+                  )}
               </View>
             </View>
           </View>
@@ -1769,8 +1891,8 @@ export default function StandardNavigationScreen() {
         <Animated.View
           className="absolute left-4 z-[95]"
           style={{
-            right: speedLimit ? 84 : 16,
-            bottom: speedPanelBottom,
+            right: 16,
+            top: insets.top + 150,
           }}
           pointerEvents="box-none"
         >
@@ -1916,6 +2038,166 @@ export default function StandardNavigationScreen() {
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <MaterialIcons name="close" size={16} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        </Animated.View>
+      )}
+
+      {activeHazardAlert && (
+        <Animated.View
+          className="absolute left-4 z-[95]"
+          style={{
+            right: 16,
+            top: insets.top + 150,
+          }}
+          pointerEvents="box-none"
+        >
+          <Animated.View
+            style={{
+              opacity: hazardAlertAnim,
+              transform: [
+                {
+                  translateY: hazardAlertAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [24, 0],
+                  }),
+                },
+              ],
+            }}
+          >
+            <View
+              style={{
+                backgroundColor:
+                  activeHazardAlert.type === "speed_camera" ||
+                  activeHazardAlert.type === "level_crossing"
+                    ? "#1a0a0a"
+                    : activeHazardAlert.type === "dangerous_curve"
+                      ? "#1a110a"
+                      : "#0a0f1a",
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor:
+                  activeHazardAlert.type === "speed_camera" ||
+                  activeHazardAlert.type === "level_crossing"
+                    ? "#ef444440"
+                    : activeHazardAlert.type === "dangerous_curve"
+                      ? "#f9731640"
+                      : "#3b82f640",
+                padding: 12,
+                flexDirection: "row",
+                alignItems: "center",
+                shadowColor:
+                  activeHazardAlert.type === "speed_camera" ||
+                  activeHazardAlert.type === "level_crossing"
+                    ? "#ef4444"
+                    : activeHazardAlert.type === "dangerous_curve"
+                      ? "#f97316"
+                      : "#3b82f6",
+                shadowOpacity: 0.4,
+                shadowRadius: 8,
+                shadowOffset: { width: 0, height: 2 },
+                elevation: 6,
+              }}
+            >
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  backgroundColor:
+                    activeHazardAlert.type === "speed_camera" ||
+                    activeHazardAlert.type === "level_crossing"
+                      ? "#ef444420"
+                      : activeHazardAlert.type === "dangerous_curve"
+                        ? "#f9731620"
+                        : "#3b82f620",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 10,
+                  flexShrink: 0,
+                }}
+              >
+                <MaterialIcons
+                  name={
+                    activeHazardAlert.type === "speed_camera"
+                      ? "camera-alt"
+                      : activeHazardAlert.type === "level_crossing"
+                        ? "train"
+                        : activeHazardAlert.type === "speed_bump"
+                          ? "speed"
+                          : activeHazardAlert.type === "school_zone"
+                            ? "school"
+                            : "warning"
+                  }
+                  size={18}
+                  color={
+                    activeHazardAlert.type === "speed_camera" ||
+                    activeHazardAlert.type === "level_crossing"
+                      ? "#ef4444"
+                      : activeHazardAlert.type === "dangerous_curve"
+                        ? "#f97316"
+                        : activeHazardAlert.type === "speed_bump"
+                          ? "#facc15"
+                          : "#3b82f6"
+                  }
+                />
+              </View>
+
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 2,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "white",
+                      fontSize: 16,
+                      fontWeight: "600",
+                    }}
+                    numberOfLines={1}
+                  >
+                    {activeHazardAlert.type === "speed_bump"
+                      ? "Ralentisseur"
+                      : activeHazardAlert.type === "speed_camera"
+                        ? "Radar"
+                        : activeHazardAlert.type === "level_crossing"
+                          ? "Passage à niveau"
+                          : activeHazardAlert.type === "school_zone"
+                            ? "Zone scolaire"
+                            : activeHazardAlert.type === "dangerous_curve"
+                              ? "Virage dangereux"
+                              : activeHazardAlert.type ===
+                                    "priority_to_right" ||
+                                  activeHazardAlert.type ===
+                                    "blind_intersection"
+                                ? "Priorité à droite"
+                                : "Danger"}
+                  </Text>
+                </View>
+                <Text
+                  style={{ color: "#9ca3af", fontSize: 13 }}
+                  numberOfLines={1}
+                >
+                  dans {activeHazardAlert.distance || 0} m
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={dismissHazardAlert}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <MaterialIcons name="close" size={18} color="#9ca3af" />
               </TouchableOpacity>
             </View>
           </Animated.View>

@@ -131,16 +131,13 @@ export interface RouteService {
 export type TransportMode = "driving" | "walking" | "bicycling" | "transit";
 
 const getRoutingOSMHost = (mode: string = "driving"): string => {
-  if (mode === "walking") return "https://routing.openstreetmap.de/routed-foot";
-  if (mode === "bicycling")
-    return "https://routing.openstreetmap.de/routed-bike";
   if (mode === "transit") return "https://4021.fr1.orionhost.xyz";
-  return "https://routing.openstreetmap.de/routed-car";
+  return "https://4021.fr1.orionhost.xyz/navigation";
 };
 
 const DEFAULT_OSRM_HOSTS = ["https://router.project-osrm.org"];
 
-const DEBUG_CACHE_ENABLED = true;
+const DEBUG_CACHE_ENABLED = false;
 
 export function useRouteService(): RouteService {
   const { settings } = useUser();
@@ -1044,8 +1041,6 @@ export function useRouteService(): RouteService {
     mode = "driving",
     options?: { heading?: number }
   ) => {
-    setRouteInfo(null);
-    setLastRawRouteData(null);
     setIsCalculating(true);
     setLastRequestTimings([]);
     try {

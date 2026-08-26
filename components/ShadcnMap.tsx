@@ -638,6 +638,31 @@ const ShadcnMap = React.forwardRef<any, Props>(
               markers.forEach(function(mk){ map.removeLayer(mk); });
               markers = [];
             }
+            if (m.type === 'setHazards') {
+              if (window.hazardLayerGroup) {
+                map.removeLayer(window.hazardLayerGroup);
+                window.hazardLayerGroup = null;
+              }
+              if (m.hazards && m.hazards.length > 0) {
+                window.hazardLayerGroup = L.layerGroup().addTo(map);
+                m.hazards.forEach(function(h) {
+                  var color = '#ffcc00';
+                  if (h.type === 'speed_camera' || h.type === 'level_crossing') color = '#ef4444';
+                  else if (h.type === 'dangerous_curve') color = '#f97316';
+                  else if (h.type === 'speed_bump') color = '#facc15';
+                  else if (h.type === 'school_zone') color = '#3b82f6';
+                  else if (h.type === 'priority_to_right' || h.type === 'blind_intersection') color = '#a855f7';
+                  
+                  L.circleMarker([h.lat, h.lon], {
+                    radius: 4,
+                    color: '#ffffff',
+                    weight: 1,
+                    fillColor: color,
+                    fillOpacity: 0.8
+                  }).addTo(window.hazardLayerGroup);
+                });
+              }
+            }
             if (m.type === 'addMarker') {
               let mk;
               if (m.circle) {
@@ -991,13 +1016,14 @@ const ShadcnMap = React.forwardRef<any, Props>(
     </html>`;
 
     const WebComponent = Platform.OS === "web" ? WebWebView : WebView;
+    const sourceObj = React.useMemo(() => ({ html }), [html]);
 
     return (
       <View className="flex-1 bg-black">
         <WebComponent
           key={html.length}
           originWhitelist={["*"]}
-          source={{ html }}
+          source={sourceObj}
           className="flex-1 w-full h-full bg-black"
           javaScriptEnabled
           domStorageEnabled

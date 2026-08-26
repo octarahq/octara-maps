@@ -87,6 +87,8 @@ export function useTrafficAlerts({
     [showNextAlert],
   );
 
+  const routeNamesStr = (routeNamesInNextHour || []).join('|');
+
   const fetchAlerts = useCallback(async () => {
     if (!enabled || !isCarMode) {
       return;
@@ -96,7 +98,7 @@ export function useTrafficAlerts({
       const res = await fetch(`${PROXY_BASE}/navigation/traffic/getalert`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ routes: routeNamesInNextHour }),
+        body: JSON.stringify({ routes: routeNamesStr.split('|').filter(Boolean) }),
       });
 
       if (!res.ok) return;
@@ -115,7 +117,7 @@ export function useTrafficAlerts({
     } catch (e) {
       console.error("[TrafficAlerts] erreur:", e);
     }
-  }, [enabled, isCarMode, routeNamesInNextHour, enqueueAlert]);
+  }, [enabled, isCarMode, routeNamesStr, enqueueAlert]);
 
   const checkReminders = useCallback(() => {
     if (!enabled || !isCarMode) return;
