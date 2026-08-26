@@ -21,6 +21,7 @@ interface Props {
   pins?: WaypointPin[];
   routeCoords?: { latitude: number; longitude: number }[];
   routeSections?: { coords: { latitude: number; longitude: number }[]; color?: string }[];
+  mode?: "pedestrian" | "car" | "bicycle" | "walking" | "driving" | "cycling";
   lat?: number;
   lng?: number;
   heading?: number;
@@ -43,6 +44,7 @@ function MapSnapshotInnerFunc({
   pins,
   routeCoords,
   routeSections,
+  mode = "pedestrian",
   lat,
   lng,
   heading,
@@ -131,6 +133,8 @@ function MapSnapshotInnerFunc({
               color: sec.color ? `#${sec.color.replace(/^#/, '')}` : "#0d7ff2",
               weight: 3,
               opacity: 0.9,
+              mode,
+              arrow: true,
             });
           });
         } else if (hasCoords) {
@@ -140,6 +144,7 @@ function MapSnapshotInnerFunc({
             color: "#0d7ff2",
             weight: 2,
             opacity: 0.85,
+            mode,
           });
         }
 
@@ -152,6 +157,7 @@ function MapSnapshotInnerFunc({
               color: "#0d7ff2",
               weight: 2.5,
               opacity: 0.8,
+              mode,
             });
           }
 
@@ -230,7 +236,7 @@ function MapSnapshotInnerFunc({
     if (lat != null && lng != null) {
       post({ type: "setUserMarker", lat, lng, heading, icon: "circle" });
     }
-  }, [mapReady, pins, routeCoords, routeSections, lat, lng, heading, zoom, layers, interactive]);
+  }, [mapReady, pins, routeCoords, routeSections, mode, lat, lng, heading, zoom, layers, interactive]);
 
   const handleMapMsg = React.useCallback((msg: any) => {
     if (msg?.type === "mapReady") {

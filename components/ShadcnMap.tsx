@@ -297,9 +297,13 @@ const ShadcnMap = React.forwardRef<any, Props>(
     map.on('zoomend', function(){ try { postToApp({ type: 'zoomChanged', zoom: map.getZoom() }); } catch(e) {} });
     map.on('zoom', function() {
       var z = map.getZoom();
-      if (routePolyline) routePolyline.setStyle({ weight: getRouteWeight(z) });
+      if (routePolyline) routePolyline.setStyle({ weight: getRouteWeight(z, routePolyline.options.mode) });
       if (overlayPolylines && overlayPolylines.length > 0) {
-        overlayPolylines.forEach(function(p) { p.setStyle({ weight: getRouteWeight(z) * 1.5 }); });
+        overlayPolylines.forEach(function(p) { 
+          if (typeof p.setStyle === 'function') {
+            p.setStyle({ weight: getRouteWeight(z, p.options.mode) * 1.5 }); 
+          }
+        });
       }
     });
     map.on('moveend', function(){ try { postToApp({ type: 'centerChanged', lat: map.getCenter().lat, lng: map.getCenter().lng }); } catch(e) {} });
@@ -390,14 +394,18 @@ const ShadcnMap = React.forwardRef<any, Props>(
     var routePolyline = null;
     var overlayPolylines = [];
 
-        function getRouteWeight(z) {
-          if (z >= 18) return 24;
-          if (z >= 17) return 18;
-          if (z >= 16) return 12;
-          if (z >= 15) return 9;
-          if (z >= 14) return 7;
-          if (z >= 12) return 5;
-          return 4;
+        function getRouteWeight(z, mode) {
+          let bw;
+          if (z >= 18) bw = 24;
+          else if (z >= 17) bw = 18;
+          else if (z >= 16) bw = 12;
+          else if (z >= 15) bw = 9;
+          else if (z >= 14) bw = 7;
+          else if (z >= 12) bw = 5;
+          else bw = 4;
+          if (mode === 'car' || mode === 'driving') return bw * 0.8;
+          if (mode === 'pedestrian' || mode === 'walking' || mode === 'bicycle' || mode === 'cycling') return bw * 0.5;
+          return bw;
         }
 
         function normalizeBearing(angle) {
@@ -653,8 +661,10 @@ const ShadcnMap = React.forwardRef<any, Props>(
               if (m.latlngs && m.latlngs.length > 1) {
                 if (routePolyline) {
                   routePolyline.setLatLngs(m.latlngs);
+                  routePolyline.options.mode = m.mode;
+                  routePolyline.setStyle({ weight: getRouteWeight(map.getZoom(), m.mode) });
                 } else {
-                  var polylineOpts = { color: m.color || '#0d7ff2', weight: getRouteWeight(map.getZoom()), opacity: m.opacity || 1.0 };
+                  var polylineOpts = { color: m.color || '#0d7ff2', weight: getRouteWeight(map.getZoom(), m.mode), opacity: m.opacity || 1.0, mode: m.mode };
                   if (m.dashArray) polylineOpts.dashArray = m.dashArray;
                   routePolyline = L.polyline(m.latlngs, polylineOpts).addTo(map);
                 }
@@ -665,7 +675,7 @@ const ShadcnMap = React.forwardRef<any, Props>(
             }
             if (m.type === 'addOverlayPolyline') {
               if (m.latlngs && m.latlngs.length > 1) {
-                var polylineOpts = { color: m.color || '#fff', weight: getRouteWeight(map.getZoom()) * 0.6, opacity: m.opacity || 1 };
+                var polylineOpts = { color: m.color || '#fff', weight: getRouteWeight(map.getZoom(), m.mode) * 0.6, opacity: m.opacity || 1, mode: m.mode };
                 var overlay = L.polyline(m.latlngs, polylineOpts).addTo(map);
                 overlayPolylines.push(overlay);
                 
@@ -675,22 +685,31 @@ const ShadcnMap = React.forwardRef<any, Props>(
                   
                   var pixelP1 = map.latLngToLayerPoint(p1);
                   var pixelP2 = map.latLngToLayerPoint(p2);
-                  
                   var dx = pixelP2.x - pixelP1.x;
                   var dy = pixelP2.y - pixelP1.y;
-                  var angle = Math.atan2(dy, dx);
+                  var angleDeg = Math.atan2(dy, dx) * 180 / Math.PI;
                   
-                  var len = 8;
-                  
-                  var a1 = angle + Math.PI * 0.85; 
-                  var a2 = angle - Math.PI * 0.85;
-                  
-                  var tip1 = map.layerPointToLatLng([pixelP2.x + Math.cos(a1) * len, pixelP2.y + Math.sin(a1) * len]);
-                  var tip2 = map.layerPointToLatLng([pixelP2.x + Math.cos(a2) * len, pixelP2.y + Math.sin(a2) * len]);
-                  
-                  var triangleOpts = { stroke: true, color: m.color || '#fff', weight: 3, lineJoin: 'round', lineCap: 'round', fill: true, fillColor: m.color || '#fff', fillOpacity: 1 };
-                  var arrowHead = L.polygon([tip1, p2, tip2], triangleOpts).addTo(map);
-                  overlayPolylines.push(arrowHead);
+                  var arrowColor = m.color || '#ffffff';
+                  var iconHtml = '<div style="transform: rotate(' + angleDeg + 'deg); display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;">' +
+                    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                      '<path d="M10 6L16 12L10 18" stroke="' + arrowColor + '" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' +
+                    '</svg>' +
+                  '</div>';
+
+                  var arrowMarker = L.marker(p2, {
+                    icon: L.divIcon({
+                      className: 'nav-arrow-marker',
+                      html: iconHtml,
+                      iconSize: [32, 32],
+                      iconAnchor: [16, 16]
+                    }),
+                    interactive: false,
+                    zIndexOffset: 1000
+                  }).addTo(map);
+
+                  // Attach mode and angle for zoom scaling if necessary, but SVG scales cleanly.
+                  arrowMarker.options.mode = m.mode;
+                  overlayPolylines.push(arrowMarker);
                 }
               }
             }
