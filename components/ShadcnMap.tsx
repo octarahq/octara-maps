@@ -159,6 +159,94 @@ const ShadcnMap = React.forwardRef<any, Props>(
       <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
       <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.min.js"></script>
       <script>
+        const dbPromise = new Promise((resolve, reject) => {
+          const request = indexedDB.open('TileCacheDB', 1);
+          request.onupgradeneeded = function(e) {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('tiles')) {
+              db.createObjectStore('tiles');
+            }
+          };
+          request.onsuccess = function(e) { resolve(e.target.result); };
+          request.onerror = function(e) { reject(e.target.error); };
+        });
+
+        async function getTileBlob(key) {
+          try {
+            const db = await dbPromise;
+            return new Promise((resolve, reject) => {
+              const tx = db.transaction('tiles', 'readonly');
+              const store = tx.objectStore('tiles');
+              const req = store.get(key);
+              req.onsuccess = () => resolve(req.result);
+              req.onerror = () => reject(req.error);
+            });
+          } catch(e) { return null; }
+        }
+
+        async function saveTileBlob(key, blob) {
+          try {
+            const db = await dbPromise;
+            return new Promise((resolve, reject) => {
+              const tx = db.transaction('tiles', 'readwrite');
+              const store = tx.objectStore('tiles');
+              const req = store.put(blob, key);
+              req.onsuccess = () => resolve();
+              req.onerror = () => reject(req.error);
+            });
+          } catch(e) {}
+        }
+
+        L.TileLayer.Cached = L.TileLayer.extend({
+          initialize: function(url, options) {
+            L.TileLayer.prototype.initialize.call(this, url, options);
+            this.on('tileunload', function(e) {
+              if (e.tile && e.tile.src && e.tile.src.startsWith('blob:')) {
+                URL.revokeObjectURL(e.tile.src);
+              }
+            });
+          },
+          createTile: function(coords, done) {
+            var tile = document.createElement('img');
+            L.DomEvent.on(tile, 'load', L.Util.bind(this._tileOnLoad, this, done, tile));
+            L.DomEvent.on(tile, 'error', L.Util.bind(this._tileOnError, this, done, tile));
+            if (this.options.crossOrigin || this.options.crossOrigin === '') {
+              tile.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
+            }
+            tile.alt = '';
+            tile.setAttribute('role', 'presentation');
+
+            var url = this.getTileUrl(coords);
+            var cacheKey = this._url + ':' + coords.z + ':' + coords.x + ':' + coords.y;
+            
+            getTileBlob(cacheKey).then(blob => {
+              if (blob) {
+                tile.src = URL.createObjectURL(blob);
+              } else {
+                fetch(url)
+                  .then(response => {
+                    if (response.ok) return response.blob();
+                    throw new Error('Network error');
+                  })
+                  .then(blob => {
+                    saveTileBlob(cacheKey, blob);
+                    tile.src = URL.createObjectURL(blob);
+                  })
+                  .catch(() => {
+                    tile.src = url;
+                  });
+              }
+            }).catch(() => {
+              tile.src = url;
+            });
+
+            return tile;
+          }
+        });
+        L.tileLayer.cached = function (url, options) {
+          return new L.TileLayer.Cached(url, options);
+        };
+
         const map = L.map('map', { 
           zoomControl: false, 
           worldCopyJump: true, 
@@ -170,7 +258,7 @@ const ShadcnMap = React.forwardRef<any, Props>(
           renderer: L.svg({ padding: 0.2 })
         }).setView([0,0], ${initialZoom});
 
-        var baseLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+        var baseLayer = L.tileLayer.cached('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
           maxZoom: 19,
           tileSize: 512,
           zoomOffset: -1,
@@ -650,7 +738,7 @@ const ShadcnMap = React.forwardRef<any, Props>(
               
               if (!url) url = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
               
-              baseLayer = L.tileLayer(url, { maxZoom: maxZ, minZoom: ${initialZoom}, detectRetina: true, tileSize: 512, zoomOffset: -1, zIndex: 1, keepBuffer: 8 }).addTo(map);
+              baseLayer = L.tileLayer.cached(url, { maxZoom: maxZ, minZoom: ${initialZoom}, detectRetina: true, tileSize: 512, zoomOffset: -1, zIndex: 1, keepBuffer: 8 }).addTo(map);
 
               if (layer === 'terrain' && theme === 'dark') {
                   baseLayer.on('add', function(e) {
